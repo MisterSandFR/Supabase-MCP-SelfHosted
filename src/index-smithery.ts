@@ -11,15 +11,33 @@ export const configSchema = z.object({
 
 // Export default function for Smithery
 export default async function createServer({ config }: { config: z.infer<typeof configSchema> }) {
-    // Import dynamically to avoid circular dependencies
-    const { createSmitheryServer } = await import('./server-smithery.js');
-    
-    // Create and return the server
-    return createSmitheryServer({
-        supabaseUrl: config.SUPABASE_URL || '',
-        supabaseAnonKey: config.SUPABASE_ANON_KEY || '',
-        supabaseServiceRoleKey: config.SUPABASE_SERVICE_ROLE_KEY,
-        databaseUrl: config.DATABASE_URL,
-        supabaseAuthJwtSecret: config.SUPABASE_AUTH_JWT_SECRET
-    });
+    try {
+        // Import dynamically to avoid circular dependencies
+        const { createSmitheryServer } = await import('./server-smithery.js');
+        
+        // Create and return the server
+        const server = await createSmitheryServer({
+            supabaseUrl: config.SUPABASE_URL || '',
+            supabaseAnonKey: config.SUPABASE_ANON_KEY || '',
+            supabaseServiceRoleKey: config.SUPABASE_SERVICE_ROLE_KEY,
+            databaseUrl: config.DATABASE_URL,
+            supabaseAuthJwtSecret: config.SUPABASE_AUTH_JWT_SECRET
+        });
+        
+        return server;
+    } catch (error) {
+        // Log error for debugging
+        console.error('Failed to create server:', error);
+        
+        // Return a minimal server on error
+        const { Server } = await import('@modelcontextprotocol/sdk/server/index.js');
+        return new Server({
+            name: 'selfhosted-supabase-mcp',
+            version: '2.1.0'
+        }, {
+            capabilities: {
+                tools: {}
+            }
+        });
+    }
 }

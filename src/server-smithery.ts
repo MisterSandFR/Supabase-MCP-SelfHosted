@@ -48,7 +48,11 @@ interface Config {
 // Create server specifically for Smithery
 export async function createSmitheryServer(config: Config) {
     // Handle placeholder/empty config for initial scan
-    if (!config.supabaseUrl || config.supabaseUrl === '' || !config.supabaseAnonKey || config.supabaseAnonKey === '') {
+    if (!config.supabaseUrl || config.supabaseUrl === '' || 
+        !config.supabaseAnonKey || config.supabaseAnonKey === '' ||
+        config.supabaseUrl === 'string' || // Smithery sometimes sends literal 'string'
+        !config.supabaseUrl.startsWith('http')) { // Must be a valid URL
+        
         // Return a minimal server that provides schema information
         const server = new Server({
             name: 'selfhosted-supabase-mcp',
@@ -68,14 +72,29 @@ export async function createSmitheryServer(config: Config) {
     const concurrencyLimiter = new ConcurrencyLimiter(10);
     const queryAnalyzer = new QueryComplexityAnalyzer();
     
-    // Create Supabase client
-    const selfhostedClient = await SelfhostedSupabaseClient.create({
-        supabaseUrl: config.supabaseUrl,
-        supabaseAnonKey: config.supabaseAnonKey,
-        supabaseServiceRoleKey: config.supabaseServiceRoleKey,
-        supabaseAuthJwtSecret: config.supabaseAuthJwtSecret,
-        supabaseDatabaseUrl: config.databaseUrl,
-    });
+    // Try to create Supabase client
+    let selfhostedClient;
+    try {
+        selfhostedClient = await SelfhostedSupabaseClient.create({
+            supabaseUrl: config.supabaseUrl,
+            supabaseAnonKey: config.supabaseAnonKey,
+            supabaseServiceRoleKey: config.supabaseServiceRoleKey,
+            supabaseAuthJwtSecret: config.supabaseAuthJwtSecret,
+            supabaseDatabaseUrl: config.databaseUrl,
+        });
+    } catch (error) {
+        console.error('Failed to create Supabase client:', error);
+        // Return a minimal server on error
+        const server = new Server({
+            name: 'selfhosted-supabase-mcp',
+            version: '2.1.0'
+        }, {
+            capabilities: {
+                tools: {}
+            }
+        });
+        return server;
+    }
 
     // Prepare the tools
     interface McpToolSchema {
