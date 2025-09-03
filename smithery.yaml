@@ -7,11 +7,13 @@ repository: https://github.com/MisterSandFR/selfhosted-supabase-mcp
 mcp:
   version: 1.0.0
 
+dockerfile: Dockerfile.smithery
+
 build:
   command: npm run build
 
 run:
-  command: npm start
+  command: node dist/index.js
   args:
     - --url
     - $SUPABASE_URL
