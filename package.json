@@ -3,6 +3,7 @@
   "version": "2.1.0",
   "description": "Enhanced security edition of Self-Hosted Supabase MCP Server with SQL injection prevention, rate limiting, and production features",
   "main": "dist/index.js",
+  "module": "./src/index.ts",
   "type": "module",
   "repository": {
     "type": "git",
@@ -47,6 +48,7 @@
     "@types/node": "^22.15.3",
     "@types/pg": "^8.11.14",
     "tsup": "^8.4.0",
+    "tsx": "^4.20.5",
     "typescript": "^5.8.3"
   }
 }

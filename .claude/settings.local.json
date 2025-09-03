@@ -12,7 +12,9 @@
       "Bash(git reset:*)",
       "Bash(node:*)",
       "Bash(tsup:*)",
-      "Bash(npx tsup:*)"
+      "Bash(npx tsup:*)",
+      "Bash(npx @smithery/cli:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []
