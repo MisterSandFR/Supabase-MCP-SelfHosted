@@ -13,5 +13,5 @@ COPY . ./
 # Build TypeScript
 RUN npm run build
 
-# Run the Apify actor using the main.js entry point
-CMD ["node", "dist/main.js"]
+# Run the Apify actor using npm script
+CMD ["npm", "run", "start:apify"]
