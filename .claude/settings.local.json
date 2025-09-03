@@ -10,7 +10,9 @@
       "Bash(git tag:*)",
       "Bash(docker build:*)",
       "Bash(git reset:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(tsup:*)",
+      "Bash(npx tsup:*)"
     ],
     "deny": [],
     "ask": []

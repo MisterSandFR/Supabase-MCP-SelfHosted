@@ -4,14 +4,14 @@ FROM apify/actor-node:18
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --omit=dev || npm install --production
+# Install all dependencies (including dev for TypeScript build)
+RUN npm ci || npm install
 
 # Copy source files
 COPY . ./
 
-# Build TypeScript if needed
-RUN npm run build || echo "Build step skipped"
+# Build TypeScript
+RUN npm run build
 
-# Run the Apify actor
-CMD ["npm", "run", "start:apify"]
+# Run the Apify actor using the main.js entry point
+CMD ["node", "dist/main.js"]
