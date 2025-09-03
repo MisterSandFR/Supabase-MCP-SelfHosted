@@ -1,11 +1,12 @@
 # Self-Hosted Supabase MCP Server - Enhanced Security Edition
 
+[![Smithery Badge](https://smithery.ai/badge/@mistersandfr/selfhosted-supabase-mcp)](https://smithery.ai/protocol/@mistersandfr/selfhosted-supabase-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Security: Enhanced](https://img.shields.io/badge/Security-Enhanced-green.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki/Security-Guide)
-[![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-blue.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/releases)
+[![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-blue.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/releases)
 [![Node: 18+](https://img.shields.io/badge/Node-18%2B-brightgreen.svg)](https://nodejs.org)
 
-> 🔒 **Enhanced Security Edition** - A production-ready fork of the original [selfhosted-supabase-mcp](https://github.com/HenkDz/selfhosted-supabase-mcp) by [@HenkDz](https://github.com/HenkDz) with comprehensive security improvements, rate limiting, and Docker/Coolify optimizations.
+> 🔒 **Enhanced Security Edition** - A production-ready fork of the original [selfhosted-supabase-mcp](https://github.com/HenkDz/selfhosted-supabase-mcp) by [@HenkDz](https://github.com/HenkDz) with comprehensive security improvements, rate limiting, Docker/Coolify optimizations, and extensive management tools for self-hosted deployments.
 
 ## 🌟 Overview
 
@@ -18,38 +19,104 @@ Built upon the solid foundation created by [@HenkDz](https://github.com/HenkDz),
 - ✅ **All Security Issues Fixed** - Addresses issues #5, #7, #8, #9, #10 from the original repo
 - 🛡️ **Production Ready** - Battle-tested in Docker/Coolify environments
 - ⚡ **Performance Optimized** - Connection pooling, retry logic, resource limits
-- 📚 **Fully Documented** - Comprehensive Wiki with guides and troubleshooting
-- 🔒 **Enterprise Security** - Rate limiting, SQL injection prevention, strong auth
+- 🔍 **Comprehensive Monitoring** - Health checks, performance analysis, logging
+- 🐳 **Docker Management** - Built-in container management for self-hosted setups
+- 💾 **Backup & Recovery** - Database backup utilities with multiple formats
+- 🚀 **Available on Smithery** - Easy deployment through [Smithery.ai](https://smithery.ai/protocol/@mistersandfr/selfhosted-supabase-mcp)
 
-## 🔐 Security Enhancements
+## 📦 Installation
 
-This fork includes comprehensive security improvements that address all critical vulnerabilities:
+### Via Smithery (Recommended)
 
-### ✅ Fixed Security Issues
-- **Connection Resilience** - Enhanced connection handling for Coolify/Docker environments with automatic retry logic
-- **SQL Injection Prevention** - Comprehensive SQL sanitization and validation  
-- **Secure Authentication** - Strong password policies and secure token handling
-- **Input Validation** - Complete input sanitization across all endpoints
-- **Rate Limiting** - Adaptive rate limiting and resource controls
-- **Query Complexity Analysis** - Prevents resource exhaustion from complex queries
+The easiest way to use this MCP server is through [Smithery](https://smithery.ai/protocol/@mistersandfr/selfhosted-supabase-mcp):
 
-### 🛡️ Security Features
+```bash
+npx @smithery/cli install @mistersandfr/selfhosted-supabase-mcp
+```
 
-#### SQL Security
+Then configure in your Claude Desktop settings with your Supabase credentials.
+
+### Manual Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/MisterSandFR/selfhosted-supabase-mcp.git
+cd selfhosted-supabase-mcp
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Run the server
+npm start -- --url YOUR_SUPABASE_URL --anon-key YOUR_ANON_KEY
+```
+
+### Docker Installation
+
+```bash
+# Build the Docker image
+docker build -t selfhosted-supabase-mcp .
+
+# Run the container
+docker run -e SUPABASE_URL=your_url -e SUPABASE_ANON_KEY=your_key selfhosted-supabase-mcp
+```
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SUPABASE_URL` | ✅ | Your self-hosted Supabase URL |
+| `SUPABASE_ANON_KEY` | ✅ | Anonymous/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | ❌ | Service role key for admin operations |
+| `DATABASE_URL` | ❌ | Direct PostgreSQL connection for fallback |
+| `SUPABASE_AUTH_JWT_SECRET` | ❌ | JWT secret for auth operations |
+
+### Claude Desktop Configuration
+
+Add to your Claude Desktop config file:
+
+```json
+{
+  "mcp-servers": {
+    "selfhosted-supabase": {
+      "command": "npx",
+      "args": [
+        "@smithery/cli",
+        "run",
+        "@mistersandfr/selfhosted-supabase-mcp"
+      ],
+      "env": {
+        "SUPABASE_URL": "https://your-instance.supabase.co",
+        "SUPABASE_ANON_KEY": "your-anon-key",
+        "SUPABASE_SERVICE_ROLE_KEY": "optional-service-key",
+        "DATABASE_URL": "optional-postgres-url"
+      }
+    }
+  }
+}
+```
+
+## 🔒 Security Features
+
+### SQL Injection Prevention
 - Query validation and injection pattern detection
 - Parameterized query support
 - Table/column name validation
 - Query complexity limits (100 points max)
 - Safe string escaping
 
-#### Authentication Security  
+### Authentication Security  
 - Password strength validation (8+ chars, uppercase, lowercase, number, special char)
 - Secure token generation using crypto
 - Safe logging without exposing sensitive data
 - HMAC signature verification
 - Timing-safe comparisons
 
-#### Rate Limiting & Resource Control
+### Rate Limiting & Resource Control
 - 100 requests/minute default limit
 - Max 10 concurrent requests
 - Query complexity scoring
@@ -57,7 +124,7 @@ This fork includes comprehensive security improvements that address all critical
 - Execution time limits (30s max)
 - Adaptive throttling based on system load
 
-#### Input Validation
+### Input Validation
 - Comprehensive sanitization for all inputs
 - File upload validation
 - Protection against prototype pollution
@@ -66,17 +133,18 @@ This fork includes comprehensive security improvements that address all critical
 
 ## 🚀 Features
 
-The server exposes the following tools to MCP clients:
+### Available Tools
 
-*   **Schema & Migrations**
-    *   `list_tables`: Lists tables in the database schemas.
-    *   `list_extensions`: Lists installed PostgreSQL extensions.
-    *   `list_migrations`: Lists applied Supabase migrations.
-    *   `apply_migration`: Applies a SQL migration script.
-*   **Database Operations & Stats**
-    *   `execute_sql`: Executes an arbitrary SQL query (via RPC or direct connection).
-    *   `get_database_connections`: Shows active database connections (`pg_stat_activity`).
-    *   `get_database_stats`: Retrieves database statistics (`pg_stat_*`).
+*   **Database Core Operations**
+    *   `execute_sql`: Execute raw SQL (with injection protection).
+    *   `list_tables`: List database tables and their columns.
+    *   `list_extensions`: Show installed PostgreSQL extensions.
+*   **Database Performance & Statistics**
+    *   `get_database_connections`: Current connection status.
+    *   `get_database_stats`: Comprehensive database statistics. 
+*   **Schema & Migration Tools**
+    *   `list_migrations`: Shows migration history from `supabase_migrations.schema_migrations`.
+    *   `apply_migration`: Apply a new migration (Requires direct DB access).
 *   **Project Configuration & Keys**
     *   `get_project_url`: Returns the configured Supabase URL.
     *   `get_anon_key`: Returns the configured Supabase anon key.
@@ -98,9 +166,45 @@ The server exposes the following tools to MCP clients:
     *   `list_realtime_publications`: Lists PostgreSQL publications (often `supabase_realtime`).
 *   **Logging & Monitoring**
     *   `get_logs`: Retrieves logs from various Supabase services (postgres, auth, storage, realtime) with filtering and level control.
-*   **Self-Hosted Operations** (New)
+*   **Self-Hosted Operations** 
     *   `check_health`: Comprehensive health checks for all Supabase components (PostgreSQL, Auth, Storage, Realtime) with performance metrics.
     *   `backup_database`: Create database backups with various formats (SQL, custom, tar) and optional storage upload.
     *   `manage_docker`: Manage Docker containers for self-hosted Supabase (status, logs, restart, stop, start, stats).
     *   `analyze_performance`: Deep performance analysis including slow queries, missing indexes, lock contention, and cache statistics.
-    *   `validate_migration`: Pre-flight validation of migration files to detect potential issues before applying. 
+    *   `validate_migration`: Pre-flight validation of migration files to detect potential issues before applying.
+
+## 🐳 Docker & Self-Hosted Support
+
+This version includes special optimizations for Docker and Coolify environments:
+
+- **Connection retry logic** with exponential backoff
+- **Transient error handling** for ECONNRESET issues
+- **Connection pooling** with automatic cleanup
+- **Health monitoring** for all Supabase components
+- **Container management** tools for Docker environments
+
+## 📚 Documentation
+
+For detailed documentation, security guidelines, and best practices, visit our [Wiki](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting PRs.
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [@HenkDz](https://github.com/HenkDz) - Original creator of selfhosted-supabase-mcp
+- The MCP and Supabase communities
+- All contributors and security researchers
+
+## ⚠️ Disclaimer
+
+This tool is designed for self-hosted Supabase instances. Always follow security best practices and never expose sensitive credentials.
+
+---
+
+**Made with ❤️ by [MisterSandFR](https://github.com/MisterSandFR)** | Based on original work by [@HenkDz](https://github.com/HenkDz)

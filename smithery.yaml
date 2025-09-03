@@ -1,0 +1,58 @@
+name: selfhosted-supabase-mcp
+version: 2.1.0
+description: Enhanced MCP Server for self-hosted Supabase instances with comprehensive security, monitoring and management tools
+author: MisterSandFR
+repository: https://github.com/MisterSandFR/selfhosted-supabase-mcp
+
+mcp:
+  version: 1.0.0
+
+build:
+  command: npm run build
+
+run:
+  command: npm start
+  args:
+    - --url
+    - $SUPABASE_URL
+    - --anon-key
+    - $SUPABASE_ANON_KEY
+    - --service-key
+    - $SUPABASE_SERVICE_ROLE_KEY
+    - --db-url
+    - $DATABASE_URL
+    - --jwt-secret
+    - $SUPABASE_AUTH_JWT_SECRET
+
+environment:
+  - name: SUPABASE_URL
+    description: Your Supabase project URL (required)
+    required: true
+    
+  - name: SUPABASE_ANON_KEY
+    description: Your Supabase anonymous key (required)
+    required: true
+    
+  - name: SUPABASE_SERVICE_ROLE_KEY
+    description: Your Supabase service role key (optional, for advanced operations)
+    required: false
+    
+  - name: DATABASE_URL
+    description: Direct database connection string (optional, for fallback operations)
+    required: false
+    
+  - name: SUPABASE_AUTH_JWT_SECRET
+    description: Your Supabase JWT secret (optional, for auth operations)
+    required: false
+
+features:
+  - SQL execution with injection prevention
+  - Database backup and restore utilities
+  - Health monitoring for all components
+  - Docker container management
+  - Performance analysis and optimization
+  - Migration validation
+  - Rate limiting and security controls
+  - Auth user management
+  - Storage operations
+  - Comprehensive logging
