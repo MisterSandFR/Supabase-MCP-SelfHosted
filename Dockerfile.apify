@@ -1,0 +1,17 @@
+# Apify-specific Dockerfile
+FROM apify/actor-node:18
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --omit=dev || npm install --production
+
+# Copy source files
+COPY . ./
+
+# Build TypeScript if needed
+RUN npm run build || echo "Build step skipped"
+
+# Run the Apify actor
+CMD ["npm", "run", "start:apify"]

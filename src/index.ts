@@ -1,9 +1,5 @@
 import { Command } from 'commander';
-import { startStandaloneServer } from './smithery.js';
-
-// Export for Smithery
-export { default } from './smithery.js';
-export { configSchema } from './smithery.js';
+import { startStandaloneServer } from './server.js';
 
 // Main function for CLI execution
 async function main() {

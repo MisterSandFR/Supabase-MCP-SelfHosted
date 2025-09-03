@@ -1,0 +1,38 @@
+{
+  "actorSpecification": 1,
+  "name": "selfhosted-supabase-mcp",
+  "title": "Self-Hosted Supabase MCP Server",
+  "description": "Enhanced security MCP server for self-hosted Supabase with SQL injection prevention, rate limiting, and production features",
+  "version": "2.0.0",
+  "meta": {
+    "templateId": "nodejs-mcp-server"
+  },
+  "dockerfile": "./Dockerfile",
+  "readme": "./README.md",
+  "input": "./input_schema.json",
+  "storages": {
+    "dataset": {
+      "actorSpecification": 1,
+      "title": "MCP Server Logs",
+      "description": "Logs and outputs from the MCP server",
+      "views": {
+        "overview": {
+          "title": "Overview",
+          "description": "Overview of server logs",
+          "transformation": {
+            "fields": [
+              "timestamp",
+              "level",
+              "message",
+              "tool",
+              "error"
+            ]
+          },
+          "display": {
+            "component": "table"
+          }
+        }
+      }
+    }
+  }
+}
