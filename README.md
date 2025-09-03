@@ -96,5 +96,5 @@ The server exposes the following tools to MCP clients:
     *   `list_storage_objects`: Lists objects within a specific bucket.
 *   **Realtime Inspection**
     *   `list_realtime_publications`: Lists PostgreSQL publications (often `supabase_realtime`).
-
-*(Note: `get_logs` was initially planned but skipped due to implementation complexities in a self-hosted environment).* 
+*   **Logging & Monitoring**
+    *   `get_logs`: Retrieves logs from various Supabase services (postgres, auth, storage, realtime) with filtering and level control. 

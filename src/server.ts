@@ -27,6 +27,7 @@ import { deleteAuthUserTool } from './tools/delete_auth_user.js';
 import { createAuthUserTool } from './tools/create_auth_user.js';
 import { updateAuthUserTool } from './tools/update_auth_user.js';
 import type { ToolContext } from './tools/types.js';
+import { getLogsTool } from './tools/get_logs.js';
 import listStorageBucketsTool from './tools/list_storage_buckets.js';
 import listStorageObjectsTool from './tools/list_storage_objects.js';
 import listRealtimePublicationsTool from './tools/list_realtime_publications.js';
@@ -99,6 +100,7 @@ export default async function createServer(config: Config) {
         [listStorageBucketsTool.name]: listStorageBucketsTool as AppTool,
         [listStorageObjectsTool.name]: listStorageObjectsTool as AppTool,
         [listRealtimePublicationsTool.name]: listRealtimePublicationsTool as AppTool,
+        [getLogsTool.name]: getLogsTool as AppTool,
     };
 
     // Prepare capabilities
