@@ -1,7 +1,7 @@
 # Self-Hosted Supabase MCP Server - Enhanced Security Edition
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![smithery badge](https://smithery.ai/badge/@MisterSandFR/selfhosted-supabase-mcp-secure)](https://smithery.ai/server/@MisterSandFR/selfhosted-supabase-mcp-secure)
+[![smithery badge](https://smithery.ai/badge/@MisterSandFR/selfhosted-supabase-mcp)](https://smithery.ai/server/@MisterSandFR/selfhosted-supabase-mcp)
 [![Security: Enhanced](https://img.shields.io/badge/Security-Enhanced-green.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki/Security-Guide)
 [![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-blue.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/releases)
 [![Node: 18+](https://img.shields.io/badge/Node-18%2B-brightgreen.svg)](https://nodejs.org)
