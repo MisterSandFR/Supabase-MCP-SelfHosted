@@ -1,7 +1,7 @@
 # Smithery configuration file: https://smithery.ai/docs/build/project-config
 # Enhanced Security Edition of Self-Hosted Supabase MCP Server
 
-name: selfhosted-supabase-mcp-secure
+name: selfhosted-supabase-mcp
 version: 2.0.0
 description: |
   🔒 Enhanced security edition of Self-Hosted Supabase MCP Server with comprehensive security 

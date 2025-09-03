@@ -1,5 +1,5 @@
 {
-  "name": "@MisterSandFR/selfhosted-supabase-mcp-secure",
+  "name": "@MisterSandFR/selfhosted-supabase-mcp",
   "displayName": "Self-Hosted Supabase MCP - Enhanced Security Edition",
   "version": "2.0.0",
   "description": "🔒 Production-ready MCP server for self-hosted Supabase with enterprise-grade security, SQL injection prevention, rate limiting, and Docker/Coolify optimizations",
