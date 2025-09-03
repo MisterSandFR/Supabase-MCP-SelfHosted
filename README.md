@@ -97,4 +97,10 @@ The server exposes the following tools to MCP clients:
 *   **Realtime Inspection**
     *   `list_realtime_publications`: Lists PostgreSQL publications (often `supabase_realtime`).
 *   **Logging & Monitoring**
-    *   `get_logs`: Retrieves logs from various Supabase services (postgres, auth, storage, realtime) with filtering and level control. 
+    *   `get_logs`: Retrieves logs from various Supabase services (postgres, auth, storage, realtime) with filtering and level control.
+*   **Self-Hosted Operations** (New)
+    *   `check_health`: Comprehensive health checks for all Supabase components (PostgreSQL, Auth, Storage, Realtime) with performance metrics.
+    *   `backup_database`: Create database backups with various formats (SQL, custom, tar) and optional storage upload.
+    *   `manage_docker`: Manage Docker containers for self-hosted Supabase (status, logs, restart, stop, start, stats).
+    *   `analyze_performance`: Deep performance analysis including slow queries, missing indexes, lock contention, and cache statistics.
+    *   `validate_migration`: Pre-flight validation of migration files to detect potential issues before applying. 

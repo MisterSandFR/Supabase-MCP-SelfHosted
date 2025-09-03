@@ -31,6 +31,11 @@ import { getLogsTool } from './tools/get_logs.js';
 import listStorageBucketsTool from './tools/list_storage_buckets.js';
 import listStorageObjectsTool from './tools/list_storage_objects.js';
 import listRealtimePublicationsTool from './tools/list_realtime_publications.js';
+import { checkHealthTool } from './tools/check_health.js';
+import { backupDatabaseTool } from './tools/backup_database.js';
+import { manageDockerTool } from './tools/manage_docker.js';
+import { analyzePerformanceTool } from './tools/analyze_performance.js';
+import { validateMigrationTool } from './tools/validate_migration.js';
 import { RateLimiter, ConcurrencyLimiter, QueryComplexityAnalyzer, withResourceLimits } from './utils/rate-limiter.js';
 
 // Export the configuration schema
@@ -101,6 +106,11 @@ export default async function createServer(config: Config) {
         [listStorageObjectsTool.name]: listStorageObjectsTool as AppTool,
         [listRealtimePublicationsTool.name]: listRealtimePublicationsTool as AppTool,
         [getLogsTool.name]: getLogsTool as AppTool,
+        [checkHealthTool.name]: checkHealthTool as AppTool,
+        [backupDatabaseTool.name]: backupDatabaseTool as AppTool,
+        [manageDockerTool.name]: manageDockerTool as AppTool,
+        [analyzePerformanceTool.name]: analyzePerformanceTool as AppTool,
+        [validateMigrationTool.name]: validateMigrationTool as AppTool,
     };
 
     // Prepare capabilities
