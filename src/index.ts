@@ -1,6 +1,18 @@
 import { Command } from 'commander';
 import { startStandaloneServer } from './server.js';
 
+// Check if running in Apify environment
+if (process.env.APIFY_IS_AT_HOME || process.env.APIFY_ACTOR_ID) {
+    // Running in Apify - use the Apify Actor entry point
+    import('./main.js');
+} else {
+    // Not in Apify - run normal CLI
+    main().catch((error) => {
+        console.error('Unhandled error:', error);
+        process.exit(1);
+    });
+}
+
 // Main function for CLI execution
 async function main() {
     const program = new Command();
@@ -46,10 +58,3 @@ async function main() {
     }
 }
 
-// Only run main if this is the entry point
-if (import.meta.url === `file://${process.argv[1]}`) {
-    main().catch((error) => {
-        console.error('Unhandled error:', error);
-        process.exit(1);
-    });
-}
