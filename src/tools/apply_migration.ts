@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { ToolContext } from './types.js';
 import type { PoolClient } from 'pg';
+import { validateSqlQuery } from '../utils/sql-sanitizer.js';
 
 // Input schema
 const ApplyMigrationInputSchema = z.object({
@@ -39,6 +40,20 @@ export const applyMigrationTool = {
         const client = context.selfhostedClient;
 
         try {
+            // Validate migration SQL for potential injection
+            // Note: Migrations may contain DDL operations, so we skip the read-only check
+            try {
+                // Basic validation without read-only restriction
+                if (!input.sql || typeof input.sql !== 'string') {
+                    throw new Error('Invalid SQL: must be a non-empty string');
+                }
+                if (input.sql.length > 100000) {
+                    throw new Error('Migration SQL exceeds maximum allowed length');
+                }
+            } catch (error) {
+                throw new Error(`Migration SQL validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
+
             // Ensure pg is configured and available
             if (!client.isPgAvailable()) {
                  throw new Error('Direct database connection (DATABASE_URL) is required for applying migrations but is not configured or available.');

@@ -3,6 +3,7 @@ import type { SelfhostedSupabaseClient } from '../client/index.js';
 // import type { McpToolDefinition } from '@modelcontextprotocol/sdk'; // Removed incorrect import
 import { handleSqlResponse, executeSqlWithFallback } from './utils.js';
 import type { ToolContext } from './types.js';
+import { validateSqlQuery } from '../utils/sql-sanitizer.js';
 
 // Input schema
 const ExecuteSqlInputSchema = z.object({
@@ -35,6 +36,13 @@ export const executeSqlTool = {
     outputSchema: ExecuteSqlOutputSchema,
     execute: async (input: ExecuteSqlInput, context: ToolContext) => {
         const client = context.selfhostedClient;
+
+        // Validate SQL query for injection attempts
+        try {
+            validateSqlQuery(input.sql);
+        } catch (error) {
+            throw new Error(`SQL validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
 
         console.error(`Executing SQL (readOnly: ${input.read_only}): ${input.sql.substring(0, 100)}...`);
         

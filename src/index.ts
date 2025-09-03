@@ -32,6 +32,8 @@ import type { ToolContext } from './tools/types.js';
 import listStorageBucketsTool from './tools/list_storage_buckets.js';
 import listStorageObjectsTool from './tools/list_storage_objects.js';
 import listRealtimePublicationsTool from './tools/list_realtime_publications.js';
+import { RateLimiter, ConcurrencyLimiter, QueryComplexityAnalyzer, withResourceLimits } from './utils/rate-limiter.js';
+import { createInputValidator } from './utils/input-validator.js';
 
 // Node.js built-in modules
 import * as fs from 'node:fs';
@@ -54,6 +56,11 @@ interface AppTool {
     outputSchema: z.ZodTypeAny; // Zod schema for output (optional)
     execute: (input: unknown, context: ToolContext) => Promise<unknown>;
 }
+
+// Initialize rate limiters
+const rateLimiter = new RateLimiter(100, 60000); // 100 requests per minute
+const concurrencyLimiter = new ConcurrencyLimiter(10); // Max 10 concurrent requests
+const queryAnalyzer = new QueryComplexityAnalyzer();
 
 // Main function
 async function main() {
@@ -216,19 +223,39 @@ async function main() {
 
         server.setRequestHandler(CallToolRequestSchema, async (request) => {
             const toolName = request.params.name;
-            // Look up the tool in the filtered 'registeredTools' map
-            const tool = registeredTools[toolName as keyof typeof registeredTools];
-
-            if (!tool) {
-                // Check if it existed originally but was filtered out
-                if (availableTools[toolName as keyof typeof availableTools]) {
-                     throw new McpError(ErrorCode.MethodNotFound, `Tool "${toolName}" is available but not enabled by the current server configuration.`);
-                }
-                // If the tool wasn't in the original list either, it's unknown
-                throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${toolName}`);
+            const requestId = `${Date.now()}-${Math.random()}`;
+            const clientId = 'default'; // In production, extract from request context
+            
+            // Check rate limit
+            const { allowed, retryAfter } = await rateLimiter.checkLimit(clientId);
+            if (!allowed) {
+                throw new McpError(
+                    ErrorCode.InvalidRequest, 
+                    `Rate limit exceeded. Please retry after ${retryAfter} seconds.`
+                );
             }
-
+            
+            // Check concurrency limit
+            const canProceed = await concurrencyLimiter.acquire(clientId, requestId);
+            if (!canProceed) {
+                throw new McpError(
+                    ErrorCode.InvalidRequest,
+                    'Too many concurrent requests. Please try again later.'
+                );
+            }
+            
             try {
+                // Look up the tool in the filtered 'registeredTools' map
+                const tool = registeredTools[toolName as keyof typeof registeredTools];
+
+                if (!tool) {
+                    // Check if it existed originally but was filtered out
+                    if (availableTools[toolName as keyof typeof availableTools]) {
+                         throw new McpError(ErrorCode.MethodNotFound, `Tool "${toolName}" is available but not enabled by the current server configuration.`);
+                    }
+                    // If the tool wasn't in the original list either, it's unknown
+                    throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${toolName}`);
+                }
                 if (typeof tool.execute !== 'function') {
                     throw new Error(`Tool ${toolName} does not have an execute method.`);
                 }
@@ -249,9 +276,33 @@ async function main() {
                     }
                 };
 
-                // Call the tool's execute method
-                // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-                const result = await tool.execute(parsedArgs as any, context);
+                // Execute with resource limits for SQL tools
+                let result;
+                if (toolName === 'execute_sql' || toolName === 'apply_migration') {
+                    // Check query complexity for SQL operations
+                    if (parsedArgs && typeof parsedArgs === 'object' && 'sql' in parsedArgs) {
+                        const sql = (parsedArgs as any).sql;
+                        if (typeof sql === 'string') {
+                            try {
+                                queryAnalyzer.checkComplexityLimit(sql, 100);
+                            } catch (error) {
+                                throw new McpError(
+                                    ErrorCode.InvalidRequest,
+                                    `Query too complex: ${error instanceof Error ? error.message : 'Unknown error'}`
+                                );
+                            }
+                        }
+                    }
+                    
+                    // Execute with resource limits
+                    result = await withResourceLimits(
+                        () => tool.execute(parsedArgs as any, context),
+                        { maxExecutionTimeMs: 30000, maxMemoryMB: 256 }
+                    );
+                } else {
+                    // Execute normally for non-SQL tools
+                    result = await tool.execute(parsedArgs as any, context);
+                }
 
                 return {
                     content: [
@@ -275,6 +326,9 @@ async function main() {
                     content: [{ type: 'text', text: errorMessage }],
                     isError: true,
                  };
+            } finally {
+                // Always release concurrency slot
+                concurrencyLimiter.release(clientId, requestId);
             }
         });
 

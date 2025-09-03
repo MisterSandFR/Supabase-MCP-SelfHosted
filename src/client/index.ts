@@ -130,7 +130,12 @@ export class SelfhostedSupabaseClient {
 
             // The RPC function returns JSONB which Supabase client parses.
             // We expect it to be an array of objects (records).
-            // Add a type check for safety, although the RPC function should guarantee the shape.
+            // Ensure we always return an array, even if data is null/undefined
+            if (data === null || data === undefined) {
+                console.error('RPC returned null/undefined, returning empty array');
+                return [] as SqlSuccessResponse;
+            }
+            
             if (Array.isArray(data)) {
                  // Explicitly cast to expected success type
                 return data as SqlSuccessResponse;
@@ -166,27 +171,111 @@ export class SelfhostedSupabaseClient {
         if (!this.options.databaseUrl) {
             return { error: { message: 'DATABASE_URL is not configured. Cannot execute SQL directly.', code: 'MCP_CONFIG_ERROR' } };
         }
-        await this.ensurePgPool(); // Ensure pool is initialized
-        if (!this.pgPool) { // Should not happen if ensurePgPool works, but type guard
-             return { error: { message: 'pg Pool not available after initialization attempt.', code: 'MCP_POOL_ERROR' } };
-        }
+        
+        // Retry logic for transient connection errors
+        const maxRetries = 3;
+        let lastError: Error | null = null;
+        
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                await this.ensurePgPool(); // Ensure pool is initialized
+                if (!this.pgPool) { // Should not happen if ensurePgPool works, but type guard
+                     return { error: { message: 'pg Pool not available after initialization attempt.', code: 'MCP_POOL_ERROR' } };
+                }
 
-        let client: PoolClient | undefined;
-        try {
-            client = await this.pgPool.connect();
-            console.error(`Executing via pg: ${query.substring(0, 100)}...`);
-            const result = await client.query(query);
-            // Return result in a format consistent with SqlSuccessResponse
-            // Assuming result.rows is the desired data array
-            return result.rows as SqlSuccessResponse;
-        } catch (dbError: unknown) {
-            const error = dbError instanceof Error ? dbError : new Error(String(dbError));
-            console.error('Error executing SQL with pg:', error);
-            // Try to extract code if possible (pg errors often have a .code property)
-            const code = (dbError as { code?: string })?.code || 'PG_ERROR';
-            return { error: { message: error.message, code: code } };
-        } finally {
-            client?.release();
+                let client: PoolClient | undefined;
+                try {
+                    client = await this.pgPool.connect();
+                    console.error(`Executing via pg (attempt ${attempt}): ${query.substring(0, 100)}...`);
+                    const result = await client.query(query);
+                    // Return result in a format consistent with SqlSuccessResponse
+                    // Ensure we always return an array, even if empty
+                    const rows = result.rows || [];
+                    return rows as SqlSuccessResponse;
+                } catch (dbError: unknown) {
+                    const error = dbError instanceof Error ? dbError : new Error(String(dbError));
+                    
+                    // Check if this is a transient error that we should retry
+                    if (attempt < maxRetries && this.isTransientError(error)) {
+                        lastError = error;
+                        console.error(`Transient error on attempt ${attempt}:`, error.message);
+                        
+                        // Reset pool if connection error
+                        if (error.message.includes('ECONNRESET') || error.message.includes('ETIMEDOUT')) {
+                            console.error('Resetting connection pool due to network error...');
+                            await this.resetPgPool();
+                        }
+                        
+                        // Wait before retrying
+                        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+                        console.error(`Retrying in ${delay}ms...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue; // Retry the operation
+                    }
+                    
+                    // Not a transient error or max retries reached
+                    console.error('Error executing SQL with pg:', error);
+                    // Try to extract code if possible (pg errors often have a .code property)
+                    const code = (dbError as { code?: string })?.code || 'PG_ERROR';
+                    return { error: { message: error.message, code: code } };
+                } finally {
+                    client?.release();
+                }
+            } catch (poolError: unknown) {
+                lastError = poolError instanceof Error ? poolError : new Error(String(poolError));
+                console.error(`Pool initialization error on attempt ${attempt}:`, lastError.message);
+                
+                if (attempt < maxRetries) {
+                    // Reset pool and retry
+                    await this.resetPgPool();
+                    const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+        
+        // All retries exhausted
+        return { 
+            error: { 
+                message: `Failed after ${maxRetries} attempts: ${lastError?.message || 'Unknown error'}`, 
+                code: 'MCP_MAX_RETRIES_EXCEEDED' 
+            } 
+        };
+    }
+    
+    /**
+     * Determines if an error is transient and should be retried.
+     */
+    private isTransientError(error: Error): boolean {
+        const transientPatterns = [
+            'ECONNRESET',
+            'ETIMEDOUT',
+            'ECONNREFUSED',
+            'EHOSTUNREACH',
+            'ENETUNREACH',
+            'connection timeout',
+            'Connection terminated',
+            'socket hang up',
+            'connect ETIMEDOUT'
+        ];
+        
+        return transientPatterns.some(pattern => 
+            error.message.toLowerCase().includes(pattern.toLowerCase())
+        );
+    }
+    
+    /**
+     * Resets the PostgreSQL connection pool.
+     */
+    private async resetPgPool(): Promise<void> {
+        if (this.pgPool) {
+            console.error('Closing existing pg pool...');
+            try {
+                await this.pgPool.end();
+            } catch (err) {
+                console.error('Error closing pg pool:', err);
+            }
+            this.pgPool = null;
         }
     }
 
@@ -200,25 +289,66 @@ export class SelfhostedSupabaseClient {
             throw new Error('DATABASE_URL is not configured. Cannot initialize pg pool.');
         }
 
-        console.error('Initializing pg pool...');
-        this.pgPool = new Pool({ connectionString: this.options.databaseUrl });
+        console.error('Initializing pg pool with enhanced connection settings...');
+        
+        // Enhanced pool configuration for better resilience in Coolify/Docker environments
+        this.pgPool = new Pool({ 
+            connectionString: this.options.databaseUrl,
+            // Connection pool configuration
+            max: 10, // Maximum number of clients in the pool
+            idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+            connectionTimeoutMillis: 10000, // Give up trying to connect after 10 seconds
+            
+            // Connection retry configuration for network issues
+            allowExitOnIdle: false, // Keep the pool alive even if all clients are idle
+            
+            // Additional connection options for better compatibility
+            application_name: 'selfhosted-supabase-mcp',
+            
+            // Statement timeout to prevent long-running queries from blocking
+            statement_timeout: 60000, // 60 seconds
+            
+            // Keep-alive settings for Docker/container environments
+            keepAlive: true,
+            keepAliveInitialDelayMillis: 10000
+        });
 
         this.pgPool.on('error', (err, client) => {
             console.error('PG Pool Error: Unexpected error on idle client', err);
-            // Optional: Implement logic to handle pool errors, e.g., attempt to reset pool
+            // Reset pool on critical errors
+            if (err.message.includes('ECONNRESET') || err.message.includes('ETIMEDOUT')) {
+                console.error('Connection error detected. Pool will attempt to recover automatically.');
+            }
         });
 
-        // Test connection?
-        try {
-            const client = await this.pgPool.connect();
-            console.error('pg pool connected successfully.');
-            client.release();
-        } catch (err) {
-            console.error('Failed to connect pg pool:', err);
-            // Clean up pool if connection fails?
-            await this.pgPool.end();
-            this.pgPool = null;
-            throw new Error(`Failed to connect pg pool: ${err instanceof Error ? err.message : String(err)}`);
+        // Test connection with retry logic
+        const maxRetries = 3;
+        let lastError: Error | null = null;
+        
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const client = await this.pgPool.connect();
+                await client.query('SELECT 1'); // Simple test query
+                console.error(`pg pool connected successfully on attempt ${attempt}.`);
+                client.release();
+                return; // Success, exit the method
+            } catch (err) {
+                lastError = err instanceof Error ? err : new Error(String(err));
+                console.error(`Connection attempt ${attempt} failed:`, lastError.message);
+                
+                if (attempt < maxRetries) {
+                    // Wait before retrying (exponential backoff)
+                    const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+                    console.error(`Retrying in ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } else {
+                    // All retries exhausted
+                    console.error('All connection attempts failed.');
+                    await this.pgPool.end();
+                    this.pgPool = null;
+                    throw new Error(`Failed to connect pg pool after ${maxRetries} attempts: ${lastError.message}`);
+                }
+            }
         }
     }
 

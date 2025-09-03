@@ -18,9 +18,15 @@ export function isSqlErrorResponse(result: SqlExecutionResult): result is SqlErr
  * Throws an error if the result contains an error or doesn't match the schema.
  */
 export function handleSqlResponse<T>(result: SqlExecutionResult, schema: z.ZodSchema<T>): T {
+    // Check if result is undefined or null
+    if (!result) {
+        throw new Error('SQL execution returned no result');
+    }
+    
     // Check if the result contains an error
-    if ('error' in result) {
-        throw new Error(`SQL Error (${result.error.code}): ${result.error.message}`);
+    if (result && typeof result === 'object' && 'error' in result) {
+        const errorResult = result as SqlErrorResponse;
+        throw new Error(`SQL Error (${errorResult.error.code}): ${errorResult.error.message}`);
     }
 
     // Validate the result against the schema

@@ -3,12 +3,13 @@ import type { ToolContext } from './types.js';
 
 import type { PoolClient } from 'pg';
 import type { AuthUser } from '../types/index.js'; // Import AuthUser
+import { validatePassword, validateEmail, hashForLogging, maskSensitiveData } from '../utils/auth-security.js';
 
-// Input schema
+// Input schema with enhanced validation
 const UpdateAuthUserInputSchema = z.object({
     user_id: z.string().uuid().describe('The UUID of the user to update.'),
     email: z.string().email().optional().describe('New email address.'),
-    password: z.string().min(6).optional().describe('New plain text password (min 6 chars). WARNING: Insecure.'),
+    password: z.string().min(8).optional().describe('New password (min 8 chars, must include uppercase, lowercase, number, and special character).'),
     role: z.string().optional().describe('New role.'),
     app_metadata: z.record(z.unknown()).optional().describe('New app metadata (will overwrite existing).'),
     user_metadata: z.record(z.unknown()).optional().describe('New user metadata (will overwrite existing).'),
@@ -58,6 +59,19 @@ export const updateAuthUserTool = {
         const client = context.selfhostedClient;
         const { user_id, email, password, role, app_metadata, user_metadata } = input;
 
+        // Validate email if provided
+        if (email !== undefined && !validateEmail(email)) {
+            throw new Error('Invalid email format');
+        }
+
+        // Validate password strength if provided
+        if (password !== undefined) {
+            const passwordValidation = validatePassword(password);
+            if (!passwordValidation.valid) {
+                throw new Error(`Password validation failed: ${passwordValidation.errors?.join(', ')}`);
+            }
+        }
+
         if (!client.isPgAvailable()) {
             context.log('Direct database connection (DATABASE_URL) is required to update auth user details.', 'error');
             throw new Error('Direct database connection (DATABASE_URL) is required to update auth user details.');
@@ -75,7 +89,9 @@ export const updateAuthUserTool = {
         if (password !== undefined) {
             updates.push(`encrypted_password = crypt($${paramIndex++}, gen_salt('bf'))`);
             params.push(password);
-            console.warn(`SECURITY WARNING: Updating password for user ${user_id} with plain text password via direct DB update.`);
+            // Log safely without exposing password
+            const hashedUserId = hashForLogging(user_id);
+            console.warn(`Updating password for user with ID hash ${hashedUserId}`);
         }
         if (role !== undefined) {
             updates.push(`role = $${paramIndex++}`);
@@ -140,7 +156,9 @@ export const updateAuthUserTool = {
                      errorMessage = `Database error during user update: ${String(dbError)}`;
                 }
 
-                console.error('Error updating user in DB:', dbError);
+                // Log error safely without exposing sensitive data
+                const safeError = maskSensitiveData(dbError);
+                console.error('Error updating user in DB:', safeError);
                 
                 // Throw the specific error message
                 throw new Error(errorMessage);

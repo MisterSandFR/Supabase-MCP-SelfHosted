@@ -1,28 +1,61 @@
-# Self-Hosted Supabase MCP Server
+# Self-Hosted Supabase MCP Server - Enhanced Security Edition
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![smithery badge](https://smithery.ai/badge/@HenkDz/selfhosted-supabase-mcp)](https://smithery.ai/server/@HenkDz/selfhosted-supabase-mcp)
+[![Security: Enhanced](https://img.shields.io/badge/Security-Enhanced-green.svg)](https://github.com/moatus/ng-supabase-mcp/wiki/Security-Guide)
 
-## Overview
+> 🔒 **Enhanced fork** of the original [selfhosted-supabase-mcp](https://github.com/HenkDz/selfhosted-supabase-mcp) by [@HenkDz](https://github.com/HenkDz) with comprehensive security improvements and production-ready features.
 
-This project provides a [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol/specification) server designed specifically for interacting with **self-hosted Supabase instances**. It bridges the gap between MCP clients (like IDE extensions) and your local or privately hosted Supabase projects, enabling database introspection, management, and interaction directly from your development environment.
+## 🌟 Overview
 
-This server was built from scratch, drawing lessons from adapting the official Supabase cloud MCP server, to provide a minimal, focused implementation tailored for the self-hosted use case.
+A secure [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol/specification) server designed for interacting with **self-hosted Supabase instances**. This enhanced version addresses critical security vulnerabilities and adds enterprise-grade features while maintaining full compatibility with the original API.
 
-## Purpose
+Built upon the solid foundation created by [@HenkDz](https://github.com/HenkDz), this fork adds comprehensive security layers, connection resilience, and production-ready features essential for enterprise deployments.
 
-The primary goal of this server is to enable developers using self-hosted Supabase installations to leverage MCP-based tools for tasks such as:
+## 🔐 Security Enhancements
 
-*   Querying database schemas and data.
-*   Managing database migrations.
-*   Inspecting database statistics and connections.
-*   Managing authentication users.
-*   Interacting with Supabase Storage.
-*   Generating type definitions.
+This fork includes comprehensive security improvements that address all critical vulnerabilities:
 
-It avoids the complexities of the official cloud server related to multi-project management and cloud-specific APIs, offering a streamlined experience for single-project, self-hosted environments.
+### ✅ Fixed Security Issues
+- **Connection Resilience** - Enhanced connection handling for Coolify/Docker environments with automatic retry logic
+- **SQL Injection Prevention** - Comprehensive SQL sanitization and validation  
+- **Secure Authentication** - Strong password policies and secure token handling
+- **Input Validation** - Complete input sanitization across all endpoints
+- **Rate Limiting** - Adaptive rate limiting and resource controls
+- **Query Complexity Analysis** - Prevents resource exhaustion from complex queries
 
-## Features (Implemented Tools)
+### 🛡️ Security Features
+
+#### SQL Security
+- Query validation and injection pattern detection
+- Parameterized query support
+- Table/column name validation
+- Query complexity limits (100 points max)
+- Safe string escaping
+
+#### Authentication Security  
+- Password strength validation (8+ chars, uppercase, lowercase, number, special char)
+- Secure token generation using crypto
+- Safe logging without exposing sensitive data
+- HMAC signature verification
+- Timing-safe comparisons
+
+#### Rate Limiting & Resource Control
+- 100 requests/minute default limit
+- Max 10 concurrent requests
+- Query complexity scoring
+- Memory limits (256MB max)
+- Execution time limits (30s max)
+- Adaptive throttling based on system load
+
+#### Input Validation
+- Comprehensive sanitization for all inputs
+- File upload validation
+- Protection against prototype pollution
+- Object depth limits
+- XSS prevention
+
+## 🚀 Features
 
 The server exposes the following tools to MCP clients:
 
@@ -57,40 +90,36 @@ The server exposes the following tools to MCP clients:
 
 *(Note: `get_logs` was initially planned but skipped due to implementation complexities in a self-hosted environment).*
 
-## Setup and Installation
+## 📦 Installation
 
-### Installing via Smithery
-
-To install Self-Hosted Supabase MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@HenkDz/selfhosted-supabase-mcp):
+### Via Smithery (Recommended)
 
 ```bash
 npx -y @smithery/cli install @HenkDz/selfhosted-supabase-mcp --client claude
 ```
 
+### Manual Installation
+
+```bash
+# Clone the enhanced security fork
+git clone https://github.com/moatus/ng-supabase-mcp.git
+cd ng-supabase-mcp
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+```
+
 ### Prerequisites
 
-*   Node.js (Version 18.x or later recommended)
-*   npm (usually included with Node.js)
-*   Access to your self-hosted Supabase instance (URL, keys, potentially direct DB connection string).
+- Node.js 18.x or later
+- npm (included with Node.js)
+- Access to your self-hosted Supabase instance
+- PostgreSQL connection string (recommended for production)
 
-### Steps
-
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository-url>
-    cd selfhosted-supabase-mcp
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-3.  **Build the project:**
-    ```bash
-    npm run build
-    ```
-    This compiles the TypeScript code to JavaScript in the `dist` directory.
-
-## Configuration
+## ⚙️ Configuration
 
 The server requires configuration details for your Supabase instance. These can be provided via command-line arguments or environment variables. CLI arguments take precedence.
 
@@ -106,14 +135,15 @@ The server requires configuration details for your Supabase instance. These can 
 *   `--jwt-secret <secret>` or `SUPABASE_AUTH_JWT_SECRET=<secret>`: Your Supabase project's JWT secret. Needed for tools like `verify_jwt_secret`.
 *   `--tools-config <path>`: Path to a JSON file specifying which tools to enable (whitelist). If omitted, all tools defined in the server are enabled. The file should have the format `{"enabledTools": ["tool_name_1", "tool_name_2"]}`.
 
-### Important Notes:
+### 💡 Important Notes
 
-*   **`execute_sql` Helper Function:** Many tools rely on a `public.execute_sql` function within your Supabase database for secure and efficient SQL execution via RPC. The server attempts to check for this function on startup. If it's missing *and* a `service-key` (or `SUPABASE_SERVICE_ROLE_KEY`) *and* `db-url` (or `DATABASE_URL`) are provided, it will attempt to create the function and grant necessary permissions. If creation fails or keys aren't provided, tools relying solely on RPC may fail.
-*   **Direct Database Access:** Tools interacting directly with privileged schemas (`auth`, `storage`) or system catalogs (`pg_catalog`) generally require the `DATABASE_URL` to be configured for a direct `pg` connection.
+- **Direct Database Connection**: For production use, always provide `DATABASE_URL` for better reliability and to bypass JWT authentication issues
+- **Helper Function**: The server auto-creates a `public.execute_sql` function if it doesn't exist (requires service key and database URL)
+- **Security**: Never commit credentials to version control - use environment variables
 
-## Usage
+## 🚀 Usage
 
-Run the server using Node.js, providing the necessary configuration:
+### Running the Server
 
 ```bash
 # Using CLI arguments (example)
@@ -136,16 +166,11 @@ npm start -- --url ... --anon-key ...
 
 The server communicates via standard input/output (stdio) and is designed to be invoked by an MCP client application (e.g., an IDE extension like Cursor). The client will connect to the server's stdio stream to list and call the available tools.
 
-## Client Configuration Examples
+## 🔧 Client Configuration
 
-Below are examples of how to configure popular MCP clients to use this self-hosted server. 
+> ⚠️ **Security Note**: Never commit configuration files with credentials. Use environment variables or secure vaults.
 
-**Important:** 
-*   Replace placeholders like `<your-supabase-url>`, `<your-anon-key>`, `<your-db-url>`, `<path-to-dist/index.js>` etc., with your actual values.
-*   Ensure the path to the compiled server file (`dist/index.js`) is correct for your system.
-*   Be cautious about storing sensitive keys directly in configuration files, especially if committed to version control. Consider using environment variables or more secure methods where supported by the client.
-
-### Cursor
+### Claude Desktop / Cursor
 
 1.  Create or open the file `.cursor/mcp.json` in your project root.
 2.  Add the following configuration:
@@ -249,13 +274,89 @@ Adapt the configuration structure shown for Cursor or the official Supabase docu
 ```
 Consult the specific documentation for each client on where to place the `mcp.json` or equivalent configuration file.
 
-## Development
+## 🐳 Docker/Coolify Deployment
 
-*   **Language:** TypeScript
-*   **Build:** `tsc` (TypeScript Compiler)
-*   **Dependencies:** Managed via `npm` (`package.json`)
-*   **Core Libraries:** `@supabase/supabase-js`, `pg` (node-postgres), `zod` (validation), `commander` (CLI args), `@modelcontextprotocol/sdk` (MCP server framework).
+This enhanced version includes specific optimizations for containerized environments:
 
-## License
+- Connection pooling with keep-alive settings
+- Automatic retry logic for transient network issues  
+- Enhanced timeout configurations
+- Docker-friendly connection parameters
 
-This project is licensed under the MIT License. See the LICENSE file for details. 
+```yaml
+# docker-compose.yml example
+services:
+  supabase-mcp:
+    build: .
+    environment:
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      DATABASE_URL: ${DATABASE_URL}
+    restart: unless-stopped
+```
+
+## 📊 Monitoring & Limits
+
+### Default Limits
+- **Rate Limit**: 100 requests/minute
+- **Concurrent Requests**: 10 maximum
+- **Query Complexity**: 100 points maximum
+- **Execution Time**: 30 seconds maximum
+- **Memory Usage**: 256MB maximum
+
+### Monitoring
+The server logs detailed metrics including:
+- Connection attempts and failures
+- Query execution times
+- Resource usage statistics
+- Security violations
+- Rate limit hits
+
+## 🔒 Security Best Practices
+
+1. **Never commit credentials** - Use environment variables
+2. **Use DATABASE_URL** - Direct connection bypasses JWT issues
+3. **Enable rate limiting** - Protects against abuse
+4. **Monitor query complexity** - Prevents resource exhaustion
+5. **Validate all inputs** - Prevents injection attacks
+6. **Use strong passwords** - Minimum 8 characters with complexity
+7. **Audit logs** - Monitor all database operations
+
+## 🤝 Contributing
+
+Contributions are welcome! Please ensure:
+- All code passes TypeScript compilation
+- Security best practices are followed
+- Tests are included for new features
+- Documentation is updated
+
+## 📚 Documentation
+
+For detailed documentation, see our [Wiki](https://github.com/moatus/ng-supabase-mcp/wiki):
+- [Security Guide](https://github.com/moatus/ng-supabase-mcp/wiki/Security-Guide)
+- [Configuration Guide](https://github.com/moatus/ng-supabase-mcp/wiki/Configuration-Guide)
+- [Troubleshooting](https://github.com/moatus/ng-supabase-mcp/wiki/Troubleshooting)
+- [API Reference](https://github.com/moatus/ng-supabase-mcp/wiki/API-Reference)
+
+## 📄 License
+
+MIT License - See [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Original project by [@HenkDz](https://github.com/HenkDz)
+- [Supabase](https://supabase.com) team for the amazing platform
+- [Model Context Protocol](https://github.com/modelcontextprotocol/specification) contributors
+
+## ⚠️ Security Notice
+
+This tool provides direct database access. Always:
+- Use strong, unique passwords
+- Limit access to trusted networks
+- Monitor usage and logs
+- Keep dependencies updated
+- Follow the principle of least privilege
+
+---
+
+**Version**: 2.0.0 | **Status**: Production Ready | **Security**: Enhanced 

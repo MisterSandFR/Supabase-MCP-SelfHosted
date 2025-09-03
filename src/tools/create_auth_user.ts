@@ -3,11 +3,12 @@ import type { ToolContext } from './types.js';
 import { handleSqlResponse } from './utils.js';
 import type { PoolClient } from 'pg';
 import type { SqlSuccessResponse, AuthUser } from '../types/index.js'; // Import AuthUser
+import { validatePassword, validateEmail, hashForLogging, maskSensitiveData } from '../utils/auth-security.js';
 
-// Input schema
+// Input schema with enhanced validation
 const CreateAuthUserInputSchema = z.object({
     email: z.string().email().describe('The email address for the new user.'),
-    password: z.string().min(6).describe('Plain text password (min 6 chars). WARNING: Insecure.'),
+    password: z.string().min(8).describe('Password (min 8 chars, must include uppercase, lowercase, number, and special character).'),
     role: z.string().optional().describe('User role.'),
     app_metadata: z.record(z.unknown()).optional().describe('Optional app metadata.'),
     user_metadata: z.record(z.unknown()).optional().describe('Optional user metadata.'),
@@ -53,14 +54,27 @@ export const createAuthUserTool = {
         const client = context.selfhostedClient;
         const { email, password, role, app_metadata, user_metadata } = input;
 
+        // Validate email format
+        if (!validateEmail(email)) {
+            throw new Error('Invalid email format');
+        }
+
+        // Validate password strength
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.valid) {
+            throw new Error(`Password validation failed: ${passwordValidation.errors?.join(', ')}`);
+        }
+
         // Direct DB connection is absolutely required for this direct insert
         if (!client.isPgAvailable()) {
              context.log('Direct database connection (DATABASE_URL) is required to create an auth user directly.', 'error');
             throw new Error('Direct database connection (DATABASE_URL) is required to create an auth user directly.');
         }
 
-        console.warn(`SECURITY WARNING: Creating user ${email} with plain text password via direct DB insert.`);
-        context.log(`Attempting to create user ${email}...`, 'warn');
+        // Log safely without exposing password
+        const hashedEmail = hashForLogging(email);
+        console.warn(`Creating user with email hash ${hashedEmail}`);
+        context.log(`Attempting to create user ${email}...`, 'info');
 
         // Use transaction to ensure atomicity and get pg client
         const createdUser = await client.executeTransactionWithPg(async (pgClient: PoolClient) => {
@@ -123,7 +137,9 @@ export const createAuthUserTool = {
                      errorMessage = `Database error during user creation: ${String(dbError)}`;
                 }
 
-                console.error('Error creating user in DB:', dbError); // Log the original error
+                // Log error safely without exposing sensitive data
+                const safeError = maskSensitiveData(dbError);
+                console.error('Error creating user in DB:', safeError);
 
                 // Throw a specific error message
                 throw new Error(errorMessage);
