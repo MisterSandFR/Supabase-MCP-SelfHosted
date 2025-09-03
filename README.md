@@ -1,6 +1,6 @@
 # Self-Hosted Supabase MCP Server - Enhanced Security Edition
 
-[![Smithery Badge](https://smithery.ai/badge/@mistersandfr/selfhosted-supabase-mcp)](https://smithery.ai/protocol/@mistersandfr/selfhosted-supabase-mcp)
+[![smithery badge](https://smithery.ai/badge/@MisterSandFR/supabase-mcp-selfhosted)](https://smithery.ai/server/@MisterSandFR/supabase-mcp-selfhosted)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Security: Enhanced](https://img.shields.io/badge/Security-Enhanced-green.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki/Security-Guide)
 [![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-blue.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/releases)
@@ -206,5 +206,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 This tool is designed for self-hosted Supabase instances. Always follow security best practices and never expose sensitive credentials.
 
 ---
+
 
 **Made with ❤️ by [MisterSandFR](https://github.com/MisterSandFR)** | Based on original work by [@HenkDz](https://github.com/HenkDz)
