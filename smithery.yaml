@@ -81,9 +81,5 @@ startCommand:
       return { command: 'node', args };
     }
   exampleConfig:
-    supabaseUrl: http://localhost:8000
-    supabaseAnonKey: example-anon-key
-    supabaseServiceRoleKey: example-service-key
-    databaseUrl: postgresql://postgres:password@localhost:5432/postgres
-    supabaseAuthJwtSecret: example-jwt-secret
-    toolsConfig: ./mcp-tools.json
+    supabaseUrl: https://demo.supabase.co
+    supabaseAnonKey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
