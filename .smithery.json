@@ -1,0 +1,139 @@
+{
+  "name": "@MisterSandFR/selfhosted-supabase-mcp-secure",
+  "displayName": "Self-Hosted Supabase MCP - Enhanced Security Edition",
+  "version": "2.0.0",
+  "description": "🔒 Production-ready MCP server for self-hosted Supabase with enterprise-grade security, SQL injection prevention, rate limiting, and Docker/Coolify optimizations",
+  "author": {
+    "name": "MisterSandFR",
+    "url": "https://github.com/MisterSandFR"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MisterSandFR/selfhosted-supabase-mcp"
+  },
+  "homepage": "https://github.com/MisterSandFR/selfhosted-supabase-mcp",
+  "license": "MIT",
+  "keywords": [
+    "supabase",
+    "postgresql",
+    "database",
+    "security",
+    "self-hosted",
+    "docker",
+    "coolify",
+    "authentication",
+    "rate-limiting",
+    "sql-injection-prevention",
+    "mcp",
+    "claude",
+    "ai",
+    "production-ready"
+  ],
+  "categories": [
+    "Database",
+    "Security",
+    "Development Tools",
+    "Self-Hosted"
+  ],
+  "badges": [
+    {
+      "label": "Security",
+      "message": "Enhanced",
+      "color": "green"
+    },
+    {
+      "label": "Production",
+      "message": "Ready",
+      "color": "blue"
+    },
+    {
+      "label": "Docker",
+      "message": "Optimized",
+      "color": "blue"
+    }
+  ],
+  "screenshots": [],
+  "requirements": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "clients": {
+    "claude": {
+      "supported": true,
+      "tested": true,
+      "configuration": "Automatic via Smithery CLI"
+    },
+    "cursor": {
+      "supported": true,
+      "tested": true,
+      "configuration": "Manual via .cursor/mcp.json"
+    },
+    "vscode": {
+      "supported": true,
+      "tested": true,
+      "configuration": "Manual via .vscode/mcp.json"
+    },
+    "other": {
+      "supported": true,
+      "tested": false,
+      "configuration": "Manual configuration required"
+    }
+  },
+  "features": {
+    "security": {
+      "sql_injection_prevention": true,
+      "strong_password_validation": true,
+      "rate_limiting": true,
+      "resource_limits": true,
+      "secure_logging": true,
+      "input_sanitization": true
+    },
+    "production": {
+      "connection_retry": true,
+      "docker_optimized": true,
+      "error_handling": true,
+      "monitoring": true,
+      "performance_optimized": true
+    },
+    "tools": {
+      "database_operations": 8,
+      "authentication": 5,
+      "storage": 2,
+      "development": 4,
+      "configuration": 4
+    }
+  },
+  "changelog": {
+    "2.0.0": {
+      "date": "2024-01-03",
+      "changes": [
+        "Enhanced security with SQL injection prevention",
+        "Added strong password validation (8+ chars with complexity)",
+        "Implemented rate limiting (100 req/min) and resource controls",
+        "Fixed Coolify/Docker connection issues (ECONNRESET)",
+        "Added comprehensive input validation and sanitization",
+        "Improved error handling and secure logging",
+        "Added complete Wiki documentation",
+        "Production-ready features and optimizations"
+      ]
+    }
+  },
+  "support": {
+    "issues": "https://github.com/MisterSandFR/selfhosted-supabase-mcp/issues",
+    "discussions": "https://github.com/MisterSandFR/selfhosted-supabase-mcp/discussions",
+    "wiki": "https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki",
+    "email": null
+  },
+  "credits": {
+    "original_author": "HenkDz",
+    "original_repository": "https://github.com/HenkDz/selfhosted-supabase-mcp",
+    "fork_author": "MisterSandFR",
+    "contributors": []
+  },
+  "tested_with": {
+    "supabase": ["self-hosted", "cloud"],
+    "postgresql": ["14", "15", "16"],
+    "environments": ["local", "docker", "kubernetes", "coolify"],
+    "operating_systems": ["linux", "macos", "windows"]
+  }
+}

@@ -1,4 +1,27 @@
 # Smithery configuration file: https://smithery.ai/docs/build/project-config
+# Enhanced Security Edition of Self-Hosted Supabase MCP Server
+
+name: selfhosted-supabase-mcp-secure
+version: 2.0.0
+description: |
+  🔒 Enhanced security edition of Self-Hosted Supabase MCP Server with comprehensive security 
+  improvements including SQL injection prevention, strong authentication, rate limiting, 
+  and production-ready features. Perfect for self-hosted Supabase instances in Docker/Coolify.
+
+author: MisterSandFR
+license: MIT
+homepage: https://github.com/MisterSandFR/selfhosted-supabase-mcp
+
+tags:
+  - supabase
+  - postgresql
+  - database
+  - security
+  - self-hosted
+  - docker
+  - authentication
+  - rate-limiting
+  - sql
 
 startCommand:
   type: stdio
@@ -11,22 +34,29 @@ startCommand:
     properties:
       supabaseUrl:
         type: string
-        description: Self-hosted Supabase HTTP URL
+        description: Self-hosted Supabase HTTP(S) URL (e.g., http://localhost:8000)
+        examples: ["http://localhost:8000", "https://your-supabase.com"]
       supabaseAnonKey:
         type: string
-        description: Supabase anonymous key
+        description: Supabase anonymous key (starts with eyJ...)
+        sensitive: true
       supabaseServiceRoleKey:
         type: string
-        description: Supabase service role key (optional)
+        description: Service role key for privileged operations (optional but recommended)
+        sensitive: true
       databaseUrl:
         type: string
-        description: Direct PostgreSQL connection string (optional)
+        description: Direct PostgreSQL connection string (highly recommended for production)
+        examples: ["postgresql://postgres:password@localhost:5432/postgres"]
+        sensitive: true
       supabaseAuthJwtSecret:
         type: string
-        description: Supabase JWT secret (optional)
+        description: JWT secret for token verification (optional)
+        sensitive: true
       toolsConfig:
         type: string
-        description: Path to tools config JSON (optional)
+        description: Path to JSON file for tool whitelisting (optional)
+        examples: ["./mcp-tools.json"]
   commandFunction:
     # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
     |-

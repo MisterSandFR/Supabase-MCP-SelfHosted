@@ -1,16 +1,26 @@
 # Self-Hosted Supabase MCP Server - Enhanced Security Edition
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![smithery badge](https://smithery.ai/badge/@HenkDz/selfhosted-supabase-mcp)](https://smithery.ai/server/@HenkDz/selfhosted-supabase-mcp)
-[![Security: Enhanced](https://img.shields.io/badge/Security-Enhanced-green.svg)](https://github.com/moatus/ng-supabase-mcp/wiki/Security-Guide)
+[![smithery badge](https://smithery.ai/badge/@MisterSandFR/selfhosted-supabase-mcp-secure)](https://smithery.ai/server/@MisterSandFR/selfhosted-supabase-mcp-secure)
+[![Security: Enhanced](https://img.shields.io/badge/Security-Enhanced-green.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki/Security-Guide)
+[![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-blue.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/releases)
+[![Node: 18+](https://img.shields.io/badge/Node-18%2B-brightgreen.svg)](https://nodejs.org)
 
-> 🔒 **Enhanced fork** of the original [selfhosted-supabase-mcp](https://github.com/HenkDz/selfhosted-supabase-mcp) by [@HenkDz](https://github.com/HenkDz) with comprehensive security improvements and production-ready features.
+> 🔒 **Enhanced Security Edition** - A production-ready fork of the original [selfhosted-supabase-mcp](https://github.com/HenkDz/selfhosted-supabase-mcp) by [@HenkDz](https://github.com/HenkDz) with comprehensive security improvements, rate limiting, and Docker/Coolify optimizations.
 
 ## 🌟 Overview
 
 A secure [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol/specification) server designed for interacting with **self-hosted Supabase instances**. This enhanced version addresses critical security vulnerabilities and adds enterprise-grade features while maintaining full compatibility with the original API.
 
 Built upon the solid foundation created by [@HenkDz](https://github.com/HenkDz), this fork adds comprehensive security layers, connection resilience, and production-ready features essential for enterprise deployments.
+
+### Why Choose the Enhanced Security Edition?
+
+- ✅ **All Security Issues Fixed** - Addresses issues #5, #7, #8, #9, #10 from the original repo
+- 🛡️ **Production Ready** - Battle-tested in Docker/Coolify environments
+- ⚡ **Performance Optimized** - Connection pooling, retry logic, resource limits
+- 📚 **Fully Documented** - Comprehensive Wiki with guides and troubleshooting
+- 🔒 **Enterprise Security** - Rate limiting, SQL injection prevention, strong auth
 
 ## 🔐 Security Enhancements
 
@@ -95,15 +105,19 @@ The server exposes the following tools to MCP clients:
 ### Via Smithery (Recommended)
 
 ```bash
-npx -y @smithery/cli install @HenkDz/selfhosted-supabase-mcp --client claude
+# Install for Claude Desktop
+npx -y @smithery/cli install @MisterSandFR/selfhosted-supabase-mcp-secure --client claude
+
+# Install for other clients
+npx -y @smithery/cli install @MisterSandFR/selfhosted-supabase-mcp-secure
 ```
 
 ### Manual Installation
 
 ```bash
 # Clone the enhanced security fork
-git clone https://github.com/moatus/ng-supabase-mcp.git
-cd ng-supabase-mcp
+git clone https://github.com/MisterSandFR/selfhosted-supabase-mcp.git
+cd selfhosted-supabase-mcp
 
 # Install dependencies
 npm install
@@ -332,11 +346,11 @@ Contributions are welcome! Please ensure:
 
 ## 📚 Documentation
 
-For detailed documentation, see our [Wiki](https://github.com/moatus/ng-supabase-mcp/wiki):
-- [Security Guide](https://github.com/moatus/ng-supabase-mcp/wiki/Security-Guide)
-- [Configuration Guide](https://github.com/moatus/ng-supabase-mcp/wiki/Configuration-Guide)
-- [Troubleshooting](https://github.com/moatus/ng-supabase-mcp/wiki/Troubleshooting)
-- [API Reference](https://github.com/moatus/ng-supabase-mcp/wiki/API-Reference)
+For detailed documentation, see our [Wiki](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki):
+- [Security Guide](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki/Security-Guide)
+- [Configuration Guide](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki/Configuration-Guide)
+- [Troubleshooting](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki/Troubleshooting)
+- [API Reference](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki/API-Reference)
 
 ## 📄 License
 
@@ -359,4 +373,23 @@ This tool provides direct database access. Always:
 
 ---
 
-**Version**: 2.0.0 | **Status**: Production Ready | **Security**: Enhanced 
+**Version**: 2.0.0 | **Status**: Production Ready | **Security**: Enhanced
+
+## 🚀 Quick Start with Smithery
+
+The easiest way to get started is through Smithery:
+
+1. **Install via Smithery CLI:**
+```bash
+npx -y @smithery/cli install @MisterSandFR/selfhosted-supabase-mcp-secure --client claude
+```
+
+2. **Configure your credentials** when prompted:
+- Supabase URL (e.g., `http://localhost:8000`)
+- Anonymous Key (starts with `eyJ...`)
+- Database URL (optional but recommended)
+- Service Role Key (optional)
+
+3. **Start using** the MCP tools in Claude Desktop!
+
+For manual configuration and other clients, see the [Configuration Guide](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki/Configuration-Guide). 

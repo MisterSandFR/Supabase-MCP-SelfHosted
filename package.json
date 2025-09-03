@@ -1,18 +1,41 @@
 {
-  "name": "self-hosted-supabase-mcp",
+  "name": "@mistersandfr/selfhosted-supabase-mcp-secure",
   "version": "2.0.0",
-  "description": "Enhanced security edition of Self-Hosted Supabase MCP Server with comprehensive security improvements",
+  "description": "Enhanced security edition of Self-Hosted Supabase MCP Server with SQL injection prevention, rate limiting, and production features",
   "main": "dist/index.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MisterSandFR/selfhosted-supabase-mcp.git"
+  },
+  "homepage": "https://github.com/MisterSandFR/selfhosted-supabase-mcp",
+  "bugs": {
+    "url": "https://github.com/MisterSandFR/selfhosted-supabase-mcp/issues"
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --clean",
     "start": "node dist/index.js",
     "dev": "tsup src/index.ts --format esm --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
+  "keywords": [
+    "supabase",
+    "mcp",
+    "postgresql",
+    "database",
+    "security",
+    "self-hosted",
+    "docker",
+    "authentication",
+    "rate-limiting",
+    "sql-injection-prevention"
+  ],
+  "author": "MisterSandFR",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "latest",
     "@supabase/supabase-js": "^2.49.4",
