@@ -4,7 +4,10 @@
       "WebFetch(domain:github.com)",
       "Bash(npm run build:*)",
       "Bash(npm install)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git tag:*)"
     ],
     "deny": [],
     "ask": []
