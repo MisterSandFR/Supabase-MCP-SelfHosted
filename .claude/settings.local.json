@@ -14,7 +14,8 @@
       "Bash(tsup:*)",
       "Bash(npx tsup:*)",
       "Bash(npx @smithery/cli:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "WebFetch(domain:smithery.ai)"
     ],
     "deny": [],
     "ask": []

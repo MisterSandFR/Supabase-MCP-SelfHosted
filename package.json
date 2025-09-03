@@ -3,7 +3,7 @@
   "version": "2.1.0",
   "description": "Enhanced security edition of Self-Hosted Supabase MCP Server with SQL injection prevention, rate limiting, and production features",
   "main": "dist/index.js",
-  "module": "./src/index.ts",
+  "module": "./src/index-smithery.ts",
   "type": "module",
   "repository": {
     "type": "git",
