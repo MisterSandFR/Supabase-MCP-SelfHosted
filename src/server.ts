@@ -32,7 +32,7 @@ import listStorageObjectsTool from './tools/list_storage_objects.js';
 import listRealtimePublicationsTool from './tools/list_realtime_publications.js';
 import { RateLimiter, ConcurrencyLimiter, QueryComplexityAnalyzer, withResourceLimits } from './utils/rate-limiter.js';
 
-// Export the configuration schema for Smithery
+// Export the configuration schema
 export const configSchema = z.object({
     supabaseUrl: z.string().describe('Self-hosted Supabase HTTP(S) URL'),
     supabaseAnonKey: z.string().describe('Supabase anonymous key'),
@@ -64,7 +64,7 @@ const rateLimiter = new RateLimiter(100, 60000);
 const concurrencyLimiter = new ConcurrencyLimiter(10);
 const queryAnalyzer = new QueryComplexityAnalyzer();
 
-// Main server creation function for Smithery
+// Main server creation function
 export default async function createServer(config: Config) {
     console.error('Creating Self-Hosted Supabase MCP Server with config...');
     
@@ -230,7 +230,7 @@ export default async function createServer(config: Config) {
     // Return the server instance
     return {
         server,
-        // Provide a connect method for Smithery to use
+        // Provide a connect method
         async connect() {
             const transport = new StdioServerTransport();
             await server.connect(transport);
