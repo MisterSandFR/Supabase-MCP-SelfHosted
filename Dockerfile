@@ -1,30 +1,37 @@
-# Use official Node.js LTS
-FROM node:20-slim
-
-# Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    make \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
+# Build stage
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install ALL dependencies for build
-RUN npm ci --include=dev
+# Install all dependencies including dev
+RUN npm ci || npm install
 
 # Copy source files
 COPY tsconfig.json ./
 COPY src ./src
 
-# Build the TypeScript project
+# Build the project
 RUN npm run build
 
-# Keep all dependencies (don't prune)
-# The server needs some runtime dependencies that might be in devDependencies
+# Runtime stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files and install production dependencies only
+COPY package*.json ./
+RUN npm ci --omit=dev || npm install --production
+
+# Copy built files from builder stage
+COPY --from=builder /app/dist ./dist
+
+# Run as non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+USER nodejs
 
 # Entrypoint for MCP server
 ENTRYPOINT ["node", "dist/index.js"]
