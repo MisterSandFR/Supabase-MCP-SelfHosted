@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import createServerFromConfig from './server.js';
 
 // Configuration schema for Smithery
 export const configSchema = z.object({
@@ -12,15 +11,15 @@ export const configSchema = z.object({
 
 // Export default function for Smithery
 export default async function createServer({ config }: { config: z.infer<typeof configSchema> }) {
-    // Create the server with the provided configuration
-    const serverInstance = await createServerFromConfig({
-        supabaseUrl: config.SUPABASE_URL,
-        supabaseAnonKey: config.SUPABASE_ANON_KEY,
+    // Import dynamically to avoid circular dependencies
+    const { createSmitheryServer } = await import('./server-smithery.js');
+    
+    // Create and return the server
+    return createSmitheryServer({
+        supabaseUrl: config.SUPABASE_URL || '',
+        supabaseAnonKey: config.SUPABASE_ANON_KEY || '',
         supabaseServiceRoleKey: config.SUPABASE_SERVICE_ROLE_KEY,
         databaseUrl: config.DATABASE_URL,
         supabaseAuthJwtSecret: config.SUPABASE_AUTH_JWT_SECRET
     });
-
-    // Return just the server object for Smithery
-    return serverInstance.server;
 }

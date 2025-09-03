@@ -72,7 +72,10 @@ const queryAnalyzer = new QueryComplexityAnalyzer();
 
 // Main server creation function
 export default async function createServer(config: Config) {
-    console.error('Creating Self-Hosted Supabase MCP Server with config...');
+    // Don't log to stderr in production/Smithery environment
+    if (process.env.NODE_ENV !== 'production') {
+        console.error('Creating Self-Hosted Supabase MCP Server with config...');
+    }
     
     // Create Supabase client
     const selfhostedClient = await SelfhostedSupabaseClient.create({
