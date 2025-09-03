@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 // Configuration schema for Smithery
 export const configSchema = z.object({
-    SUPABASE_URL: z.string().describe('Your Supabase project URL'),
-    SUPABASE_ANON_KEY: z.string().describe('Your Supabase anonymous key'),
+    SUPABASE_URL: z.string().optional().default('').describe('Your Supabase project URL (required for operation)'),
+    SUPABASE_ANON_KEY: z.string().optional().default('').describe('Your Supabase anonymous key (required for operation)'),
     SUPABASE_SERVICE_ROLE_KEY: z.string().optional().describe('Supabase service role key (optional)'),
     DATABASE_URL: z.string().optional().describe('Direct database connection string (optional)'),
     SUPABASE_AUTH_JWT_SECRET: z.string().optional().describe('Supabase JWT secret (optional)')
