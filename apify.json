@@ -10,5 +10,6 @@
     "memoryMbytes": 512,
     "timeoutSecs": 3600
   },
-  "dockerfile": "./Dockerfile.apify"
+  "dockerfile": "./Dockerfile.apify",
+  "main": "dist/main.js"
 }
