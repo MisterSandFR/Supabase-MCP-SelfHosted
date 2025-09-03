@@ -7,7 +7,7 @@
   "meta": {
     "templateId": "nodejs-mcp-server"
   },
-  "dockerfile": "./Dockerfile",
+  "dockerfile": "./Dockerfile.apify",
   "readme": "./README.md",
   "input": "./input_schema.json",
   "storages": {
