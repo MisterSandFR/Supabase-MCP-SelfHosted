@@ -3,7 +3,7 @@
 [![smithery badge](https://smithery.ai/badge/@MisterSandFR/supabase-mcp-selfhosted)](https://smithery.ai/server/@MisterSandFR/supabase-mcp-selfhosted)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Security: Enhanced](https://img.shields.io/badge/Security-Enhanced-green.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki/Security-Guide)
-[![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-blue.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/releases)
+[![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-blue.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/releases)
 [![Node: 18+](https://img.shields.io/badge/Node-18%2B-brightgreen.svg)](https://nodejs.org)
 
 > 🔒 **Enhanced Security Edition** - A production-ready fork of the original [selfhosted-supabase-mcp](https://github.com/HenkDz/selfhosted-supabase-mcp) by [@HenkDz](https://github.com/HenkDz) with comprehensive security improvements, rate limiting, Docker/Coolify optimizations, and extensive management tools for self-hosted deployments.
@@ -133,6 +133,18 @@ Add to your Claude Desktop config file:
 
 ## 🚀 Features
 
+### 🆕 New in v2.3.0
+
+#### Automatic Migration Management
+The new `auto_migrate` tool revolutionizes database migration management:
+- **Automatic Detection**: Scans for pending migrations in your `supabase/migrations` folder
+- **Smart Application**: Applies migrations in the correct order with transaction support
+- **Comprehensive Tracking**: Maintains a detailed history of all applied migrations
+- **Error Recovery**: Automatic rollback on failures with detailed error reporting
+- **No Manual Intervention**: Eliminates the need to manually execute SQL in Supabase console
+
+**Use Case**: Perfect for CI/CD pipelines and automated deployments. No more "Please execute these SQL queries manually" messages!
+
 ### Available Tools
 
 *   **Database Core Operations**
@@ -148,6 +160,7 @@ Add to your Claude Desktop config file:
     *   `create_migration`: Create new migration files with proper versioning.
     *   `push_migrations`: Automatically push and apply migrations to your instance.
     *   `validate_migration`: Pre-flight validation before applying migrations.
+    *   `auto_migrate`: **NEW** - Automatically detect and apply all pending migrations with transaction support.
 *   **Project Configuration & Keys**
     *   `get_project_url`: Returns the configured Supabase URL.
     *   `get_anon_key`: Returns the configured Supabase anon key.

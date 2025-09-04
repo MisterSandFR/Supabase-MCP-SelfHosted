@@ -1,6 +1,6 @@
 {
   "name": "@mistersandfr/selfhosted-supabase-mcp",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Enhanced security edition of Self-Hosted Supabase MCP Server with SQL injection prevention, rate limiting, and production features",
   "main": "dist/index.js",
   "module": "./src/index-smithery.ts",
