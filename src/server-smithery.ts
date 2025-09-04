@@ -25,11 +25,11 @@ import { getAuthUserTool } from './tools/get_auth_user.js';
 import { deleteAuthUserTool } from './tools/delete_auth_user.js';
 import { createAuthUserTool } from './tools/create_auth_user.js';
 import { updateAuthUserTool } from './tools/update_auth_user.js';
-import type { ToolContext } from './tools/types.js';
+import type { ToolContext, AppTool } from './tools/types.js';
 import { getLogsTool } from './tools/get_logs.js';
-import listStorageBucketsTool from './tools/list_storage_buckets.js';
-import listStorageObjectsTool from './tools/list_storage_objects.js';
-import listRealtimePublicationsTool from './tools/list_realtime_publications.js';
+import { listStorageBucketsTool } from './tools/list_storage_buckets.js';
+import { listStorageObjectsTool } from './tools/list_storage_objects.js';
+import { listRealtimePublicationsTool } from './tools/list_realtime_publications.js';
 import { checkHealthTool } from './tools/check_health.js';
 import { backupDatabaseTool } from './tools/backup_database.js';
 import { manageDockerTool } from './tools/manage_docker.js';
@@ -81,8 +81,8 @@ export async function createSmitheryServer(config: Config) {
             supabaseUrl: config.supabaseUrl,
             supabaseAnonKey: config.supabaseAnonKey,
             supabaseServiceRoleKey: config.supabaseServiceRoleKey,
-            supabaseAuthJwtSecret: config.supabaseAuthJwtSecret,
-            supabaseDatabaseUrl: config.databaseUrl,
+            jwtSecret: config.supabaseAuthJwtSecret,
+            databaseUrl: config.databaseUrl,
         });
     } catch (error) {
         console.error('Failed to create Supabase client:', error);
@@ -99,20 +99,9 @@ export async function createSmitheryServer(config: Config) {
     }
 
     // Prepare the tools
-    interface McpToolSchema {
-        name: string;
-        description?: string;
-        inputSchema: object; 
-    }
+    
 
-    interface AppTool {
-        name: string;
-        description: string;
-        inputSchema: z.ZodTypeAny;
-        mcpInputSchema: object;
-        outputSchema: z.ZodTypeAny;
-        execute: (input: unknown, context: ToolContext) => Promise<unknown>;
-    }
+    
 
     const availableTools: Record<string, AppTool> = {
         [listTablesTool.name]: listTablesTool as AppTool,
@@ -138,7 +127,35 @@ export async function createSmitheryServer(config: Config) {
         [listRealtimePublicationsTool.name]: listRealtimePublicationsTool as AppTool,
         [getLogsTool.name]: getLogsTool as AppTool,
         [checkHealthTool.name]: checkHealthTool as AppTool,
-        [backupDatabaseTool.name]: backupDatabaseTool as AppTool,
+        [listTablesTool.name]: listTablesTool,
+        [listExtensionsTool.name]: listExtensionsTool,
+        [listMigrationsTool.name]: listMigrationsTool,
+        [applyMigrationTool.name]: applyMigrationTool,
+        [executeSqlTool.name]: executeSqlTool,
+        [getDatabaseConnectionsTool.name]: getDatabaseConnectionsTool,
+        [getDatabaseStatsTool.name]: getDatabaseStatsTool,
+        [getProjectUrlTool.name]: getProjectUrlTool,
+        [getAnonKeyTool.name]: getAnonKeyTool,
+        [getServiceKeyTool.name]: getServiceKeyTool,
+        [generateTypesTool.name]: generateTypesTool,
+        [rebuildHooksTool.name]: rebuildHooksTool,
+        [verifyJwtSecretTool.name]: verifyJwtSecretTool,
+        [listAuthUsersTool.name]: listAuthUsersTool,
+        [getAuthUserTool.name]: getAuthUserTool,
+        [deleteAuthUserTool.name]: deleteAuthUserTool,
+        [createAuthUserTool.name]: createAuthUserTool,
+        [updateAuthUserTool.name]: updateAuthUserTool,
+        [listStorageBucketsTool.name]: listStorageBucketsTool,
+        [listStorageObjectsTool.name]: listStorageObjectsTool,
+        [listRealtimePublicationsTool.name]: listRealtimePublicationsTool,
+        [getLogsTool.name]: getLogsTool,
+        [checkHealthTool.name]: checkHealthTool,
+        [backupDatabaseTool.name]: backupDatabaseTool,
+        [manageDockerTool.name]: manageDockerTool,
+        [analyzePerformanceTool.name]: analyzePerformanceTool,
+        [validateMigrationTool.name]: validateMigrationTool,
+        [pushMigrationsTool.name]: pushMigrationsTool,
+        [createMigrationTool.name]: createMigrationTool,
         [manageDockerTool.name]: manageDockerTool as AppTool,
         [analyzePerformanceTool.name]: analyzePerformanceTool as AppTool,
         [validateMigrationTool.name]: validateMigrationTool as AppTool,
@@ -147,13 +164,16 @@ export async function createSmitheryServer(config: Config) {
     };
 
     // Prepare capabilities
-    const capabilitiesTools: Record<string, McpToolSchema> = {};
+    const capabilitiesTools: Record<string, AppTool> = {};
     for (const tool of Object.values(availableTools)) {
         const staticInputSchema = tool.mcpInputSchema || { type: 'object', properties: {} };
         capabilitiesTools[tool.name] = {
             name: tool.name,
             description: tool.description || 'Tool description missing',
-            inputSchema: staticInputSchema,
+            inputSchema: tool.inputSchema,
+            mcpInputSchema: staticInputSchema,
+            outputSchema: tool.outputSchema,
+            execute: tool.execute,
         };
     }
 
@@ -172,8 +192,10 @@ export async function createSmitheryServer(config: Config) {
 
     // Create context that will be shared across tool executions
     const context: ToolContext = {
+        selfhostedClient: selfhostedClient,
+        log: console.error,
         supabase: selfhostedClient.supabase,
-        pg: selfhostedClient.pgClient,
+        pg: selfhostedClient.getPgPool(),
         config: {
             url: config.supabaseUrl,
             anonKey: config.supabaseAnonKey,

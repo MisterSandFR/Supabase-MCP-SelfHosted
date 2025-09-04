@@ -1,4 +1,4 @@
-import { Tool } from "@modelcontextprotocol/sdk/dist/types.js";
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { ToolContext } from "./types.js";
 import { executeSqlWithFallback } from "./utils.js";
@@ -54,7 +54,7 @@ export const validateMigrationTool: Tool = {
     required: ["migrationPath"]
   },
   outputSchema: ValidateMigrationOutputSchema,
-  execute: async (input: unknown, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
     const validatedInput = ValidateMigrationInputSchema.parse(input);
     const results: ValidationResult[] = [];
     

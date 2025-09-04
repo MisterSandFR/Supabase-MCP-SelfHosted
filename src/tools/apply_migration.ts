@@ -1,5 +1,6 @@
-import { z } from 'zod';
-import type { ToolContext } from './types.js';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import type { PoolClient } from 'pg';
 import { validateSqlQuery } from '../utils/sql-sanitizer.js';
 
@@ -36,7 +37,7 @@ export const applyMigrationTool = {
     inputSchema: ApplyMigrationInputSchema,
     mcpInputSchema: mcpInputSchema,
     outputSchema: ApplyMigrationOutputSchema,
-    execute: async (input: ApplyMigrationInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
 
         try {

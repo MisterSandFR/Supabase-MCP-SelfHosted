@@ -47,7 +47,21 @@
       "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp/**)",
       "Bash(npx tsx:*)",
       "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src/**)",
-      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src/**)"
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\.smithery/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\.smithery/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\.smithery/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\.smithery/**)",
+      "Bash(npx @smithery/cli build:*)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\.smithery/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\.smithery/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\.smithery/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\.smithery/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\.smithery/**)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

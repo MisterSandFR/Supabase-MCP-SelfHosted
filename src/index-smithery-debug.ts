@@ -99,7 +99,7 @@ const workingTools = {
 console.log(`🔍 DEBUG: Creating server with ${Object.keys(workingTools).length} tools`);
 
 // Export default function for Smithery
-export default function createServer({ config }: { config: z.infer<typeof configSchema> } = { config: {} }) {
+export default async function createServer({ config }: { config: z.infer<typeof configSchema> } = { config: { SUPABASE_URL: '', SUPABASE_ANON_KEY: '' } }) {
     console.log('🔍 DEBUG: createServer called');
     
     // Prepare capabilities

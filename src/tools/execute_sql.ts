@@ -1,8 +1,9 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
 import type { SelfhostedSupabaseClient } from '../client/index.js';
 // import type { McpToolDefinition } from '@modelcontextprotocol/sdk'; // Removed incorrect import
 import { handleSqlResponse, executeSqlWithFallback } from './utils.js';
-import type { ToolContext } from './types.js';
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { validateSqlQuery } from '../utils/sql-sanitizer.js';
 
 // Input schema
@@ -34,7 +35,7 @@ export const executeSqlTool = {
     inputSchema: ExecuteSqlInputSchema,
     mcpInputSchema: mcpInputSchema,
     outputSchema: ExecuteSqlOutputSchema,
-    execute: async (input: ExecuteSqlInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
 
         // Validate SQL query for injection attempts

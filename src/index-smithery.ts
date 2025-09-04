@@ -5,42 +5,59 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 
+import type { ToolContext, AppTool } from "./tools/types.js";
+
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 // --- DYNAMIC TOOL LOADING ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // This interface is a simplified version for the purpose of loading tools.
-interface AppTool {
-    name: string;
-    description: string;
-    mcpInputSchema: object;
-    // Add other properties if needed for the capabilities object
-}
+
 
 async function loadTools(): Promise<Record<string, AppTool>> {
     const toolsDir = path.join(__dirname, 'tools');
-    const toolFiles = fs.readdirSync(toolsDir).filter(file => 
-        file.endsWith('.ts') && !file.endsWith('.d.ts') && file !== 'types.ts' && file !== 'utils.ts'
-    );
+    // Support both TS (Smithery typescript runtime) and JS (compiled) environments
+    const toolFiles = fs
+        .readdirSync(toolsDir)
+        .filter((file) =>
+            (file.endsWith('.ts') || file.endsWith('.js')) &&
+            !file.endsWith('.d.ts') &&
+            file !== 'types.ts' &&
+            file !== 'utils.ts'
+        );
 
     const tools: Record<string, AppTool> = {};
     for (const file of toolFiles) {
-        const modulePath = `./tools/${file.replace('.ts', '.js')}`;
+        const absolutePath = path.join(toolsDir, file);
         try {
-            const module = await import(modulePath);
+            const module = await import(pathToFileURL(absolutePath).href);
             const toolObject = Object.values(module).find(
                 (exp: any) => exp && typeof exp === 'object' && 'name' in exp && 'execute' in exp
             ) as AppTool | undefined;
-            
+
             if (toolObject) {
                 tools[toolObject.name] = toolObject;
             }
-        } catch (error) {
-            // In a scanner context, we might not want to log verbose errors
+        } catch (_) {
+            // Fallback: try sibling extension variant
+            const alt = absolutePath.endsWith('.ts')
+                ? absolutePath.replace(/\.ts$/, '.js')
+                : absolutePath.replace(/\.js$/, '.ts');
+            try {
+                const module = await import(pathToFileURL(alt).href);
+                const toolObject = Object.values(module).find(
+                    (exp: any) => exp && typeof exp === 'object' && 'name' in exp && 'execute' in exp
+                ) as AppTool | undefined;
+                if (toolObject) {
+                    tools[toolObject.name] = toolObject;
+                }
+            } catch {
+                // Silently ignore to keep Smithery scan resilient
+            }
         }
     }
     return tools;
@@ -58,7 +75,7 @@ export const configSchema = z.object({
 });
 
 // Export default async function for Smithery
-export default async function createServer({ config }: { config: z.infer<typeof configSchema> } = { config: {} }) {
+export default async function createServer({ config }: { config: z.infer<typeof configSchema> } = { config: { SUPABASE_URL: '', SUPABASE_ANON_KEY: '' } }) {
     // Collect all tools dynamically
     const availableTools = await loadTools();
 

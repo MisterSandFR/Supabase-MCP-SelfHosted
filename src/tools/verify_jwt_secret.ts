@@ -1,6 +1,7 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
 import type { SelfhostedSupabaseClient } from '../client/index.js';
-import type { ToolContext } from './types.js';
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 // Input schema (none needed)
 const VerifyJwtInputSchema = z.object({});
@@ -26,7 +27,7 @@ export const verifyJwtSecretTool = {
     inputSchema: VerifyJwtInputSchema,
     mcpInputSchema: mcpInputSchema,
     outputSchema: VerifyJwtOutputSchema,
-    execute: async (input: VerifyJwtInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
         const secret = client.getJwtSecret();
 

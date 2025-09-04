@@ -1,7 +1,8 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
 import type { SelfhostedSupabaseClient } from '../client/index.js';
 import { handleSqlResponse, executeSqlWithFallback } from './utils.js';
-import type { ToolContext } from './types.js';
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 // Schema for combined stats output
 // Note: Types are often bigint from pg_stat, returned as string by JSON/RPC.
@@ -62,7 +63,7 @@ export const getDatabaseStatsTool = {
     inputSchema: GetDbStatsInputSchema,
     mcpInputSchema: mcpInputSchema,
     outputSchema: GetDbStatsOutputSchema,
-    execute: async (input: GetDbStatsInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
 
         // Combine queries for efficiency if possible, but RPC might handle separate calls better.

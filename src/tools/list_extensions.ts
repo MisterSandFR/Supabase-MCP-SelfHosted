@@ -1,7 +1,8 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
 import type { SelfhostedSupabaseClient } from '../client/index.js';
 import { handleSqlResponse, executeSqlWithFallback } from './utils.js';
-import type { ToolContext } from './types.js';
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 // Schema for the output: array of extension details
 const ListExtensionsOutputSchema = z.array(z.object({
@@ -28,7 +29,7 @@ export const listExtensionsTool = {
     inputSchema: ListExtensionsInputSchema,
     mcpInputSchema: mcpInputSchema,
     outputSchema: ListExtensionsOutputSchema,
-    execute: async (input: ListExtensionsInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
 
         // SQL based on pg_extension

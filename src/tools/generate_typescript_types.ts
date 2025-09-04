@@ -1,3 +1,4 @@
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { z } from 'zod';
 import { writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
@@ -62,13 +63,13 @@ const mcpInputSchema = {
 };
 
 // The tool definition - No explicit McpToolDefinition type needed
-export const generateTypesTool = {
+export const generateTypesTool: Tool = {
     name: 'generate_typescript_types',
     description: 'Generates TypeScript types from the database schema using the Supabase CLI (`supabase gen types`) and downloads the file to the specified absolute path. The tool returns the current platform (win32, darwin, linux) to help with path formatting. Requires DATABASE_URL configuration and Supabase CLI installed.',
     inputSchema: GenerateTypesInputSchema,
     mcpInputSchema: mcpInputSchema, // Add static JSON schema
     outputSchema: GenerateTypesOutputSchema,
-    execute: async (input: GenerateTypesInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
         const dbUrl = client.getDbUrl(); // Need this getter in the client
 

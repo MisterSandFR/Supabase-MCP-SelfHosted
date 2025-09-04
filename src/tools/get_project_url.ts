@@ -1,6 +1,7 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
 import type { SelfhostedSupabaseClient } from '../client/index.js';
-import type { ToolContext } from './types.js';
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 // Input schema (none needed)
 const GetProjectUrlInputSchema = z.object({});
@@ -25,7 +26,7 @@ export const getProjectUrlTool = {
     inputSchema: GetProjectUrlInputSchema,
     mcpInputSchema: mcpInputSchema, // Add static JSON schema
     outputSchema: GetProjectUrlOutputSchema,
-    execute: async (input: GetProjectUrlInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
         const url = client.getSupabaseUrl(); // Use getter from client
         return { project_url: url };

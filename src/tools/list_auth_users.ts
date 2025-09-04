@@ -1,5 +1,6 @@
-import { z } from 'zod';
-import type { ToolContext } from './types.js';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { handleSqlResponse } from './utils.js';
 import type { SqlSuccessResponse, AuthUser } from '../types/index.js';
 
@@ -53,7 +54,7 @@ export const listAuthUsersTool = {
     mcpInputSchema: mcpInputSchema,
     outputSchema: ListAuthUsersOutputSchema,
 
-    execute: async (input: ListAuthUsersInput, context: ToolContext): Promise<ListAuthUsersOutput> => {
+    execute: async (input: unknown, context: ToolContext): Promise<ListAuthUsersOutput> => {
         const client = context.selfhostedClient;
         const { limit, offset } = input;
 

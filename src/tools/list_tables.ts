@@ -1,7 +1,8 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
 import type { SelfhostedSupabaseClient } from '../client/index.js';
 import { handleSqlResponse, executeSqlWithFallback } from './utils.js';
-import type { ToolContext } from './types.js';
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 // Define the schema for the tool's output (an array of table names)
 const ListTablesOutputSchema = z.array(z.object({
@@ -32,7 +33,7 @@ export const listTablesTool = {
     mcpInputSchema: mcpInputSchema,     // Add the static JSON schema for MCP
     outputSchema: ListTablesOutputSchema,
     // Use explicit types for input and context
-    execute: async (input: ListTablesInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
 
         // SQL query to get tables from pg_catalog and information_schema

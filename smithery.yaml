@@ -1,1 +1,2 @@
 runtime: "typescript"
+entry: "src/index-smithery.ts"

@@ -1,5 +1,6 @@
-import { z } from 'zod';
-import type { ToolContext } from './types.js';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { handleSqlResponse, isSqlErrorResponse } from './utils.js';
 
 // Input schema: User ID
@@ -35,7 +36,7 @@ export const deleteAuthUserTool = {
     mcpInputSchema: mcpInputSchema,
     outputSchema: DeleteAuthUserOutputSchema,
 
-    execute: async (input: DeleteAuthUserInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
         const { user_id } = input;
 

@@ -1,6 +1,7 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
 import type { SelfhostedSupabaseClient } from '../client/index.js';
-import type { ToolContext } from './types.js';
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 // Input schema (none needed)
 const GetServiceKeyInputSchema = z.object({});
@@ -26,7 +27,7 @@ export const getServiceKeyTool = {
     inputSchema: GetServiceKeyInputSchema,
     mcpInputSchema: mcpInputSchema,
     outputSchema: GetServiceKeyOutputSchema,
-    execute: async (input: GetServiceKeyInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
         const key = client.getServiceRoleKey();
         if (key) {

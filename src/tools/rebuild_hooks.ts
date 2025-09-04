@@ -1,3 +1,4 @@
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { z } from 'zod';
 import type { SelfhostedSupabaseClient } from '../client/index.js';
 // import type { McpToolDefinition } from '@modelcontextprotocol/sdk'; // Removed incorrect import
@@ -22,13 +23,13 @@ const mcpInputSchema = {
 };
 
 // The tool definition - No explicit McpToolDefinition type needed
-export const rebuildHooksTool = {
+export const rebuildHooksTool: Tool = {
     name: 'rebuild_hooks',
     description: 'Attempts to restart the pg_net worker. Requires the pg_net extension to be installed and available.',
     inputSchema: RebuildHooksInputSchema,
     mcpInputSchema: mcpInputSchema,
     outputSchema: RebuildHooksOutputSchema,
-    execute: async (input: RebuildHooksInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
 
         // Attempt to restart the pg_net worker.

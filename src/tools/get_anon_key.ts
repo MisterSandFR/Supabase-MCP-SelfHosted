@@ -1,6 +1,7 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
 import type { SelfhostedSupabaseClient } from '../client/index.js';
-import type { ToolContext } from './types.js';
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 // Input schema (none needed)
 const GetAnonKeyInputSchema = z.object({});
@@ -25,7 +26,7 @@ export const getAnonKeyTool = {
     inputSchema: GetAnonKeyInputSchema,
     mcpInputSchema: mcpInputSchema,
     outputSchema: GetAnonKeyOutputSchema,
-    execute: async (input: GetAnonKeyInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
         const key = client.getAnonKey(); // Use getter from client
         return { anon_key: key };

@@ -503,4 +503,10 @@ export class SelfhostedSupabaseClient {
         return !!this.options.databaseUrl;
     }
 
-} 
+    /**
+     * Gets the pgPool instance.
+     */
+    public getPgPool(): Pool | null {
+        return this.pgPool;
+    }
+}

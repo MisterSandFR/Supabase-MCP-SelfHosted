@@ -1,6 +1,7 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
 import type { SelfhostedSupabaseClient } from '../client/index.js';
-import type { ToolContext } from './types.js';
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { handleSqlResponse, executeSqlWithFallback } from './utils.js';
 
 // Schema for the output: array of migration details
@@ -28,7 +29,7 @@ export const listMigrationsTool = {
     inputSchema: ListMigrationsInputSchema,
     mcpInputSchema: mcpInputSchema,
     outputSchema: ListMigrationsOutputSchema,
-    execute: async (input: ListMigrationsInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
 
         // SQL to query the Supabase migrations table

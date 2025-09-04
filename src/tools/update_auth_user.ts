@@ -1,3 +1,4 @@
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { z } from 'zod';
 import type { ToolContext } from './types.js';
 
@@ -55,7 +56,7 @@ export const updateAuthUserTool = {
     mcpInputSchema: mcpInputSchema, // Ensure defined
     outputSchema: UpdatedAuthUserZodSchema,
 
-    execute: async (input: UpdateAuthUserInput, context: ToolContext): Promise<UpdateAuthUserOutput> => { // Use UpdateAuthUserOutput
+    execute: async (input: unknown, context: ToolContext): Promise<UpdateAuthUserOutput> => { // Use UpdateAuthUserOutput
         const client = context.selfhostedClient;
         const { user_id, email, password, role, app_metadata, user_metadata } = input;
 

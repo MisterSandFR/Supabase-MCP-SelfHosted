@@ -66,7 +66,7 @@ export const configSchema = z.object({
 });
 
 // Export default function for Smithery
-export default function createServer({ config }: { config: z.infer<typeof configSchema> } = { config: {} }) {
+export default function createServer({ config }: { config: z.infer<typeof configSchema> } = { config: { SUPABASE_URL: '', SUPABASE_ANON_KEY: '' } }) {
     // Collect all tools
     const availableTools = {
         [listTablesTool.name]: listTablesTool,

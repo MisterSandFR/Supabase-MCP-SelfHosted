@@ -1,7 +1,8 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { ToolContext } from "./types.js";
 import type { SelfhostedSupabaseClient } from '../client/index.js';
 import { handleSqlResponse, executeSqlWithFallback } from './utils.js';
-import type { ToolContext } from './types.js';
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 // Schema for the output: array of connection details
 const GetDbConnectionsOutputSchema = z.array(z.object({
@@ -33,7 +34,7 @@ export const getDatabaseConnectionsTool = {
     inputSchema: GetDbConnectionsInputSchema,
     mcpInputSchema: mcpInputSchema,
     outputSchema: GetDbConnectionsOutputSchema,
-    execute: async (input: GetDbConnectionsInput, context: ToolContext) => {
+    execute: async (input: unknown, context: ToolContext) => {
         const client = context.selfhostedClient;
 
         // Query pg_stat_activity
