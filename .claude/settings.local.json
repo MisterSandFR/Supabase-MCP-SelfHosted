@@ -42,7 +42,12 @@
       "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\dist/**)",
       "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\dist/**)",
       "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\dist/**)",
-      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\dist/**)"
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\dist/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp/**)",
+      "Bash(npx tsx:*)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src/**)"
     ],
     "deny": [],
     "ask": []
