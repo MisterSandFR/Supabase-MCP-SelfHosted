@@ -56,6 +56,17 @@ export const manageWebhooksTool: Tool = {
                 description: "Webhook action"
             },
             webhookName: { type: "string", description: "Webhook name" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             url: { type: "string", description: "Webhook URL" },
             events: {
                 type: "array",

@@ -48,6 +48,17 @@ export const realtimeManagementTool: Tool = {
                 description: "Realtime management action"
             },
             tableName: { type: "string", description: "Table name" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             schemaName: { type: "string", description: "Schema name" },
             channelName: { type: "string", description: "Channel name" },
             eventTypes: {

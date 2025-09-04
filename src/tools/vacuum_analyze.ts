@@ -41,6 +41,17 @@ export const vacuumAnalyzeTool: Tool = {
                 description: "Maintenance action to perform"
             },
             tableName: { type: "string", description: "Specific table name" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             schemaName: { type: "string", description: "Schema name" },
             indexName: { type: "string", description: "Specific index name" },
             verbose: { type: "boolean", description: "Verbose output" },

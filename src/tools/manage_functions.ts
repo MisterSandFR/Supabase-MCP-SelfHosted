@@ -35,6 +35,17 @@ export const manageFunctionsTool: Tool = {
                 description: "Action to perform"
             },
             functionName: { type: "string", description: "Function name" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             schema: { type: "string", description: "Schema name" },
             parameters: {
                 type: "array",

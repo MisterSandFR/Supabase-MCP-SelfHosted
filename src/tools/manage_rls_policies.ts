@@ -59,6 +59,17 @@ export const manageRlsPoliciesTool: Tool = {
                 type: "string",
                 description: "Table name (schema.table format)"
             },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             policyName: {
                 type: "string",
                 description: "Policy name"

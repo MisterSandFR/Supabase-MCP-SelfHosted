@@ -40,6 +40,17 @@ export const manageSecretsTool: Tool = {
                 description: "Action to perform"
             },
             secretName: { type: "string", description: "Secret name/key" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             secretValue: { type: "string", description: "Secret value" },
             description: { type: "string", description: "Secret description" },
             environment: {

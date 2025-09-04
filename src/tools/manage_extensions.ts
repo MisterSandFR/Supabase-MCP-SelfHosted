@@ -33,6 +33,17 @@ export const manageExtensionsTool: Tool = {
                 description: "Action to perform"
             },
             extensionName: { type: "string", description: "Extension name" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             schema: { type: "string", description: "Schema to install in" },
             version: { type: "string", description: "Specific version" },
             cascade: { type: "boolean", description: "Use CASCADE when dropping" },

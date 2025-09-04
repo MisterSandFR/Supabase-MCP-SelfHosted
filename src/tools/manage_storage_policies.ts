@@ -39,6 +39,17 @@ export const manageStoragePolicies: Tool = {
                 description: "Action to perform"
             },
             bucketName: { type: "string", description: "Storage bucket name" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             policyName: { type: "string", description: "Policy name" },
             operation: {
                 type: "string",

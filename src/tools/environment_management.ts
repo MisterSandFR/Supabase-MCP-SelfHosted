@@ -55,6 +55,17 @@ export const environmentManagementTool: Tool = {
                 description: "Environment management action"
             },
             environmentName: { type: "string", description: "Environment name" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             sourceEnvironment: { type: "string", description: "Source environment" },
             targetEnvironment: { type: "string", description: "Target environment" },
             environmentType: {

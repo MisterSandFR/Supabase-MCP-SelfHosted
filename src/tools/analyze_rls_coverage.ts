@@ -25,6 +25,17 @@ export const analyzeRlsCoverageTool: Tool = {
                 type: "boolean",
                 description: "Suggest policies for unprotected tables"
             },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             checkOrphans: {
                 type: "boolean",
                 description: "Check for orphaned policies"

@@ -28,6 +28,17 @@ export const manageTriggersTool: Tool = {
                 description: "Action to perform"
             },
             triggerName: { type: "string" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             tableName: { type: "string" },
             timing: {
                 type: "string",

@@ -49,6 +49,17 @@ export const metricsDashboardTool: Tool = {
                 enum: ["1h", "24h", "7d", "30d", "90d"],
                 description: "Time frame"
             },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             metricType: {
                 type: "string",
                 enum: ["cpu", "memory", "connections", "queries", "errors", "latency", "throughput", "storage", "all"],

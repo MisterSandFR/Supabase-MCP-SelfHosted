@@ -41,6 +41,17 @@ export const manageRolesTool: Tool = {
                 description: "Action to perform"
             },
             roleName: { type: "string", description: "Role name" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             password: { type: "string", description: "Role password" },
             permissions: {
                 type: "array",

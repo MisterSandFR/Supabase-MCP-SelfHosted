@@ -50,6 +50,17 @@ export const syncSchemaTool: Tool = {
                 description: "Schema sync action"
             },
             sourceEnvironment: { type: "string", description: "Source environment" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             targetEnvironment: { type: "string", description: "Target environment" },
             schemaName: { type: "string", description: "Schema name" },
             includeTables: {

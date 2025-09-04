@@ -26,6 +26,17 @@ export const autoCreateIndexesTool: Tool = {
                 description: "Action to perform"
             },
             minUsage: { type: "number", description: "Minimum query usage" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             minSize: { type: "number", description: "Minimum table size" },
             autoApply: { type: "boolean", description: "Auto apply suggestions" },
             includePartial: { type: "boolean", description: "Include partial indexes" },

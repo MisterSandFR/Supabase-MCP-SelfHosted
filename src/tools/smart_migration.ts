@@ -54,6 +54,17 @@ export const smartMigrationTool: Tool = {
                 description: "Smart migration action"
             },
             migrationName: { type: "string", description: "Migration name" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             migrationId: { type: "string", description: "Migration ID" },
             targetSchema: { type: "string", description: "Target schema definition" },
             sourceEnvironment: { type: "string", description: "Source environment" },

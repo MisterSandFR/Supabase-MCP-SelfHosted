@@ -47,6 +47,17 @@ export const auditSecurityTool: Tool = {
                 enum: ["database", "auth", "storage", "api", "all"],
                 description: "Audit scope"
             },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             severity: {
                 type: "string",
                 enum: ["low", "medium", "high", "critical", "all"],

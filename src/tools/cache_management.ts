@@ -36,6 +36,17 @@ export const cacheManagementTool: Tool = {
                 description: "Cache management action"
             },
             viewName: { type: "string", description: "Materialized view name" },
+    mcpInputSchema: {
+        type: "object",
+        properties: {},
+        required: []
+    },
+    outputSchema: z.object({
+        content: z.array(z.object({
+            type: z.literal("text"),
+            text: z.string()
+        }))
+    }),
             query: { type: "string", description: "SQL query" },
             schemaName: { type: "string", description: "Schema name" },
             refreshInterval: { type: "number", description: "Auto-refresh interval" },
