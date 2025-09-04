@@ -3,7 +3,7 @@
   "version": "3.0.0",
   "description": "Complete Autonomy Edition - 50+ MCP tools for 100% autonomous Supabase management with comprehensive security, automation, and monitoring",
   "main": "dist/index.js",
-  "module": "./src/index-smithery.ts",
+  "module": "./dist/index-smithery.js",
   "type": "module",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
     "url": "https://github.com/MisterSandFR/selfhosted-supabase-mcp/issues"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --clean",
+    "build": "tsup src/index.ts src/index-smithery.ts --format esm --clean",
     "start": "node dist/index.js",
     "dev": "tsup src/index.ts --format esm --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
