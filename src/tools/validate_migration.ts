@@ -12,6 +12,13 @@ const ValidateMigrationInputSchema = z.object({
   dryRun: z.boolean().optional().default(false).describe("Execute migration in a transaction and rollback")
 });
 
+const ValidateMigrationOutputSchema = z.object({
+  content: z.array(z.object({
+    type: z.literal("text"),
+    text: z.string()
+  }))
+});
+
 type ValidateMigrationInput = z.infer<typeof ValidateMigrationInputSchema>;
 
 interface ValidationResult {
@@ -23,7 +30,8 @@ interface ValidationResult {
 export const validateMigrationTool: Tool = {
   name: "validate_migration",
   description: "Validate a migration file before applying it to check for potential issues",
-  inputSchema: {
+  inputSchema: ValidateMigrationInputSchema,
+  mcpInputSchema: {
     type: "object",
     properties: {
       migrationPath: {
@@ -45,6 +53,7 @@ export const validateMigrationTool: Tool = {
     },
     required: ["migrationPath"]
   },
+  outputSchema: ValidateMigrationOutputSchema,
   execute: async (input: unknown, context: ToolContext) => {
     const validatedInput = ValidateMigrationInputSchema.parse(input);
     const results: ValidationResult[] = [];

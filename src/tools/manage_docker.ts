@@ -14,6 +14,13 @@ const ManageDockerInputSchema = z.object({
   composePath: z.string().optional().describe("Path to docker-compose file")
 });
 
+const ManageDockerOutputSchema = z.object({
+  content: z.array(z.object({
+    type: z.literal("text"),
+    text: z.string()
+  }))
+});
+
 type ManageDockerInput = z.infer<typeof ManageDockerInputSchema>;
 
 interface DockerContainer {
@@ -28,7 +35,8 @@ interface DockerContainer {
 export const manageDockerTool: Tool = {
   name: "manage_docker",
   description: "Manage Docker containers for self-hosted Supabase (status, logs, restart)",
-  inputSchema: {
+  inputSchema: ManageDockerInputSchema,
+  mcpInputSchema: {
     type: "object",
     properties: {
       action: {
@@ -55,6 +63,7 @@ export const manageDockerTool: Tool = {
     },
     required: ["action"]
   },
+  outputSchema: ManageDockerOutputSchema,
   execute: async (input: unknown, context: ToolContext) => {
     const validatedInput = ManageDockerInputSchema.parse(input);
     

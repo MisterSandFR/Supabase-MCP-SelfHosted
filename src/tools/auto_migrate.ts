@@ -25,10 +25,18 @@ interface MigrationStatus {
     appliedAt?: string;
 }
 
-export const autoMigrateTool: Tool = {
+const autoMigrateOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
+
+export const autoMigrateTool = {
     name: "auto_migrate",
     description: "Automatically detect and apply all pending migrations to your Supabase instance",
-    inputSchema: {
+    inputSchema: AutoMigrateInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             migrationsPath: {
@@ -53,6 +61,7 @@ export const autoMigrateTool: Tool = {
             }
         }
     },
+    outputSchema: autoMigrateOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = AutoMigrateInputSchema.parse(input || {});
         const results: MigrationStatus[] = [];

@@ -1,3 +1,4 @@
+import { Tool } from "@modelcontextprotocol/sdk/dist/types.js";
 import { z } from 'zod';
 import type { PoolClient } from 'pg'; // Import PoolClient type
 
@@ -31,35 +32,35 @@ const StorageObjectSchema = z.object({
     updated_at: z.string().nullable(),
     last_accessed_at: z.string().nullable(),
 });
-const ListStorageObjectsOutputSchema = z.array(StorageObjectSchema);
+const ListStorageObjectsOutputSchema = z.object({
+  content: z.array(z.object({
+    type: z.literal("text"),
+    text: z.string()
+  }))
+});
 type ListStorageObjectsOutput = z.infer<typeof ListStorageObjectsOutputSchema>;
 
-// Static JSON schema for MCP
-export const mcpInputSchema = {
-    type: 'object',
-    properties: {
-        bucket_id: { type: 'string', description: 'The ID of the bucket to list objects from.' },
-        limit: { type: 'number', description: 'Max number of objects to return', default: 100 },
-        offset: { type: 'number', description: 'Number of objects to skip', default: 0 },
-        prefix: { type: 'string', description: "Filter objects by a path prefix (e.g., 'public/')" },
-    },
-    required: ['bucket_id'],
-};
-
 // Tool definition
-export const listStorageObjectsTool = {
+export const listStorageObjectsTool: Tool = {
     name: 'list_storage_objects',
     description: 'Lists objects within a specific storage bucket, optionally filtering by prefix.',
-    mcpInputSchema,
     inputSchema: ListStorageObjectsInputSchema,
+    mcpInputSchema: {
+        type: 'object',
+        properties: {
+            bucket_id: { type: 'string', description: 'The ID of the bucket to list objects from.' },
+            limit: { type: 'number', description: 'Max number of objects to return', default: 100 },
+            offset: { type: 'number', description: 'Number of objects to skip', default: 0 },
+            prefix: { type: 'string', description: "Filter objects by a path prefix (e.g., 'public/')" },
+        },
+        required: ['bucket_id'],
+    },
     outputSchema: ListStorageObjectsOutputSchema,
 
-    execute: async (
-        input: ListStorageObjectsInput,
-        context: ToolContext
-    ): Promise<ListStorageObjectsOutput> => {
+    execute: async (input: unknown, context: ToolContext) => {
+        const validatedInput = ListStorageObjectsInputSchema.parse(input);
         const client = context.selfhostedClient;
-        const { bucket_id, limit, offset, prefix } = input;
+        const { bucket_id, limit, offset, prefix } = validatedInput;
 
         console.error(`Listing objects for bucket ${bucket_id} (Prefix: ${prefix || 'N/A'})...`);
 
@@ -97,9 +98,9 @@ export const listStorageObjectsTool = {
 
             sql += ' ORDER BY name ASC NULLS FIRST';
             sql += ` LIMIT $${paramIndex++}`;
-            params.push(limit);
+            params.push(limit!);
             sql += ` OFFSET $${paramIndex++}`;
-            params.push(offset);
+            params.push(offset!);
             sql += ';';
 
             console.error('Executing parameterized SQL to list storage objects within transaction...');
@@ -107,13 +108,18 @@ export const listStorageObjectsTool = {
 
             // Explicitly pass result.rows, which matches the expected structure
             // of SqlSuccessResponse (unknown[]) for handleSqlResponse.
-            return handleSqlResponse(result.rows as SqlSuccessResponse, ListStorageObjectsOutputSchema);
+            const StorageObjectArraySchema = z.array(StorageObjectSchema);
+            return handleSqlResponse(result.rows as SqlSuccessResponse, StorageObjectArraySchema);
         });
 
         console.error(`Found ${objects.length} objects.`);
         context.log(`Found ${objects.length} objects.`);
-        return objects;
-    },
-};
-
-export default listStorageObjectsTool; 
+        
+        return {
+            content: [{
+                type: "text",
+                text: JSON.stringify(objects, null, 2)
+            }]
+        };
+    }
+}; 

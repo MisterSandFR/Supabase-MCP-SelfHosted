@@ -9,12 +9,20 @@ const AnalyzePerformanceInputSchema = z.object({
   limit: z.number().optional().default(10).describe("Number of results to return")
 });
 
+const AnalyzePerformanceOutputSchema = z.object({
+  content: z.array(z.object({
+    type: z.literal("text"),
+    text: z.string()
+  }))
+});
+
 type AnalyzePerformanceInput = z.infer<typeof AnalyzePerformanceInputSchema>;
 
 export const analyzePerformanceTool: Tool = {
   name: "analyze_performance",
   description: "Analyze database performance including slow queries, missing indexes, and resource usage",
-  inputSchema: {
+  inputSchema: AnalyzePerformanceInputSchema,
+  mcpInputSchema: {
     type: "object",
     properties: {
       category: {
@@ -32,6 +40,7 @@ export const analyzePerformanceTool: Tool = {
       }
     }
   },
+  outputSchema: AnalyzePerformanceOutputSchema,
   execute: async (input: unknown, context: ToolContext) => {
     const validatedInput = AnalyzePerformanceInputSchema.parse(input || {});
     const results: Record<string, any> = {};

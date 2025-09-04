@@ -11,12 +11,20 @@ const CreateMigrationInputSchema = z.object({
     timestamp: z.string().optional().describe("Custom timestamp (YYYYMMDDHHMMSS format)")
 });
 
+const CreateMigrationOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
+
 type CreateMigrationInput = z.infer<typeof CreateMigrationInputSchema>;
 
 export const createMigrationTool: Tool = {
     name: "create_migration",
     description: "Create a new migration file with proper versioning",
-    inputSchema: {
+    inputSchema: CreateMigrationInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             name: {
@@ -38,6 +46,7 @@ export const createMigrationTool: Tool = {
         },
         required: ["name", "content"]
     },
+    outputSchema: CreateMigrationOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = CreateMigrationInputSchema.parse(input);
         

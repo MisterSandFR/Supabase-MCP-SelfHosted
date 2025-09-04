@@ -19,12 +19,20 @@ const BackupDatabaseInputSchema = z.object({
   uploadToStorage: z.boolean().optional().default(false).describe("Upload backup to Supabase storage")
 });
 
+const BackupDatabaseOutputSchema = z.object({
+  content: z.array(z.object({
+    type: z.literal("text"),
+    text: z.string()
+  }))
+});
+
 type BackupDatabaseInput = z.infer<typeof BackupDatabaseInputSchema>;
 
 export const backupDatabaseTool: Tool = {
   name: "backup_database",
   description: "Create a backup of the PostgreSQL database with various options",
-  inputSchema: {
+  inputSchema: BackupDatabaseInputSchema,
+  mcpInputSchema: {
     type: "object",
     properties: {
       format: {
@@ -59,6 +67,7 @@ export const backupDatabaseTool: Tool = {
       }
     }
   },
+  outputSchema: BackupDatabaseOutputSchema,
   execute: async (input: unknown, context: ToolContext) => {
     const validatedInput = BackupDatabaseInputSchema.parse(input || {});
     

@@ -8,6 +8,13 @@ const CheckHealthInputSchema = z.object({
   checkExternal: z.boolean().optional().describe("Check external services (Storage, Auth endpoints)")
 });
 
+const CheckHealthOutputSchema = z.object({
+  content: z.array(z.object({
+    type: z.literal("text"),
+    text: z.string()
+  }))
+});
+
 type CheckHealthInput = z.infer<typeof CheckHealthInputSchema>;
 
 interface HealthStatus {
@@ -21,7 +28,8 @@ interface HealthStatus {
 export const checkHealthTool: Tool = {
   name: "check_health",
   description: "Check health status of all Supabase components (PostgreSQL, Auth, Storage, Realtime)",
-  inputSchema: {
+  inputSchema: CheckHealthInputSchema,
+  mcpInputSchema: {
     type: "object",
     properties: {
       includeMetrics: {
@@ -34,6 +42,7 @@ export const checkHealthTool: Tool = {
       }
     }
   },
+  outputSchema: CheckHealthOutputSchema,
   execute: async (input: unknown, context: ToolContext) => {
     const validatedInput = CheckHealthInputSchema.parse(input || {});
     const results: HealthStatus[] = [];

@@ -15,6 +15,13 @@ const PushMigrationsInputSchema = z.object({
     pattern: z.string().optional().default('*.sql').describe("Migration file pattern")
 });
 
+const PushMigrationsOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
+
 type PushMigrationsInput = z.infer<typeof PushMigrationsInputSchema>;
 
 interface Migration {
@@ -29,7 +36,8 @@ interface Migration {
 export const pushMigrationsTool: Tool = {
     name: "push_migrations",
     description: "Automatically push and apply migrations to self-hosted Supabase instance",
-    inputSchema: {
+    inputSchema: PushMigrationsInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             migrationsPath: {
@@ -50,6 +58,7 @@ export const pushMigrationsTool: Tool = {
             }
         }
     },
+    outputSchema: PushMigrationsOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = PushMigrationsInputSchema.parse(input || {});
         

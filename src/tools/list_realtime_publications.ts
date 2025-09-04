@@ -1,3 +1,4 @@
+import { Tool } from "@modelcontextprotocol/sdk/dist/types.js";
 import { z } from 'zod';
 
 import type { ToolContext } from './types.js';
@@ -21,28 +22,28 @@ const PublicationSchema = z.object({
     pubviaroot: z.boolean(),
     // Potentially add pubownername if needed via join
 });
-const ListRealtimePublicationsOutputSchema = z.array(PublicationSchema);
+const ListRealtimePublicationsOutputSchema = z.object({
+  content: z.array(z.object({
+    type: z.literal("text"),
+    text: z.string()
+  }))
+});
 type ListRealtimePublicationsOutput = z.infer<typeof ListRealtimePublicationsOutputSchema>;
 
-// Static JSON schema for MCP (no parameters)
-export const mcpInputSchema = {
-    type: 'object',
-    properties: {},
-    required: [],
-};
-
 // Tool definition
-export const listRealtimePublicationsTool = {
+export const listRealtimePublicationsTool: Tool = {
     name: 'list_realtime_publications',
     description: 'Lists PostgreSQL publications, often used by Supabase Realtime.',
-    mcpInputSchema,
     inputSchema: ListRealtimePublicationsInputSchema,
+    mcpInputSchema: {
+        type: 'object',
+        properties: {},
+        required: [],
+    },
     outputSchema: ListRealtimePublicationsOutputSchema,
 
-    execute: async (
-        input: ListRealtimePublicationsInput,
-        context: ToolContext
-    ): Promise<ListRealtimePublicationsOutput> => {
+    execute: async (input: unknown, context: ToolContext) => {
+        const validatedInput = ListRealtimePublicationsInputSchema.parse(input || {});
         const client = context.selfhostedClient;
         console.error('Listing Realtime publications...');
 
@@ -70,12 +71,17 @@ export const listRealtimePublicationsTool = {
         // Use executeSqlWithPg as it's a simple read query without parameters
         const result = await client.executeSqlWithPg(sql);
 
-        const validatedPublications = handleSqlResponse(result, ListRealtimePublicationsOutputSchema);
+        const PublicationArraySchema = z.array(PublicationSchema);
+        const validatedPublications = handleSqlResponse(result, PublicationArraySchema);
 
         console.error(`Found ${validatedPublications.length} publications.`);
         context.log(`Found ${validatedPublications.length} publications.`);
-        return validatedPublications;
-    },
-};
-
-export default listRealtimePublicationsTool; 
+        
+        return {
+            content: [{
+                type: "text",
+                text: JSON.stringify(validatedPublications, null, 2)
+            }]
+        };
+        }
+}; 

@@ -1,3 +1,4 @@
+import { Tool } from "@modelcontextprotocol/sdk/dist/types.js";
 import { z } from 'zod';
 
 import type { ToolContext } from './types.js';
@@ -18,32 +19,32 @@ const BucketSchema = z.object({
     updated_at: z.string().nullable(),
 });
 
-const ListStorageBucketsOutputSchema = z.array(BucketSchema);
+const ListStorageBucketsOutputSchema = z.object({
+  content: z.array(z.object({
+    type: z.literal("text"),
+    text: z.string()
+  }))
+});
 type ListStorageBucketsOutput = StorageBucket[];
 
-// Static JSON schema for MCP
-export const mcpInputSchema = {
-    type: 'object',
-    properties: {},
-    required: [],
-};
-
 // Zod schema for runtime input validation
-const inputSchema = z.object({});
-type Input = z.infer<typeof inputSchema>;
+const ListStorageBucketsInputSchema = z.object({});
+type ListStorageBucketsInput = z.infer<typeof ListStorageBucketsInputSchema>;
 
 // Tool definition
-export const listStorageBucketsTool = {
+export const listStorageBucketsTool: Tool = {
     name: 'list_storage_buckets',
     description: 'Lists all storage buckets in the project.',
-    mcpInputSchema,
-    inputSchema,
+    inputSchema: ListStorageBucketsInputSchema,
+    mcpInputSchema: {
+        type: 'object',
+        properties: {},
+        required: [],
+    },
     outputSchema: ListStorageBucketsOutputSchema,
 
-    execute: async (
-        input: Input,
-        context: ToolContext
-    ): Promise<ListStorageBucketsOutput> => {
+    execute: async (input: unknown, context: ToolContext) => {
+        const validatedInput = ListStorageBucketsInputSchema.parse(input || {});
         const client = context.selfhostedClient;
         // Use console.error for operational logging
         console.error('Listing storage buckets...');
@@ -73,13 +74,17 @@ export const listStorageBucketsTool = {
         const result = await client.executeSqlWithPg(sql);
 
         // Validate and return using handler
-        const validatedBuckets = handleSqlResponse(result, ListStorageBucketsOutputSchema);
+        const BucketArraySchema = z.array(BucketSchema);
+        const validatedBuckets = handleSqlResponse(result, BucketArraySchema);
 
         console.error(`Found ${validatedBuckets.length} buckets.`);
         context.log(`Found ${validatedBuckets.length} buckets.`); // Also log for MCP
-        return validatedBuckets;
-    },
-};
-
-// Default export for potential dynamic loading
-export default listStorageBucketsTool; 
+        
+        return {
+            content: [{
+                type: "text",
+                text: JSON.stringify(validatedBuckets, null, 2)
+            }]
+        };
+    }
+}; 
