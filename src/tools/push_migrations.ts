@@ -56,7 +56,7 @@ export const pushMigrationsTool: Tool = {
         // Resolve migrations path
         const migrationsDir = path.isAbsolute(validatedInput.migrationsPath)
             ? validatedInput.migrationsPath
-            : path.join(context.config.workspacePath, validatedInput.migrationsPath);
+            : path.join(context.workspacePath || process.cwd(), validatedInput.migrationsPath);
         
         // Check if migrations directory exists
         try {

@@ -52,7 +52,7 @@ export const validateMigrationTool: Tool = {
     // Read migration file
     const migrationFile = path.isAbsolute(validatedInput.migrationPath) 
       ? validatedInput.migrationPath
-      : path.join(context.config.workspacePath, validatedInput.migrationPath);
+      : path.join(context.workspacePath || process.cwd(), validatedInput.migrationPath);
     
     let migrationContent: string;
     try {

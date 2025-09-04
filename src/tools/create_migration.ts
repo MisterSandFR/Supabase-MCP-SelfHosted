@@ -63,7 +63,7 @@ export const createMigrationTool: Tool = {
         // Resolve migrations path
         const migrationsDir = path.isAbsolute(validatedInput.migrationsPath)
             ? validatedInput.migrationsPath
-            : path.join(context.config.workspacePath, validatedInput.migrationsPath);
+            : path.join(context.workspacePath || process.cwd(), validatedInput.migrationsPath);
         
         // Create migrations directory if it doesn't exist
         await fs.mkdir(migrationsDir, { recursive: true });

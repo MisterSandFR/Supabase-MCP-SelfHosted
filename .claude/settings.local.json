@@ -15,7 +15,15 @@
       "Bash(npx tsup:*)",
       "Bash(npx @smithery/cli:*)",
       "Bash(npm install:*)",
-      "WebFetch(domain:smithery.ai)"
+      "WebFetch(domain:smithery.ai)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src\\tools/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src\\tools/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src\\tools/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src\\tools/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src\\tools/**)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []
