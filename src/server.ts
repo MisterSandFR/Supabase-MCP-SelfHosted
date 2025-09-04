@@ -8,57 +8,11 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { SelfhostedSupabaseClient } from './client/index.js';
-import { listTablesTool } from './tools/list_tables.js';
-import { listExtensionsTool } from './tools/list_extensions.js';
-import { listMigrationsTool } from './tools/list_migrations.js';
-import { applyMigrationTool } from './tools/apply_migration.js';
-import { executeSqlTool } from './tools/execute_sql.js';
-import { getDatabaseConnectionsTool } from './tools/get_database_connections.js';
-import { getDatabaseStatsTool } from './tools/get_database_stats.js';
-import { getProjectUrlTool } from './tools/get_project_url.js';
-import { getAnonKeyTool } from './tools/get_anon_key.js';
-import { getServiceKeyTool } from './tools/get_service_key.js';
-import { generateTypesTool } from './tools/generate_typescript_types.js';
-import { rebuildHooksTool } from './tools/rebuild_hooks.js';
-import { verifyJwtSecretTool } from './tools/verify_jwt_secret.js';
-import { listAuthUsersTool } from './tools/list_auth_users.js';
-import { getAuthUserTool } from './tools/get_auth_user.js';
-import { deleteAuthUserTool } from './tools/delete_auth_user.js';
-import { createAuthUserTool } from './tools/create_auth_user.js';
-import { updateAuthUserTool } from './tools/update_auth_user.js';
 import type { ToolContext } from './tools/types.js';
-import { getLogsTool } from './tools/get_logs.js';
-import { listStorageBucketsTool } from './tools/list_storage_buckets.js';
-import { listStorageObjectsTool } from './tools/list_storage_objects.js';
-import { listRealtimePublicationsTool } from './tools/list_realtime_publications.js';
-import { checkHealthTool } from './tools/check_health.js';
-import { backupDatabaseTool } from './tools/backup_database.js';
-import { manageDockerTool } from './tools/manage_docker.js';
-import { analyzePerformanceTool } from './tools/analyze_performance.js';
-import { validateMigrationTool } from './tools/validate_migration.js';
-import { pushMigrationsTool } from './tools/push_migrations.js';
-import { createMigrationTool } from './tools/create_migration.js';
-import { autoMigrateTool } from './tools/auto_migrate.js';
-import { manageRlsPoliciesTool } from './tools/manage_rls_policies.js';
-import { analyzeRlsCoverageTool } from './tools/analyze_rls_coverage.js';
-import { manageFunctionsTool } from './tools/manage_functions.js';
-import { manageTriggersTool } from './tools/manage_triggers.js';
-import { autoCreateIndexesTool } from './tools/auto_create_indexes.js';
-import { manageRolesTool } from './tools/manage_roles.js';
-import { manageStoragePolicies } from './tools/manage_storage_policies.js';
-import { vacuumAnalyzeTool } from './tools/vacuum_analyze.js';
-import { manageExtensionsTool } from './tools/manage_extensions.js';
-import { syncSchemaTool } from './tools/sync_schema.js';
-import { manageSecretsTool } from './tools/manage_secrets.js';
-import { auditSecurityTool } from './tools/audit_security.js';
-import { generateCrudApiTool } from './tools/generate_crud_api.js';
-import { manageWebhooksTool } from './tools/manage_webhooks.js';
-import { cacheManagementTool } from './tools/cache_management.js';
-import { realtimeManagementTool } from './tools/realtime_management.js';
-import { environmentManagementTool } from './tools/environment_management.js';
-import { smartMigrationTool } from './tools/smart_migration.js';
-import { metricsDashboardTool } from './tools/metrics_dashboard.js';
 import { RateLimiter, ConcurrencyLimiter, QueryComplexityAnalyzer, withResourceLimits } from './utils/rate-limiter.js';
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 
 // Export the configuration schema
 export const configSchema = z.object({
@@ -87,6 +41,40 @@ interface AppTool {
     execute: (input: unknown, context: ToolContext) => Promise<unknown>;
 }
 
+// --- DYNAMIC TOOL LOADING ---
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+async function loadTools(): Promise<Record<string, AppTool>> {
+    const toolsDir = path.join(__dirname, 'tools');
+    const toolFiles = fs.readdirSync(toolsDir).filter(file => 
+        file.endsWith('.ts') && !file.endsWith('.d.ts') && file !== 'types.ts' && file !== 'utils.ts'
+    );
+
+    const tools: Record<string, AppTool> = {};
+    for (const file of toolFiles) {
+        // Important: Adjust the path for dynamic import to be relative and use the .js extension
+        const modulePath = `./tools/${file.replace('.ts', '.js')}`;
+        try {
+            const module = await import(modulePath);
+            // Find the first exported object that looks like a tool
+            const toolObject = Object.values(module).find(
+                (exp: any) => exp && typeof exp === 'object' && 'name' in exp && 'execute' in exp
+            ) as AppTool | undefined;
+            
+            if (toolObject) {
+                tools[toolObject.name] = toolObject;
+            } else {
+                console.error(`Warning: No valid tool export found in ${file}`);
+            }
+        } catch (error) {
+            console.error(`Error loading tool from ${file}:`, error);
+        }
+    }
+    return tools;
+}
+// --- END DYNAMIC TOOL LOADING ---
+
 // Initialize rate limiters
 const rateLimiter = new RateLimiter(100, 60000);
 const concurrencyLimiter = new ConcurrencyLimiter(10);
@@ -108,57 +96,10 @@ export default async function createServer(config: Config) {
         jwtSecret: config.supabaseAuthJwtSecret,
     });
 
-    const availableTools = {
-        [listTablesTool.name]: listTablesTool as AppTool,
-        [listExtensionsTool.name]: listExtensionsTool as AppTool,
-        [listMigrationsTool.name]: listMigrationsTool as AppTool,
-        [applyMigrationTool.name]: applyMigrationTool as AppTool,
-        [executeSqlTool.name]: executeSqlTool as AppTool,
-        [getDatabaseConnectionsTool.name]: getDatabaseConnectionsTool as AppTool,
-        [getDatabaseStatsTool.name]: getDatabaseStatsTool as AppTool,
-        [getProjectUrlTool.name]: getProjectUrlTool as AppTool,
-        [getAnonKeyTool.name]: getAnonKeyTool as AppTool,
-        [getServiceKeyTool.name]: getServiceKeyTool as AppTool,
-        [generateTypesTool.name]: generateTypesTool as AppTool,
-        [rebuildHooksTool.name]: rebuildHooksTool as AppTool,
-        [verifyJwtSecretTool.name]: verifyJwtSecretTool as AppTool,
-        [listAuthUsersTool.name]: listAuthUsersTool as AppTool,
-        [getAuthUserTool.name]: getAuthUserTool as AppTool,
-        [deleteAuthUserTool.name]: deleteAuthUserTool as AppTool,
-        [createAuthUserTool.name]: createAuthUserTool as AppTool,
-        [updateAuthUserTool.name]: updateAuthUserTool as AppTool,
-        [listStorageBucketsTool.name]: listStorageBucketsTool as AppTool,
-        [listStorageObjectsTool.name]: listStorageObjectsTool as AppTool,
-        [listRealtimePublicationsTool.name]: listRealtimePublicationsTool as AppTool,
-        [getLogsTool.name]: getLogsTool as AppTool,
-        [checkHealthTool.name]: checkHealthTool as AppTool,
-        [backupDatabaseTool.name]: backupDatabaseTool as AppTool,
-        [manageDockerTool.name]: manageDockerTool as AppTool,
-        [analyzePerformanceTool.name]: analyzePerformanceTool as AppTool,
-        [validateMigrationTool.name]: validateMigrationTool as AppTool,
-        [pushMigrationsTool.name]: pushMigrationsTool as AppTool,
-        [createMigrationTool.name]: createMigrationTool as AppTool,
-        [autoMigrateTool.name]: autoMigrateTool as AppTool,
-        [manageRlsPoliciesTool.name]: manageRlsPoliciesTool as AppTool,
-        [analyzeRlsCoverageTool.name]: analyzeRlsCoverageTool as AppTool,
-        [manageFunctionsTool.name]: manageFunctionsTool as AppTool,
-        [manageTriggersTool.name]: manageTriggersTool as AppTool,
-        [autoCreateIndexesTool.name]: autoCreateIndexesTool as AppTool,
-        [manageRolesTool.name]: manageRolesTool as AppTool,
-        [manageStoragePolicies.name]: manageStoragePolicies as AppTool,
-        [vacuumAnalyzeTool.name]: vacuumAnalyzeTool as AppTool,
-        [manageExtensionsTool.name]: manageExtensionsTool as AppTool,
-        [syncSchemaTool.name]: syncSchemaTool as AppTool,
-        [manageSecretsTool.name]: manageSecretsTool as AppTool,
-        [auditSecurityTool.name]: auditSecurityTool as AppTool,
-        [generateCrudApiTool.name]: generateCrudApiTool as AppTool,
-        [manageWebhooksTool.name]: manageWebhooksTool as AppTool,
-        [cacheManagementTool.name]: cacheManagementTool as AppTool,
-        [realtimeManagementTool.name]: realtimeManagementTool as AppTool,
-        [environmentManagementTool.name]: environmentManagementTool as AppTool,
-        [smartMigrationTool.name]: smartMigrationTool as AppTool,
-        [metricsDashboardTool.name]: metricsDashboardTool as AppTool,
-    };
+    const availableTools = await loadTools();
+    if (process.env.NODE_ENV !== 'production') {
+        console.error(`Loaded ${Object.keys(availableTools).length} tools dynamically.`);
+    }
 
     // Prepare capabilities
     const capabilitiesTools: Record<string, McpToolSchema> = {};
