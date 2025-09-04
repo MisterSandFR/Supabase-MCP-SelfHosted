@@ -39,6 +39,25 @@ import { validateMigrationTool } from './tools/validate_migration.js';
 import { pushMigrationsTool } from './tools/push_migrations.js';
 import { createMigrationTool } from './tools/create_migration.js';
 import { autoMigrateTool } from './tools/auto_migrate.js';
+import { manageRlsPoliciesTool } from './tools/manage_rls_policies.js';
+import { analyzeRlsCoverageTool } from './tools/analyze_rls_coverage.js';
+import { manageFunctionsTool } from './tools/manage_functions.js';
+import { manageTriggersTool } from './tools/manage_triggers.js';
+import { autoCreateIndexesTool } from './tools/auto_create_indexes.js';
+import { manageRolesTool } from './tools/manage_roles.js';
+import { manageStoragePolicies } from './tools/manage_storage_policies.js';
+import { vacuumAnalyzeTool } from './tools/vacuum_analyze.js';
+import { manageExtensionsTool } from './tools/manage_extensions.js';
+import { syncSchemaTool } from './tools/sync_schema.js';
+import { manageSecretsTool } from './tools/manage_secrets.js';
+import { auditSecurityTool } from './tools/audit_security.js';
+import { generateCrudApiTool } from './tools/generate_crud_api.js';
+import { manageWebhooksTool } from './tools/manage_webhooks.js';
+import { cacheManagementTool } from './tools/cache_management.js';
+import { realtimeManagementTool } from './tools/realtime_management.js';
+import { environmentManagementTool } from './tools/environment_management.js';
+import { smartMigrationTool } from './tools/smart_migration.js';
+import { metricsDashboardTool } from './tools/metrics_dashboard.js';
 import { RateLimiter, ConcurrencyLimiter, QueryComplexityAnalyzer, withResourceLimits } from './utils/rate-limiter.js';
 
 // Export the configuration schema
@@ -120,6 +139,25 @@ export default async function createServer(config: Config) {
         [pushMigrationsTool.name]: pushMigrationsTool as AppTool,
         [createMigrationTool.name]: createMigrationTool as AppTool,
         [autoMigrateTool.name]: autoMigrateTool as AppTool,
+        [manageRlsPoliciesTool.name]: manageRlsPoliciesTool as AppTool,
+        [analyzeRlsCoverageTool.name]: analyzeRlsCoverageTool as AppTool,
+        [manageFunctionsTool.name]: manageFunctionsTool as AppTool,
+        [manageTriggersTool.name]: manageTriggersTool as AppTool,
+        [autoCreateIndexesTool.name]: autoCreateIndexesTool as AppTool,
+        [manageRolesTool.name]: manageRolesTool as AppTool,
+        [manageStoragePolicies.name]: manageStoragePolicies as AppTool,
+        [vacuumAnalyzeTool.name]: vacuumAnalyzeTool as AppTool,
+        [manageExtensionsTool.name]: manageExtensionsTool as AppTool,
+        [syncSchemaTool.name]: syncSchemaTool as AppTool,
+        [manageSecretsTool.name]: manageSecretsTool as AppTool,
+        [auditSecurityTool.name]: auditSecurityTool as AppTool,
+        [generateCrudApiTool.name]: generateCrudApiTool as AppTool,
+        [manageWebhooksTool.name]: manageWebhooksTool as AppTool,
+        [cacheManagementTool.name]: cacheManagementTool as AppTool,
+        [realtimeManagementTool.name]: realtimeManagementTool as AppTool,
+        [environmentManagementTool.name]: environmentManagementTool as AppTool,
+        [smartMigrationTool.name]: smartMigrationTool as AppTool,
+        [metricsDashboardTool.name]: metricsDashboardTool as AppTool,
     };
 
     // Prepare capabilities

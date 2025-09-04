@@ -1,7 +1,7 @@
 {
   "name": "@mistersandfr/selfhosted-supabase-mcp",
-  "version": "2.3.0",
-  "description": "Enhanced security edition of Self-Hosted Supabase MCP Server with SQL injection prevention, rate limiting, and production features",
+  "version": "3.0.0",
+  "description": "Complete Autonomy Edition - 50+ MCP tools for 100% autonomous Supabase management with comprehensive security, automation, and monitoring",
   "main": "dist/index.js",
   "module": "./src/index-smithery.ts",
   "type": "module",

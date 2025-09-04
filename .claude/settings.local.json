@@ -27,6 +27,13 @@
       "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\.actor/**)",
       "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\wiki/**)",
       "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src\\tools/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src\\tools/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp\\src/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp/**)",
+      "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp/**)",
       "Read(/C:\\Users\\coupaul\\Documents\\GitHub\\ng-supabase-mcp/**)"
     ],
     "deny": [],
