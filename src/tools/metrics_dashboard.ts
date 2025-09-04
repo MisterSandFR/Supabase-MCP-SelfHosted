@@ -32,34 +32,31 @@ const MetricsDashboardInputSchema = z.object({
 });
 
 type MetricsDashboardInput = z.infer<typeof MetricsDashboardInputSchema>;
+const metricsDashboardOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
 
-export const metricsDashboardTool: Tool = {
+
+export const metricsDashboardTool = {
     name: "metrics_dashboard",
     description: "Comprehensive real-time metrics and monitoring dashboard with alerts, reporting, and anomaly detection",
-    inputSchema: {
+    inputSchema: MetricsDashboardInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
-            action: {
-                type: "string",
-                enum: ["get_overview", "database_metrics", "performance_metrics", "security_metrics", "usage_metrics", "realtime_metrics", "storage_metrics", "create_alert", "generate_report", "export_metrics"],
-                description: "Metrics dashboard action"
+            action: { 
+                type: "string", 
+                enum: ['get_overview', 'database_metrics', 'performance_metrics', 'security_metrics', 'usage_metrics', 'realtime_metrics', 'storage_metrics', 'create_alert', 'generate_report', 'export_metrics'], 
+                description: "Metrics dashboard action" 
             },
             timeframe: {
                 type: "string",
                 enum: ["1h", "24h", "7d", "30d", "90d"],
-                description: "Time frame"
+                description: "Time frame for metrics"
             },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             metricType: {
                 type: "string",
                 enum: ["cpu", "memory", "connections", "queries", "errors", "latency", "throughput", "storage", "all"],
@@ -115,6 +112,7 @@ export const metricsDashboardTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: metricsDashboardOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = MetricsDashboardInputSchema.parse(input);
         

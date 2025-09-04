@@ -37,11 +37,19 @@ const SyncSchemaInputSchema = z.object({
 });
 
 type SyncSchemaInput = z.infer<typeof SyncSchemaInputSchema>;
+const syncSchemaOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
 
-export const syncSchemaTool: Tool = {
+
+export const syncSchemaTool = {
     name: "sync_schema",
     description: "Comprehensive schema synchronization tool for managing database schemas across environments with conflict resolution, validation, and automated migration planning",
-    inputSchema: {
+    inputSchema: SyncSchemaInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             action: {
@@ -50,17 +58,6 @@ export const syncSchemaTool: Tool = {
                 description: "Schema sync action"
             },
             sourceEnvironment: { type: "string", description: "Source environment" },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             targetEnvironment: { type: "string", description: "Target environment" },
             schemaName: { type: "string", description: "Schema name" },
             includeTables: {
@@ -112,6 +109,7 @@ export const syncSchemaTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: syncSchemaOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = SyncSchemaInputSchema.parse(input);
         

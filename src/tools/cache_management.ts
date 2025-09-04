@@ -23,11 +23,19 @@ const CacheManagementInputSchema = z.object({
 });
 
 type CacheManagementInput = z.infer<typeof CacheManagementInputSchema>;
+const cacheManagementOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
 
-export const cacheManagementTool: Tool = {
+
+export const cacheManagementTool = {
     name: "cache_management",
     description: "Comprehensive materialized view and caching management with auto-refresh, partitioning, and performance optimization",
-    inputSchema: {
+    inputSchema: CacheManagementInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             action: {
@@ -36,17 +44,6 @@ export const cacheManagementTool: Tool = {
                 description: "Cache management action"
             },
             viewName: { type: "string", description: "Materialized view name" },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             query: { type: "string", description: "SQL query" },
             schemaName: { type: "string", description: "Schema name" },
             refreshInterval: { type: "number", description: "Auto-refresh interval" },
@@ -84,6 +81,7 @@ export const cacheManagementTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: cacheManagementOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = CacheManagementInputSchema.parse(input);
         

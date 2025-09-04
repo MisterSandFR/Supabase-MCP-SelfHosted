@@ -30,34 +30,31 @@ const AuditSecurityInputSchema = z.object({
 });
 
 type AuditSecurityInput = z.infer<typeof AuditSecurityInputSchema>;
+const auditSecurityOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
 
-export const auditSecurityTool: Tool = {
+
+export const auditSecurityTool = {
     name: "audit_security",
     description: "Comprehensive security audit tool for Supabase with compliance checking, vulnerability scanning, and automated remediation recommendations",
-    inputSchema: {
+    inputSchema: AuditSecurityInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
-            action: {
-                type: "string",
-                enum: ["full_audit", "rls_audit", "permission_audit", "auth_audit", "storage_audit", "extension_audit", "compliance_check", "vulnerability_scan", "generate_report"],
-                description: "Security audit action"
+            action: { 
+                type: "string", 
+                enum: ['full_audit', 'rls_audit', 'permission_audit', 'auth_audit', 'storage_audit', 'extension_audit', 'compliance_check', 'vulnerability_scan', 'generate_report'], 
+                description: "Security audit action" 
             },
             scope: {
                 type: "string",
                 enum: ["database", "auth", "storage", "api", "all"],
                 description: "Audit scope"
             },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             severity: {
                 type: "string",
                 enum: ["low", "medium", "high", "critical", "all"],
@@ -111,6 +108,7 @@ export const auditSecurityTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: auditSecurityOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = AuditSecurityInputSchema.parse(input);
         

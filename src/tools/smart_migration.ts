@@ -41,30 +41,27 @@ const SmartMigrationInputSchema = z.object({
 });
 
 type SmartMigrationInput = z.infer<typeof SmartMigrationInputSchema>;
+const smartMigrationOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
 
-export const smartMigrationTool: Tool = {
+
+export const smartMigrationTool = {
     name: "smart_migration",
     description: "Intelligent database migrations with breaking change detection, automated rollbacks, and risk assessment",
-    inputSchema: {
-        type: "object",
-        properties: {
-            action: {
-                type: "string",
-                enum: ["analyze_breaking_changes", "generate_migration", "validate_migration", "apply_migration", "rollback_migration", "migration_plan", "dependency_analysis", "risk_assessment", "auto_migrate", "migration_history"],
-                description: "Smart migration action"
-            },
-            migrationName: { type: "string", description: "Migration name" },
+    inputSchema: SmartMigrationInputSchema,
     mcpInputSchema: {
         type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
+        properties: {
+            action: { 
+                type: "string", 
+                enum: ['analyze_breaking_changes', 'generate_migration', 'validate_migration', 'apply_migration', 'rollback_migration', 'migration_plan', 'dependency_analysis', 'risk_assessment', 'auto_migrate', 'migration_history'], 
+                description: "Smart migration action" 
+            },
+            migrationName: { type: "string", description: "Migration name" },
             migrationId: { type: "string", description: "Migration ID" },
             targetSchema: { type: "string", description: "Target schema definition" },
             sourceEnvironment: { type: "string", description: "Source environment" },
@@ -126,6 +123,7 @@ export const smartMigrationTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: smartMigrationOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = SmartMigrationInputSchema.parse(input);
         

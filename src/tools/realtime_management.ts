@@ -35,30 +35,27 @@ const RealtimeManagementInputSchema = z.object({
 });
 
 type RealtimeManagementInput = z.infer<typeof RealtimeManagementInputSchema>;
+const realtimeManagementOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
 
-export const realtimeManagementTool: Tool = {
+
+export const realtimeManagementTool = {
     name: "realtime_management",
     description: "Comprehensive Supabase Realtime management with channels, broadcasts, presence, and security controls",
-    inputSchema: {
-        type: "object",
-        properties: {
-            action: {
-                type: "string",
-                enum: ["enable_realtime", "disable_realtime", "list_publications", "create_channel", "manage_broadcast", "configure_presence", "analytics", "test_connection", "security_audit"],
-                description: "Realtime management action"
-            },
-            tableName: { type: "string", description: "Table name" },
+    inputSchema: RealtimeManagementInputSchema,
     mcpInputSchema: {
         type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
+        properties: {
+            action: { 
+                type: "string", 
+                enum: ['enable_realtime', 'disable_realtime', 'list_publications', 'create_channel', 'manage_broadcast', 'configure_presence', 'analytics', 'test_connection', 'security_audit'], 
+                description: "Realtime management action" 
+            },
+            tableName: { type: "string", description: "Table name for realtime" },
             schemaName: { type: "string", description: "Schema name" },
             channelName: { type: "string", description: "Channel name" },
             eventTypes: {
@@ -122,6 +119,7 @@ export const realtimeManagementTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: realtimeManagementOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = RealtimeManagementInputSchema.parse(input);
         

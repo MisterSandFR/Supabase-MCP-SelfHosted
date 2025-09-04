@@ -42,30 +42,27 @@ const EnvironmentManagementInputSchema = z.object({
 });
 
 type EnvironmentManagementInput = z.infer<typeof EnvironmentManagementInputSchema>;
+const environmentManagementOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
 
-export const environmentManagementTool: Tool = {
+
+export const environmentManagementTool = {
     name: "environment_management",
     description: "Comprehensive environment management for dev/staging/production with cloning, syncing, promotion, and rollback capabilities",
-    inputSchema: {
-        type: "object",
-        properties: {
-            action: {
-                type: "string",
-                enum: ["list_environments", "create_environment", "clone_environment", "sync_environments", "compare_environments", "promote_changes", "rollback_environment", "configure_settings", "backup_environment", "restore_environment"],
-                description: "Environment management action"
-            },
-            environmentName: { type: "string", description: "Environment name" },
+    inputSchema: EnvironmentManagementInputSchema,
     mcpInputSchema: {
         type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
+        properties: {
+            action: { 
+                type: "string", 
+                enum: ['list_environments', 'create_environment', 'clone_environment', 'sync_environments', 'compare_environments', 'promote_changes', 'rollback_environment', 'configure_settings', 'backup_environment', 'restore_environment'], 
+                description: "Environment management action" 
+            },
+            environmentName: { type: "string", description: "Environment name" },
             sourceEnvironment: { type: "string", description: "Source environment" },
             targetEnvironment: { type: "string", description: "Target environment" },
             environmentType: {
@@ -137,6 +134,7 @@ export const environmentManagementTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: environmentManagementOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = EnvironmentManagementInputSchema.parse(input);
         

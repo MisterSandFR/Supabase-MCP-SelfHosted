@@ -43,30 +43,27 @@ const ManageWebhooksInputSchema = z.object({
 });
 
 type ManageWebhooksInput = z.infer<typeof ManageWebhooksInputSchema>;
+const manageWebhooksOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
 
-export const manageWebhooksTool: Tool = {
+
+export const manageWebhooksTool = {
     name: "manage_webhooks",
     description: "Comprehensive webhook management with pg_net integration, retry logic, analytics, and batch processing",
-    inputSchema: {
-        type: "object",
-        properties: {
-            action: {
-                type: "string",
-                enum: ["create", "list", "update", "delete", "test", "logs", "retry", "configure", "batch_create", "analytics"],
-                description: "Webhook action"
-            },
-            webhookName: { type: "string", description: "Webhook name" },
+    inputSchema: ManageWebhooksInputSchema,
     mcpInputSchema: {
         type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
+        properties: {
+            action: { 
+                type: "string", 
+                enum: ['create', 'list', 'update', 'delete', 'test', 'logs', 'retry', 'configure', 'batch_create', 'analytics'], 
+                description: "Webhook action" 
+            },
+            webhookName: { type: "string", description: "Webhook name" },
             url: { type: "string", description: "Webhook URL" },
             events: {
                 type: "array",
@@ -138,6 +135,7 @@ export const manageWebhooksTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: manageWebhooksOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = ManageWebhooksInputSchema.parse(input);
         

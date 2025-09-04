@@ -20,11 +20,19 @@ const ManageExtensionsInputSchema = z.object({
 });
 
 type ManageExtensionsInput = z.infer<typeof ManageExtensionsInputSchema>;
+const manageExtensionsOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
 
-export const manageExtensionsTool: Tool = {
+
+export const manageExtensionsTool = {
     name: "manage_extensions",
     description: "Comprehensive PostgreSQL extension management with dependency handling, security auditing, and environment-specific configurations",
-    inputSchema: {
+    inputSchema: ManageExtensionsInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             action: {
@@ -33,17 +41,6 @@ export const manageExtensionsTool: Tool = {
                 description: "Action to perform"
             },
             extensionName: { type: "string", description: "Extension name" },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             schema: { type: "string", description: "Schema to install in" },
             version: { type: "string", description: "Specific version" },
             cascade: { type: "boolean", description: "Use CASCADE when dropping" },
@@ -73,6 +70,7 @@ export const manageExtensionsTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: manageExtensionsOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = ManageExtensionsInputSchema.parse(input);
         

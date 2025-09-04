@@ -27,11 +27,19 @@ const ManageSecretsInputSchema = z.object({
 });
 
 type ManageSecretsInput = z.infer<typeof ManageSecretsInputSchema>;
+const manageSecretsOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
 
-export const manageSecretsTool: Tool = {
+
+export const manageSecretsTool = {
     name: "manage_secrets",
     description: "Comprehensive secrets and environment variables management with encryption, rotation, auditing, and cross-environment synchronization",
-    inputSchema: {
+    inputSchema: ManageSecretsInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             action: {
@@ -40,17 +48,6 @@ export const manageSecretsTool: Tool = {
                 description: "Action to perform"
             },
             secretName: { type: "string", description: "Secret name/key" },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             secretValue: { type: "string", description: "Secret value" },
             description: { type: "string", description: "Secret description" },
             environment: {
@@ -100,6 +97,7 @@ export const manageSecretsTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: manageSecretsOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = ManageSecretsInputSchema.parse(input);
         

@@ -28,11 +28,19 @@ const VacuumAnalyzeInputSchema = z.object({
 });
 
 type VacuumAnalyzeInput = z.infer<typeof VacuumAnalyzeInputSchema>;
+const vacuumAnalyzeOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
 
-export const vacuumAnalyzeTool: Tool = {
+
+export const vacuumAnalyzeTool = {
     name: "vacuum_analyze",
     description: "Comprehensive database maintenance tool for VACUUM, ANALYZE, REINDEX with intelligent automation, bloat detection, and scheduled maintenance",
-    inputSchema: {
+    inputSchema: VacuumAnalyzeInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             action: {
@@ -41,17 +49,6 @@ export const vacuumAnalyzeTool: Tool = {
                 description: "Maintenance action to perform"
             },
             tableName: { type: "string", description: "Specific table name" },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             schemaName: { type: "string", description: "Schema name" },
             indexName: { type: "string", description: "Specific index name" },
             verbose: { type: "boolean", description: "Verbose output" },
@@ -86,6 +83,7 @@ export const vacuumAnalyzeTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: vacuumAnalyzeOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = VacuumAnalyzeInputSchema.parse(input);
         

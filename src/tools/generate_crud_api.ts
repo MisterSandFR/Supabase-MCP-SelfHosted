@@ -37,30 +37,27 @@ const GenerateCrudApiInputSchema = z.object({
 });
 
 type GenerateCrudApiInput = z.infer<typeof GenerateCrudApiInputSchema>;
+const generateCrudApiOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
 
-export const generateCrudApiTool: Tool = {
+
+export const generateCrudApiTool = {
     name: "generate_crud_api",
     description: "Comprehensive CRUD API generator for Supabase with TypeScript, validation, authentication, testing, and deployment support",
-    inputSchema: {
-        type: "object",
-        properties: {
-            action: {
-                type: "string",
-                enum: ["generate", "analyze", "list", "deploy", "test", "document", "validate", "optimize", "batch_generate"],
-                description: "CRUD API action"
-            },
-            tableName: { type: "string", description: "Table name" },
+    inputSchema: GenerateCrudApiInputSchema,
     mcpInputSchema: {
         type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
+        properties: {
+            action: { 
+                type: "string", 
+                enum: ['generate', 'analyze', 'list', 'deploy', 'test', 'document', 'validate', 'optimize', 'batch_generate'], 
+                description: "CRUD API action" 
+            },
+            tableName: { type: "string", description: "Table name to generate API for" },
             schemaName: { type: "string", description: "Schema name" },
             apiType: {
                 type: "string",
@@ -137,6 +134,7 @@ export const generateCrudApiTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: generateCrudApiOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = GenerateCrudApiInputSchema.parse(input);
         
