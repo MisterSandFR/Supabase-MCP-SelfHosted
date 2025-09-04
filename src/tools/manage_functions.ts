@@ -23,10 +23,18 @@ const ManageFunctionsInputSchema = z.object({
 
 type ManageFunctionsInput = z.infer<typeof ManageFunctionsInputSchema>;
 
-export const manageFunctionsTool: Tool = {
+const ManageFunctionsOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
+
+export const manageFunctionsTool = {
     name: "manage_functions",
     description: "Create, update, delete, and manage PostgreSQL functions including stored procedures",
-    inputSchema: {
+    inputSchema: ManageFunctionsInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             action: {
@@ -35,17 +43,6 @@ export const manageFunctionsTool: Tool = {
                 description: "Action to perform"
             },
             functionName: { type: "string", description: "Function name" },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             schema: { type: "string", description: "Schema name" },
             parameters: {
                 type: "array",
@@ -85,6 +82,7 @@ export const manageFunctionsTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: ManageFunctionsOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = ManageFunctionsInputSchema.parse(input);
         

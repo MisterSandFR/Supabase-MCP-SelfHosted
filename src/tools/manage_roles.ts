@@ -29,10 +29,18 @@ const ManageRolesInputSchema = z.object({
 
 type ManageRolesInput = z.infer<typeof ManageRolesInputSchema>;
 
-export const manageRolesTool: Tool = {
+const ManageRolesOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
+
+export const manageRolesTool = {
     name: "manage_roles",
     description: "Comprehensive role and permission management for PostgreSQL/Supabase with RLS integration and environment synchronization",
-    inputSchema: {
+    inputSchema: ManageRolesInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             action: {
@@ -41,17 +49,6 @@ export const manageRolesTool: Tool = {
                 description: "Action to perform"
             },
             roleName: { type: "string", description: "Role name" },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             password: { type: "string", description: "Role password" },
             permissions: {
                 type: "array",
@@ -86,6 +83,7 @@ export const manageRolesTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: ManageRolesOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = ManageRolesInputSchema.parse(input);
         

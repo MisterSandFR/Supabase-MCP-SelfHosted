@@ -11,10 +11,18 @@ const AnalyzeRlsCoverageInputSchema = z.object({
 
 type AnalyzeRlsCoverageInput = z.infer<typeof AnalyzeRlsCoverageInputSchema>;
 
-export const analyzeRlsCoverageTool: Tool = {
+const AnalyzeRlsCoverageOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
+
+export const analyzeRlsCoverageTool = {
     name: "analyze_rls_coverage",
     description: "Analyze RLS coverage, detect unprotected tables, and suggest security improvements",
-    inputSchema: {
+    inputSchema: AnalyzeRlsCoverageInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             includeSystemTables: {
@@ -25,23 +33,13 @@ export const analyzeRlsCoverageTool: Tool = {
                 type: "boolean",
                 description: "Suggest policies for unprotected tables"
             },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             checkOrphans: {
                 type: "boolean",
                 description: "Check for orphaned policies"
             }
         }
     },
+    outputSchema: AnalyzeRlsCoverageOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = AnalyzeRlsCoverageInputSchema.parse(input || {});
         

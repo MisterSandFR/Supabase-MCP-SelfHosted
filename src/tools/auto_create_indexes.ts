@@ -14,10 +14,18 @@ const AutoCreateIndexesInputSchema = z.object({
 
 type AutoCreateIndexesInput = z.infer<typeof AutoCreateIndexesInputSchema>;
 
-export const autoCreateIndexesTool: Tool = {
+const AutoCreateIndexesOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
+
+export const autoCreateIndexesTool = {
     name: "auto_create_indexes",
     description: "Automatically analyze queries and create optimal indexes for performance",
-    inputSchema: {
+    inputSchema: AutoCreateIndexesInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             action: {
@@ -26,17 +34,6 @@ export const autoCreateIndexesTool: Tool = {
                 description: "Action to perform"
             },
             minUsage: { type: "number", description: "Minimum query usage" },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             minSize: { type: "number", description: "Minimum table size" },
             autoApply: { type: "boolean", description: "Auto apply suggestions" },
             includePartial: { type: "boolean", description: "Include partial indexes" },
@@ -44,6 +41,7 @@ export const autoCreateIndexesTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: AutoCreateIndexesOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = AutoCreateIndexesInputSchema.parse(input || {});
         

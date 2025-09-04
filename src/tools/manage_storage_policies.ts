@@ -27,10 +27,18 @@ const ManageStoragePoliciesInputSchema = z.object({
 
 type ManageStoragePoliciesInput = z.infer<typeof ManageStoragePoliciesInputSchema>;
 
-export const manageStoragePolicies: Tool = {
+const ManageStoragePoliciesOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
+
+export const manageStoragePolicies = {
     name: "manage_storage_policies",
     description: "Comprehensive Supabase Storage bucket and policy management with advanced security, templates, and automation features",
-    inputSchema: {
+    inputSchema: ManageStoragePoliciesInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             action: {
@@ -39,17 +47,6 @@ export const manageStoragePolicies: Tool = {
                 description: "Action to perform"
             },
             bucketName: { type: "string", description: "Storage bucket name" },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             policyName: { type: "string", description: "Policy name" },
             operation: {
                 type: "string",
@@ -89,6 +86,7 @@ export const manageStoragePolicies: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: ManageStoragePoliciesOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = ManageStoragePoliciesInputSchema.parse(input);
         

@@ -44,10 +44,18 @@ const POLICY_TEMPLATES = {
     }
 };
 
-export const manageRlsPoliciesTool: Tool = {
+const ManageRlsPoliciesOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
+
+export const manageRlsPoliciesTool = {
     name: "manage_rls_policies",
     description: "Create, update, delete, and manage Row Level Security policies",
-    inputSchema: {
+    inputSchema: ManageRlsPoliciesInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             action: {
@@ -59,17 +67,6 @@ export const manageRlsPoliciesTool: Tool = {
                 type: "string",
                 description: "Table name (schema.table format)"
             },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             policyName: {
                 type: "string",
                 description: "Policy name"
@@ -100,6 +97,7 @@ export const manageRlsPoliciesTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: ManageRlsPoliciesOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = ManageRlsPoliciesInputSchema.parse(input);
         

@@ -16,10 +16,18 @@ const ManageTriggersInputSchema = z.object({
 
 type ManageTriggersInput = z.infer<typeof ManageTriggersInputSchema>;
 
-export const manageTriggersTool: Tool = {
+const ManageTriggersOutputSchema = z.object({
+    content: z.array(z.object({
+        type: z.literal("text"),
+        text: z.string()
+    }))
+});
+
+export const manageTriggersTool = {
     name: "manage_triggers",
     description: "Create, manage, and monitor database triggers including audit and timestamp triggers",
-    inputSchema: {
+    inputSchema: ManageTriggersInputSchema,
+    mcpInputSchema: {
         type: "object",
         properties: {
             action: {
@@ -28,17 +36,6 @@ export const manageTriggersTool: Tool = {
                 description: "Action to perform"
             },
             triggerName: { type: "string" },
-    mcpInputSchema: {
-        type: "object",
-        properties: {},
-        required: []
-    },
-    outputSchema: z.object({
-        content: z.array(z.object({
-            type: z.literal("text"),
-            text: z.string()
-        }))
-    }),
             tableName: { type: "string" },
             timing: {
                 type: "string",
@@ -60,6 +57,7 @@ export const manageTriggersTool: Tool = {
         },
         required: ["action"]
     },
+    outputSchema: ManageTriggersOutputSchema,
     execute: async (input: unknown, context: ToolContext) => {
         const validatedInput = ManageTriggersInputSchema.parse(input);
         
