@@ -145,6 +145,9 @@ Add to your Claude Desktop config file:
 *   **Schema & Migration Tools**
     *   `list_migrations`: Shows migration history from `supabase_migrations.schema_migrations`.
     *   `apply_migration`: Apply a new migration (Requires direct DB access).
+    *   `create_migration`: Create new migration files with proper versioning.
+    *   `push_migrations`: Automatically push and apply migrations to your instance.
+    *   `validate_migration`: Pre-flight validation before applying migrations.
 *   **Project Configuration & Keys**
     *   `get_project_url`: Returns the configured Supabase URL.
     *   `get_anon_key`: Returns the configured Supabase anon key.
@@ -171,7 +174,6 @@ Add to your Claude Desktop config file:
     *   `backup_database`: Create database backups with various formats (SQL, custom, tar) and optional storage upload.
     *   `manage_docker`: Manage Docker containers for self-hosted Supabase (status, logs, restart, stop, start, stats).
     *   `analyze_performance`: Deep performance analysis including slow queries, missing indexes, lock contention, and cache statistics.
-    *   `validate_migration`: Pre-flight validation of migration files to detect potential issues before applying.
 
 ## 🐳 Docker & Self-Hosted Support
 

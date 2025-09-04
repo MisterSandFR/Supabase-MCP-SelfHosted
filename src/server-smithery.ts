@@ -35,6 +35,8 @@ import { backupDatabaseTool } from './tools/backup_database.js';
 import { manageDockerTool } from './tools/manage_docker.js';
 import { analyzePerformanceTool } from './tools/analyze_performance.js';
 import { validateMigrationTool } from './tools/validate_migration.js';
+import { pushMigrationsTool } from './tools/push_migrations.js';
+import { createMigrationTool } from './tools/create_migration.js';
 import { RateLimiter, ConcurrencyLimiter, QueryComplexityAnalyzer, withResourceLimits } from './utils/rate-limiter.js';
 
 interface Config {
@@ -140,6 +142,8 @@ export async function createSmitheryServer(config: Config) {
         [manageDockerTool.name]: manageDockerTool as AppTool,
         [analyzePerformanceTool.name]: analyzePerformanceTool as AppTool,
         [validateMigrationTool.name]: validateMigrationTool as AppTool,
+        [pushMigrationsTool.name]: pushMigrationsTool as AppTool,
+        [createMigrationTool.name]: createMigrationTool as AppTool,
     };
 
     // Prepare capabilities
