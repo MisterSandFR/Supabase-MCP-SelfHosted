@@ -177,7 +177,7 @@ export default async function createServer(config: Config) {
     const server = new Server(
         {
             name: 'selfhosted-supabase-mcp',
-            version: '2.0.0',
+            version: '3.0.0',
         },
         {
             capabilities,
