@@ -1,4 +1,9 @@
-# Self-Hosted Supabase MCP Server - Complete Autonomy Edition
+# Self-Hosted Supabase MCP Server - Complete Autonomy Edition 🚀
+
+## ✨ Push Automatique Smithery CLI Activé !
+- Configuration automatique après chaque commit
+- Déploiement instantané via Smithery
+- Workflow 100% automatisé
 
 [![smithery badge](https://smithery.ai/badge/@MisterSandFR/supabase-mcp-selfhosted)](https://smithery.ai/server/@MisterSandFR/supabase-mcp-selfhosted)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
