@@ -1,5 +1,5 @@
 FROM python:3.12-slim
 WORKDIR /app
-COPY ultra_simple_server.py .
+COPY main.py .
 EXPOSE 8000
-CMD ["python", "ultra_simple_server.py"]
+CMD ["python", "main.py"]
