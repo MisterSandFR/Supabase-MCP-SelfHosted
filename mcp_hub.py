@@ -348,6 +348,19 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                         ]
                     }
                 }
+            elif method == 'ping':
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "result": {
+                        "pong": True,
+                        "timestamp": time.time(),
+                        "status": "OK"
+                    }
+                }
+            elif method == 'notifications/initialized':
+                # Les notifications n'ont pas de réponse
+                response = None
             else:
                 response = {
                     "jsonrpc": "2.0",
@@ -358,13 +371,20 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                     }
                 }
             
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-            self.end_headers()
-            self.wfile.write(json.dumps(response, indent=2).encode())
+            if response is not None:
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+                self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+                self.end_headers()
+                self.wfile.write(json.dumps(response, indent=2).encode())
+            else:
+                # Pour les notifications, pas de réponse
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
             
         except json.JSONDecodeError as e:
             print(f"JSON decode error: {e}")
