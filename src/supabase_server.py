@@ -211,7 +211,48 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                             "serverInfo": {
                                 "name": "supabase-mcp-server",
                                 "version": "3.1.0"
-                            }
+                            },
+                            "tools": [
+                                {
+                                    "name": "execute_sql",
+                                    "description": "Execute SQL queries on Supabase",
+                                    "inputSchema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "sql": {"type": "string", "description": "SQL query to execute"},
+                                            "allow_multiple_statements": {"type": "boolean", "default": False}
+                                        },
+                                        "required": ["sql"]
+                                    }
+                                },
+                                {
+                                    "name": "list_tables",
+                                    "description": "List all database tables",
+                                    "inputSchema": {"type": "object", "properties": {}}
+                                },
+                                {
+                                    "name": "check_health",
+                                    "description": "Check Supabase health status",
+                                    "inputSchema": {"type": "object", "properties": {}}
+                                },
+                                {
+                                    "name": "list_auth_users",
+                                    "description": "List authentication users",
+                                    "inputSchema": {"type": "object", "properties": {}}
+                                },
+                                {
+                                    "name": "create_auth_user",
+                                    "description": "Create new authentication user",
+                                    "inputSchema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "email": {"type": "string", "description": "User email"},
+                                            "password": {"type": "string", "description": "User password"}
+                                        },
+                                        "required": ["email", "password"]
+                                    }
+                                }
+                            ]
                         }
                     }
                 
@@ -250,7 +291,48 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                         "serverInfo": {
                             "name": "supabase-mcp-server",
                             "version": "3.1.0"
-                        }
+                        },
+                        "tools": [
+                            {
+                                "name": "execute_sql",
+                                "description": "Execute SQL queries on Supabase",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "sql": {"type": "string", "description": "SQL query to execute"},
+                                        "allow_multiple_statements": {"type": "boolean", "default": False}
+                                    },
+                                    "required": ["sql"]
+                                }
+                            },
+                            {
+                                "name": "list_tables",
+                                "description": "List all database tables",
+                                "inputSchema": {"type": "object", "properties": {}}
+                            },
+                            {
+                                "name": "check_health",
+                                "description": "Check Supabase health status",
+                                "inputSchema": {"type": "object", "properties": {}}
+                            },
+                            {
+                                "name": "list_auth_users",
+                                "description": "List authentication users",
+                                "inputSchema": {"type": "object", "properties": {}}
+                            },
+                            {
+                                "name": "create_auth_user",
+                                "description": "Create new authentication user",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "email": {"type": "string"},
+                                        "password": {"type": "string"}
+                                    },
+                                    "required": ["email", "password"]
+                                }
+                            }
+                        ]
                     }
                 elif method == "tools/list":
                     response["result"] = {
