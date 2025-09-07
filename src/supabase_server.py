@@ -229,8 +229,8 @@ class MCPHandler(BaseHTTPRequestHandler):
                     
                     <div class="info-grid">
                         <div class="info-card">
-                            <div class="info-label">Supabase URL</div>
-                            <div class="info-value">""" + self.config.SUPABASE_URL + """</div>
+                            <div class="info-label">Server Status</div>
+                            <div class="info-value">Connected</div>
                         </div>
                         <div class="info-card">
                             <div class="info-label">Available Tools</div>
