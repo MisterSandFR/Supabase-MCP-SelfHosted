@@ -1,54 +1,42 @@
-import { Command } from 'commander';
-import { startStandaloneServer } from './server.js';
+#!/usr/bin/env node
 
-// Run the CLI directly
-main().catch((error) => {
-    console.error('Unhandled error:', error);
-    process.exit(1);
+/**
+ * Point d'entrée TypeScript pour Smithery CLI
+ * Ce fichier permet à Smithery de construire le projet et appelle le serveur Python
+ */
+
+import { spawn } from 'child_process';
+import { join } from 'path';
+
+// Configuration du serveur Python
+const PYTHON_SERVER_PATH = join(__dirname, 'src', 'supabase_server.py');
+
+console.log('🚀 Démarrage du serveur Supabase MCP OAuth2 v3.1.0...');
+console.log(`📁 Chemin du serveur Python: ${PYTHON_SERVER_PATH}`);
+
+// Démarrer le serveur Python
+const pythonProcess = spawn('python', [PYTHON_SERVER_PATH], {
+  stdio: 'inherit',
+  cwd: process.cwd()
 });
 
-// Main function for CLI execution
-async function main() {
-    const program = new Command();
+pythonProcess.on('error', (error) => {
+  console.error('❌ Erreur lors du démarrage du serveur Python:', error.message);
+  process.exit(1);
+});
 
-    program
-        .name('self-hosted-supabase-mcp')
-        .description('MCP Server for self-hosted Supabase instances')
-        .option('--url <url>', 'Supabase project URL', process.env.SUPABASE_URL || process.env.supabaseUrl)
-        .option('--anon-key <key>', 'Supabase anonymous key', process.env.SUPABASE_ANON_KEY || process.env.supabaseAnonKey)
-        .option('--service-key <key>', 'Supabase service role key (optional)', process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.supabaseServiceRoleKey)
-        .option('--db-url <url>', 'Direct database connection string (optional, for pg fallback)', process.env.DATABASE_URL || process.env.databaseUrl)
-        .option('--jwt-secret <secret>', 'Supabase JWT secret (optional, needed for some tools)', process.env.SUPABASE_AUTH_JWT_SECRET || process.env.supabaseAuthJwtSecret)
-        .option('--workspace-path <path>', 'Workspace root path (for file operations)', process.cwd())
-        .option('--tools-config <path>', 'Path to a JSON file specifying which tools to enable')
-        .parse(process.argv);
+pythonProcess.on('exit', (code) => {
+  console.log(`🔄 Serveur Python terminé avec le code: ${code}`);
+  process.exit(code || 0);
+});
 
-    const options = program.opts();
+// Gestion des signaux pour arrêter proprement
+process.on('SIGINT', () => {
+  console.log('\n🛑 Arrêt du serveur...');
+  pythonProcess.kill('SIGINT');
+});
 
-    if (!options.url) {
-        console.error('Error: Supabase URL is required. Use --url or SUPABASE_URL.');
-        throw new Error('Supabase URL is required.');
-    }
-    if (!options.anonKey) {
-        console.error('Error: Supabase Anon Key is required. Use --anon-key or SUPABASE_ANON_KEY.');
-        throw new Error('Supabase Anon Key is required.');
-    }
-
-    console.error('Starting Self-Hosted Supabase MCP Server...');
-
-    try {
-        await startStandaloneServer({
-            url: options.url,
-            anonKey: options.anonKey,
-            serviceKey: options.serviceKey,
-            dbUrl: options.dbUrl,
-            jwtSecret: options.jwtSecret,
-            workspacePath: options.workspacePath,
-            toolsConfig: options.toolsConfig
-        });
-    } catch (error) {
-        console.error('Failed to start the MCP server:', error);
-        throw error;
-    }
-}
-
+process.on('SIGTERM', () => {
+  console.log('\n🛑 Arrêt du serveur...');
+  pythonProcess.kill('SIGTERM');
+});

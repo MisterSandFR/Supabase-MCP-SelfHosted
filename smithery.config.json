@@ -1,0 +1,12 @@
+{
+  "runtime": "python",
+  "entry": "src/supabase_server.py",
+  "build": {
+    "command": "python -m pip install -r requirements.txt",
+    "output": "dist"
+  },
+  "server": {
+    "command": "python src/supabase_server.py",
+    "port": 3000
+  }
+}
