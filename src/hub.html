@@ -192,6 +192,21 @@
             opacity: 0.8;
         }
     </style>
+    <script>
+        // Afficher la date de dernière mise à jour
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                timeZone: 'Europe/Paris'
+            };
+            document.getElementById('lastUpdate').textContent = now.toLocaleDateString('fr-FR', options);
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -325,7 +340,7 @@
         <div class="footer">
             <p>🌐 <strong>mcp.coupaul.fr</strong> - Hub MCP de @MisterSandFR</p>
             <p>Serveurs MCP auto-hébergés sur Railway</p>
-            <p><em>Dernière mise à jour: $(date)</em></p>
+            <p><em>Dernière mise à jour: <span id="lastUpdate"></span></em></p>
         </div>
     </div>
 </body>
