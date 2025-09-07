@@ -256,18 +256,70 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                 print(f"📨 POST / (config) - Requête: {request}")
                 
                 # Réponse de configuration MCP
-                response = {
-                    "jsonrpc": "2.0",
-                    "id": request.get("id", "config"),
-                    "result": {
-                        "protocolVersion": "2024-11-05",
-                        "capabilities": {"tools": {}},
-                        "serverInfo": {
-                            "name": "supabase-mcp-server",
-                            "version": "3.1.0"
+                method = request.get("method", "")
+                if method == "tools/list":
+                    # Retourner la liste des outils
+                    response = {
+                        "jsonrpc": "2.0",
+                        "id": request.get("id", "tools"),
+                        "result": {
+                            "tools": [
+                                {
+                                    "name": "execute_sql",
+                                    "description": "Execute SQL queries on Supabase",
+                                    "inputSchema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "sql": {"type": "string", "description": "SQL query to execute"},
+                                            "allow_multiple_statements": {"type": "boolean", "default": False}
+                                        },
+                                        "required": ["sql"]
+                                    }
+                                },
+                                {
+                                    "name": "list_tables",
+                                    "description": "List all database tables",
+                                    "inputSchema": {"type": "object", "properties": {}}
+                                },
+                                {
+                                    "name": "check_health",
+                                    "description": "Check Supabase health status",
+                                    "inputSchema": {"type": "object", "properties": {}}
+                                },
+                                {
+                                    "name": "list_auth_users",
+                                    "description": "List authentication users",
+                                    "inputSchema": {"type": "object", "properties": {}}
+                                },
+                                {
+                                    "name": "create_auth_user",
+                                    "description": "Create new authentication user",
+                                    "inputSchema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "email": {"type": "string", "description": "User email"},
+                                            "password": {"type": "string", "description": "User password"}
+                                        },
+                                        "required": ["email", "password"]
+                                    }
+                                }
+                            ]
                         }
                     }
-                }
+                else:
+                    # Réponse standard d'initialisation
+                    response = {
+                        "jsonrpc": "2.0",
+                        "id": request.get("id", "config"),
+                        "result": {
+                            "protocolVersion": "2024-11-05",
+                            "capabilities": {"tools": {}},
+                            "serverInfo": {
+                                "name": "supabase-mcp-server",
+                                "version": "3.1.0"
+                            }
+                        }
+                    }
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
