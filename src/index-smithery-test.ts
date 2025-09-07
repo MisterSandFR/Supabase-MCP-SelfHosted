@@ -40,6 +40,39 @@ export default async function createServer({ config }) {
         }
       },
       {
+        name: 'execute_psql',
+        description: '🆕 v3.1.0 Direct PostgreSQL psql access',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            command: { type: 'string' },
+            output_format: { type: 'string', enum: ['table', 'json'] }
+          }
+        }
+      },
+      {
+        name: 'inspect_schema',
+        description: '🆕 v3.1.0 Schema inspection with TypeScript generation',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            format: { type: 'string', enum: ['detailed', 'typescript'] }
+          }
+        }
+      },
+      {
+        name: 'apply_migration',
+        description: '🆕 v3.1.0 Advanced migrations with validation',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            version: { type: 'string' },
+            dry_run: { type: 'boolean', default: false }
+          },
+          required: ['version']
+        }
+      },
+      {
         name: 'list_tables',
         description: 'List database tables',
         inputSchema: {
