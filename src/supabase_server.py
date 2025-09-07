@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Redirection vers main.py pour Railway
-Railway essaie d'exécuter src/supabase_server.py, on le redirige vers main.py
+Redirection vers mcp_hub.py pour Railway
+Railway essaie d'exécuter src/supabase_server.py, on le redirige vers mcp_hub.py
 """
 
 import os
@@ -11,14 +11,14 @@ import subprocess
 # Changer vers le répertoire parent
 os.chdir('/app')
 
-# Exécuter main.py
+# Exécuter mcp_hub.py
 try:
-    subprocess.run([sys.executable, 'main.py'], check=True)
+    subprocess.run([sys.executable, 'mcp_hub.py'], check=True)
 except subprocess.CalledProcessError as e:
-    print(f"Erreur lors de l'exécution de main.py: {e}")
+    print(f"Erreur lors de l'exécution de mcp_hub.py: {e}")
     sys.exit(1)
 except FileNotFoundError:
-    print("main.py non trouvé, tentative de création d'un serveur HTTP simple...")
+    print("mcp_hub.py non trouvé, tentative de création d'un serveur HTTP simple...")
     
     # Créer un serveur HTTP simple en cas d'urgence
     import http.server
