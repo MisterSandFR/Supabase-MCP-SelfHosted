@@ -10,10 +10,10 @@ server:
   command: "python src/supabase_server.py"
   port: 3000
 
-# Configuration Docker personnalisée
-docker:
-  use_custom_dockerfile: true
-  dockerfile: "Dockerfile"
+# Configuration Docker désactivée pour éviter les timeouts
+# docker:
+#   use_custom_dockerfile: true
+#   dockerfile: "Dockerfile"
 
 # Variables d'environnement requises
 env:
