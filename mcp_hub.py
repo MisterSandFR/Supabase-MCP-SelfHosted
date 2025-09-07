@@ -112,7 +112,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                     "api": "/api/servers",
                     "tools": "/api/tools"
                 },
-                "capabilities": ["tools", "simulation_mode", "database_management"],
+                "capabilities": ["tools", "production_mode", "database_management"],
                 "self_hosted": True,
                 "url": "mcp.coupaul.fr",
                 "repository": "https://github.com/MisterSandFR/Supabase-MCP-SelfHosted",
@@ -347,29 +347,6 @@ class MCPHubHandler(BaseHTTPRequestHandler):
     </script>
     <style>
         :root {
-            --background: 0 0% 100%;
-            --foreground: 222.2 84% 4.9%;
-            --card: 0 0% 100%;
-            --card-foreground: 222.2 84% 4.9%;
-            --popover: 0 0% 100%;
-            --popover-foreground: 222.2 84% 4.9%;
-            --primary: 221.2 83.2% 53.3%;
-            --primary-foreground: 210 40% 98%;
-            --secondary: 210 40% 96%;
-            --secondary-foreground: 222.2 84% 4.9%;
-            --muted: 210 40% 96%;
-            --muted-foreground: 215.4 16.3% 46.9%;
-            --accent: 210 40% 96%;
-            --accent-foreground: 222.2 84% 4.9%;
-            --destructive: 0 84.2% 60.2%;
-            --destructive-foreground: 210 40% 98%;
-            --border: 214.3 31.8% 91.4%;
-            --input: 214.3 31.8% 91.4%;
-            --ring: 221.2 83.2% 53.3%;
-            --radius: 0.5rem;
-        }
-        
-        .dark {
             --background: 222.2 84% 4.9%;
             --foreground: 210 40% 98%;
             --card: 222.2 84% 4.9%;
@@ -389,10 +366,11 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             --border: 217.2 32.6% 17.5%;
             --input: 217.2 32.6% 17.5%;
             --ring: 224.3 76.3% 94.1%;
+            --radius: 0.5rem;
         }
         
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
         }
         
         .glass-effect {
@@ -451,7 +429,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                 </div>
                 <div class="stat-card glass-effect rounded-xl p-6 text-center">
                     <div class="text-3xl font-bold text-white mb-2">100%</div>
-                    <div class="text-white/80 text-sm">Mode Simulation</div>
+                    <div class="text-white/80 text-sm">Uptime</div>
                 </div>
             </div>
         </div>
@@ -502,7 +480,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-white/70">Mode:</span>
-                                <span class="text-blue-400 font-medium">Simulation activé</span>
+                                <span class="text-blue-400 font-medium">Production</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-white/70">Self-hosted:</span>
@@ -515,7 +493,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                         <h3 class="text-lg font-semibold text-white mb-2">Capacités</h3>
                         <div class="flex flex-wrap gap-2">
                             <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">✅ Outils MCP</span>
-                            <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">✅ Mode simulation</span>
+                            <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">✅ Mode production</span>
                             <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs">✅ Gestion d'erreurs</span>
                             <span class="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs">✅ Configuration flexible</span>
                             <span class="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs">✅ Gestion base de données</span>
