@@ -10,13 +10,10 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements files
-COPY pyproject.toml uv.lock ./
+COPY requirements.txt ./
 
-# Install uv for faster Python package management
-RUN pip install uv
-
-# Install dependencies using uv
-RUN uv sync --frozen --no-dev
+# Install dependencies using pip
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code
 COPY src ./src
@@ -30,4 +27,4 @@ USER app
 ENV PYTHONPATH=/app
 
 # Entrypoint for MCP server
-ENTRYPOINT ["uv", "run", "python", "src/supabase_server.py"]
+ENTRYPOINT ["python", "src/supabase_server.py"]
