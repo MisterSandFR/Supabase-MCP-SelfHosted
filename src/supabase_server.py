@@ -381,6 +381,7 @@ def run_server():
     print(f"🔧 MCP Endpoint: http://0.0.0.0:{port}/mcp")
     print(f"🏥 Health Check: http://0.0.0.0:{port}/health")
     print(f"📡 Supabase URL: {os.getenv('SUPABASE_URL', 'Not configured')}")
+    print(f"🔑 Anon Key: {os.getenv('SUPABASE_ANON_KEY', 'Not configured')[:20]}...")
     server.serve_forever()
 
 if __name__ == "__main__":
