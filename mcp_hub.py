@@ -792,6 +792,7 @@ if __name__ == "__main__":
     print(f"🚀 Starting MCP Hub on port {PORT}")
     print(f"📊 Serving 2 MCP servers with 20 tools")
     print(f"🌐 Access at: http://localhost:{PORT}")
+    print(f"🔧 Well-known endpoint: /.well-known/mcp-config")
     
     with socketserver.TCPServer(("", PORT), MCPHubHandler) as httpd:
         print(f"✅ MCP Hub running on port {PORT}")
