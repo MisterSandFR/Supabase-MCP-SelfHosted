@@ -201,6 +201,19 @@ apply_automatic_fixes() {
         # Ajouter le décorateur manquant
     fi
     
+    # Corriger les arguments non supportés du décorateur Smithery
+    if grep -q "description=" src/supabase_server.py && grep -q "@smithery.server" src/supabase_server.py; then
+        log_warning "Correction des arguments non supportés du décorateur Smithery..."
+        # Supprimer les arguments non supportés
+        sed -i '/@smithery\.server(/,/)/ {
+            /description=/d
+            /tags=/d
+            /homepage=/d
+            /repository=/d
+        }' src/supabase_server.py
+        log_success "Arguments non supportés supprimés du décorateur Smithery"
+    fi
+    
     # Correctif 3: Vérifier les dépendances
     if ! grep -q "mcp.server.fastmcp" src/supabase_server.py; then
         log_warning "Correction des imports FastMCP..."

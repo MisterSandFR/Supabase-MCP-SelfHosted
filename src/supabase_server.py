@@ -19,11 +19,7 @@ class ConfigSchema(BaseModel):
     SUPABASE_SERVICE_KEY: Optional[str] = Field(None, description="Clé de service Supabase (optionnelle)")
 
 @smithery.server(
-    config_schema=ConfigSchema,
-    description="Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management with OAuth2 support",
-    tags=["supabase", "database", "oauth2", "self-hosted", "mcp"],
-    homepage="https://mcp.coupaul.fr",
-    repository="https://github.com/MisterSandFR/Supabase-MCP-SelfHosted"
+    config_schema=ConfigSchema
 )
 def create_server():
     """Create and return a FastMCP server instance with Supabase tools."""
