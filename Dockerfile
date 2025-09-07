@@ -1,37 +1,33 @@
-# Build stage
-FROM node:20-alpine AS builder
+# Use Python 3.12 slim image
+FROM python:3.12-slim
 
+# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install all dependencies including dev
-RUN npm ci || npm install
+# Copy requirements files
+COPY pyproject.toml uv.lock ./
 
-# Copy source files
-COPY tsconfig.json ./
+# Install uv for faster Python package management
+RUN pip install uv
+
+# Install dependencies using uv
+RUN uv sync --frozen --no-dev
+
+# Copy source code
 COPY src ./src
 
-# Build the project
-RUN npm run build
+# Create non-root user for security
+RUN useradd --create-home --shell /bin/bash app && \
+    chown -R app:app /app
+USER app
 
-# Runtime stage
-FROM node:20-alpine
-
-WORKDIR /app
-
-# Copy package files and install production dependencies only
-COPY package*.json ./
-RUN npm ci --omit=dev || npm install --production
-
-# Copy built files from builder stage
-COPY --from=builder /app/dist ./dist
-
-# Run as non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
-USER nodejs
+# Set Python path
+ENV PYTHONPATH=/app
 
 # Entrypoint for MCP server
-ENTRYPOINT ["node", "dist/index.js"]
+ENTRYPOINT ["uv", "run", "python", "src/supabase_server.py"]
