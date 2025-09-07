@@ -78,7 +78,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                 },
                 {
                     "name": "execute_sql",
-                    "description": "Enhanced SQL with OAuth2 DDL support"
+                    "description": "Enhanced SQL with advanced database management"
                 },
                 {
                     "name": "check_health",
@@ -303,7 +303,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCP Hub - Supabase MCP OAuth2 v3.1.0</title>
+    <title>MCP Hub - Serveurs MCP Multiples</title>
     <style>
         * {
             margin: 0;
@@ -465,17 +465,17 @@ class MCPHubHandler(BaseHTTPRequestHandler):
     <div class="container">
         <div class="header">
             <h1>🚀 MCP Hub</h1>
-            <p>Supabase MCP OAuth2 v3.1.0 - Self-Hosted</p>
+            <p>Serveurs MCP Multiples - Self-Hosted</p>
             <div class="status-badge">✅ Online</div>
         </div>
         
         <div class="stats">
             <div class="stat-card">
-                <div class="stat-number">1</div>
-                <div class="stat-label">Serveur MCP</div>
+                <div class="stat-number">2</div>
+                <div class="stat-label">Serveurs MCP</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">8</div>
+                <div class="stat-number">20</div>
                 <div class="stat-label">Outils Disponibles</div>
             </div>
             <div class="stat-card">
@@ -499,14 +499,27 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             
             <div class="card">
                 <h2>🛠️ Outils MCP</h2>
+                <h3>Supabase MCP Server</h3>
                 <div class="tool always-works">ping - Test ping simple</div>
                 <div class="tool always-works">test_connection - Test connexion MCP</div>
                 <div class="tool always-works">get_server_info - Infos serveur</div>
                 <div class="tool always-works">get_capabilities - Capacités serveur</div>
                 <div class="tool always-works">smithery_scan_test - Test Smithery</div>
-                <div class="tool">execute_sql - Exécution SQL OAuth2</div>
+                <div class="tool">execute_sql - Exécution SQL avancée</div>
                 <div class="tool">check_health - Santé base de données</div>
                 <div class="tool">list_tables - Liste des tables</div>
+                
+                <h3>File Manager MCP</h3>
+                <div class="tool always-works">read_file - Lecture de fichiers</div>
+                <div class="tool always-works">write_file - Écriture de fichiers</div>
+                <div class="tool always-works">compress_files - Compression d'archives</div>
+                <div class="tool always-works">search_files - Recherche de fichiers</div>
+                <div class="tool always-works">sync_directory - Synchronisation</div>
+                <div class="tool always-works">get_file_info - Infos fichiers</div>
+                <div class="tool always-works">create_directory - Création dossiers</div>
+                <div class="tool always-works">copy_files - Copie de fichiers</div>
+                <div class="tool always-works">move_files - Déplacement fichiers</div>
+                <div class="tool always-works">watch_directory - Surveillance</div>
             </div>
             
             <div class="card">
@@ -522,7 +535,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                 <p>✅ Mode simulation</p>
                 <p>✅ Gestion d'erreurs robuste</p>
                 <p>✅ Configuration flexible</p>
-                <p>✅ Support OAuth2 DDL</p>
+                <p>✅ Gestion base de données</p>
             </div>
             
             <div class="card">
@@ -537,7 +550,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         </div>
         
         <div class="footer">
-            <p>🚀 MCP Hub - Supabase MCP OAuth2 v3.1.0</p>
+            <p>🚀 MCP Hub - Serveurs MCP Multiples</p>
             <p>Self-hosted sur mcp.coupaul.fr | Compatible Smithery</p>
         </div>
     </div>
