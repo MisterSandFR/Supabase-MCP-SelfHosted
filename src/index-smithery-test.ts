@@ -28,6 +28,18 @@ export default async function createServer({ config }) {
         }
       },
       {
+        name: 'import_schema',
+        description: '🆕 v3.1.0 Import OAuth2 schemas with transaction safety',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            source: { type: 'string' },
+            enable_extensions: { type: 'array', items: { type: 'string' } }
+          },
+          required: ['source']
+        }
+      },
+      {
         name: 'list_tables',
         description: 'List database tables',
         inputSchema: {
