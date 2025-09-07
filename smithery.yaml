@@ -1,3 +1,3 @@
 runtime: "typescript"
-entry: "src/index-smithery-basic.ts"
+entry: "src/index-smithery-final.ts"
 dockerfile: "Dockerfile.smithery"
