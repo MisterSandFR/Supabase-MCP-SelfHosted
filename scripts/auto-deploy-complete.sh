@@ -156,19 +156,29 @@ test_server_connectivity() {
 apply_automatic_fixes() {
     log "🔧 Application de correctifs automatiques..."
     
-    # Correctif 1: Vérifier et corriger la configuration
+    # Correctif 1: Vérifier et corriger l'encodage UTF-8
+    if ! python -c "import ast; ast.parse(open('src/supabase_server.py', 'r', encoding='utf-8').read())" 2>/dev/null; then
+        log_warning "Correction de l'encodage UTF-8..."
+        # Ajouter l'encodage UTF-8 au début du fichier
+        if ! grep -q "# -*- coding: utf-8 -*-" src/supabase_server.py; then
+            sed -i '1i# -*- coding: utf-8 -*-' src/supabase_server.py
+            log_success "Encodage UTF-8 ajouté"
+        fi
+    fi
+    
+    # Correctif 2: Vérifier et corriger la configuration Smithery
     if ! grep -q "@smithery.server" src/supabase_server.py; then
         log_warning "Correction de la configuration Smithery..."
         # Ajouter le décorateur manquant
     fi
     
-    # Correctif 2: Vérifier les dépendances
+    # Correctif 3: Vérifier les dépendances
     if ! grep -q "mcp.server.fastmcp" src/supabase_server.py; then
         log_warning "Correction des imports FastMCP..."
         # Corriger les imports
     fi
     
-    # Correctif 3: Vérifier le build
+    # Correctif 4: Vérifier le build
     if ! npx smithery build; then
         log_warning "Correction du build Smithery..."
         # Appliquer des correctifs de build
