@@ -90,6 +90,29 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         else:
             self.send_404_response()
 
+    def do_HEAD(self):
+        """Support pour les requêtes HEAD"""
+        print(f"HEAD request to: {self.path}")
+        if self.path == '/health':
+            self.send_health_response()
+        elif self.path == '/mcp':
+            self.send_mcp_endpoint()
+        elif self.path == '/.well-known/mcp-config':
+            self.send_mcp_config()
+        elif self.path == '/api/servers':
+            self.send_servers_api()
+        elif self.path == '/api/tools':
+            self.send_tools_api()
+        elif self.path == '/' or self.path.startswith('/?config='):
+            if self.path.startswith('/?config='):
+                self.send_mcp_endpoint()
+            else:
+                self.send_hub_page()
+        elif self.path.startswith('/mcp/'):
+            self.send_mcp_endpoint()
+        else:
+            self.send_404_response()
+
     def send_health_response(self):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
