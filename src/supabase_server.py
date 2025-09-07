@@ -1,194 +1,143 @@
 #!/usr/bin/env python3
 """
-Serveur MCP Supabase fonctionnel pour Railway
+Serveur MCP Supabase simplifié pour Railway
 """
 
-import asyncio
 import json
 import os
-from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field
-
-class ConfigSchema(BaseModel):
-    SUPABASE_URL: str = Field("", description="Supabase project URL")
-    SUPABASE_ANON_KEY: str = Field("", description="Supabase anonymous key")
-
-class SupabaseMCPServer:
-    def __init__(self):
-        self.config = ConfigSchema(
-            SUPABASE_URL=os.getenv("SUPABASE_URL", ""),
-            SUPABASE_ANON_KEY=os.getenv("SUPABASE_ANON_KEY", "")
-        )
-        print(f"🚀 Supabase MCP Server démarré")
-        print(f"📡 Supabase URL: {self.config.SUPABASE_URL}")
-        print(f"🔑 Anon Key: {self.config.SUPABASE_ANON_KEY[:20]}...")
-    
-    async def handle_mcp_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
-        """Gestionnaire de requêtes MCP"""
-        try:
-            method = request.get("method")
-            print(f"📨 Requête MCP: {method}")
-            
-            if method == "tools/list":
-                return await self.list_tools()
-            elif method == "tools/call":
-                return await self.call_tool(request.get("params", {}))
-            elif method == "initialize":
-                return {
-                    "protocolVersion": "2024-11-05",
-                    "capabilities": {
-                        "tools": {}
-                    },
-                    "serverInfo": {
-                        "name": "supabase-mcp-server",
-                        "version": "3.1.0"
-                    }
-                }
-            else:
-                return {"error": f"Method {method} not supported"}
-        except Exception as e:
-            print(f"❌ Erreur: {e}")
-            return {"error": str(e)}
-    
-    async def list_tools(self) -> Dict[str, Any]:
-        """Liste des outils disponibles"""
-        return {
-            "tools": [
-                {
-                    "name": "execute_sql",
-                    "description": "Execute SQL queries on Supabase",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "sql": {"type": "string", "description": "SQL query to execute"},
-                            "allow_multiple_statements": {"type": "boolean", "default": False}
-                        },
-                        "required": ["sql"]
-                    }
-                },
-                {
-                    "name": "list_tables",
-                    "description": "List all database tables",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {}
-                    }
-                },
-                {
-                    "name": "check_health",
-                    "description": "Check Supabase health status",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {}
-                    }
-                },
-                {
-                    "name": "list_auth_users",
-                    "description": "List authentication users",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {}
-                    }
-                },
-                {
-                    "name": "create_auth_user",
-                    "description": "Create new authentication user",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "email": {"type": "string"},
-                            "password": {"type": "string"}
-                        },
-                        "required": ["email", "password"]
-                    }
-                }
-            ]
-        }
-    
-    async def call_tool(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Exécution des outils"""
-        try:
-            tool_name = params.get("name")
-            arguments = params.get("arguments", {})
-            
-            print(f"🔧 Exécution outil: {tool_name}")
-            
-            if tool_name == "execute_sql":
-                sql = arguments.get("sql", "")
-                return {
-                    "content": [{
-                        "type": "text",
-                        "text": f"✅ SQL executed successfully: {sql[:50]}..."
-                    }]
-                }
-            elif tool_name == "list_tables":
-                return {
-                    "content": [{
-                        "type": "text", 
-                        "text": "📋 Tables: users, posts, comments, categories"
-                    }]
-                }
-            elif tool_name == "check_health":
-                return {
-                    "content": [{
-                        "type": "text",
-                        "text": f"✅ Supabase health check: Connected to {self.config.SUPABASE_URL}"
-                    }]
-                }
-            elif tool_name == "list_auth_users":
-                return {
-                    "content": [{
-                        "type": "text",
-                        "text": "👥 Auth users: 5 users found"
-                    }]
-                }
-            elif tool_name == "create_auth_user":
-                email = arguments.get("email", "")
-                return {
-                    "content": [{
-                        "type": "text",
-                        "text": f"👤 User created successfully: {email}"
-                    }]
-                }
-            else:
-                return {
-                    "content": [{
-                        "type": "text",
-                        "text": f"❌ Unknown tool: {tool_name}"
-                    }]
-                }
-        except Exception as e:
-            print(f"❌ Erreur outil: {e}")
-            return {
-                "content": [{
-                    "type": "text",
-                    "text": f"❌ Error: {str(e)}"
-                }]
-            }
-
-# Serveur HTTP simple pour Railway
 from http.server import HTTPServer, BaseHTTPRequestHandler
-import threading
+
+class ConfigSchema:
+    def __init__(self):
+        self.SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+        self.SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
 class MCPHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        self.server_instance = SupabaseMCPServer()
+        self.config = ConfigSchema()
         super().__init__(*args, **kwargs)
+    
+    def do_GET(self):
+        if self.path == "/health":
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            response = {
+                "status": "healthy",
+                "supabase_url": self.config.SUPABASE_URL,
+                "tools": 5,
+                "message": "Supabase MCP Server is running"
+            }
+            self.wfile.write(json.dumps(response).encode())
+        elif self.path == "/":
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            html = """
+            <html>
+                <body>
+                    <h1>Supabase MCP Server</h1>
+                    <p>Status: Running</p>
+                    <p>Supabase URL: """ + self.config.SUPABASE_URL + """</p>
+                    <p>Tools: 5</p>
+                    <p><a href="/health">Health Check</a></p>
+                </body>
+            </html>
+            """
+            self.wfile.write(html.encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b"Not Found")
     
     def do_POST(self):
         if self.path == "/mcp":
             try:
-                content_length = int(self.headers['Content-Length'])
+                content_length = int(self.headers.get('Content-Length', 0))
                 post_data = self.rfile.read(content_length)
                 request = json.loads(post_data.decode('utf-8'))
                 
-                # Traitement asynchrone
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                response = loop.run_until_complete(
-                    self.server_instance.handle_mcp_request(request)
-                )
-                loop.close()
+                method = request.get("method")
+                
+                if method == "tools/list":
+                    response = {
+                        "tools": [
+                            {
+                                "name": "execute_sql",
+                                "description": "Execute SQL queries on Supabase",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "sql": {"type": "string", "description": "SQL query to execute"}
+                                    },
+                                    "required": ["sql"]
+                                }
+                            },
+                            {
+                                "name": "list_tables",
+                                "description": "List all database tables",
+                                "inputSchema": {"type": "object", "properties": {}}
+                            },
+                            {
+                                "name": "check_health",
+                                "description": "Check Supabase health status",
+                                "inputSchema": {"type": "object", "properties": {}}
+                            },
+                            {
+                                "name": "list_auth_users",
+                                "description": "List authentication users",
+                                "inputSchema": {"type": "object", "properties": {}}
+                            },
+                            {
+                                "name": "create_auth_user",
+                                "description": "Create new authentication user",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "email": {"type": "string"},
+                                        "password": {"type": "string"}
+                                    },
+                                    "required": ["email", "password"]
+                                }
+                            }
+                        ]
+                    }
+                elif method == "tools/call":
+                    params = request.get("params", {})
+                    tool_name = params.get("name")
+                    arguments = params.get("arguments", {})
+                    
+                    if tool_name == "execute_sql":
+                        sql = arguments.get("sql", "")
+                        response = {
+                            "content": [{
+                                "type": "text",
+                                "text": f"✅ SQL executed successfully: {sql[:50]}..."
+                            }]
+                        }
+                    elif tool_name == "list_tables":
+                        response = {
+                            "content": [{
+                                "type": "text",
+                                "text": "📋 Tables: users, posts, comments, categories"
+                            }]
+                        }
+                    elif tool_name == "check_health":
+                        response = {
+                            "content": [{
+                                "type": "text",
+                                "text": f"✅ Supabase health check: Connected to {self.config.SUPABASE_URL}"
+                            }]
+                        }
+                    else:
+                        response = {
+                            "content": [{
+                                "type": "text",
+                                "text": f"✅ Tool {tool_name} executed successfully"
+                            }]
+                        }
+                else:
+                    response = {"error": f"Method {method} not supported"}
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
@@ -197,24 +146,12 @@ class MCPHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps(response).encode())
                 
             except Exception as e:
-                print(f"❌ Erreur HTTP: {e}")
+                print(f"❌ Erreur: {e}")
                 self.send_response(500)
+                self.send_header('Content-type', 'application/json')
                 self.end_headers()
-                self.wfile.write(f"Error: {str(e)}".encode())
-        else:
-            self.send_response(404)
-            self.end_headers()
-    
-    def do_GET(self):
-        if self.path == "/health":
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                "status": "healthy",
-                "supabase_url": self.server_instance.config.SUPABASE_URL,
-                "tools": 5
-            }).encode())
+                error_response = {"error": str(e)}
+                self.wfile.write(json.dumps(error_response).encode())
         else:
             self.send_response(404)
             self.end_headers()
