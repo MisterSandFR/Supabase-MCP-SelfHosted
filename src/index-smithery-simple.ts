@@ -25,49 +25,13 @@ export default async function createServer({ config }) {
           },
           required: ['sql']
         }
-      },
-      {
-        name: 'list_tables',
-        description: 'List database tables',
-        inputSchema: {
-          type: 'object',
-          properties: {}
-        }
-      },
-      {
-        name: 'check_health',
-        description: 'Check database health',
-        inputSchema: {
-          type: 'object',
-          properties: {}
-        }
       }
     ]
   }));
 
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
-    const { name } = req.params;
-    
-    if (name === 'execute_sql') {
-      return {
-        content: [{ type: 'text', text: '✅ SQL executed successfully' }]
-      };
-    }
-    
-    if (name === 'list_tables') {
-      return {
-        content: [{ type: 'text', text: '📋 Tables listed successfully' }]
-      };
-    }
-    
-    if (name === 'check_health') {
-      return {
-        content: [{ type: 'text', text: '✅ Database health check passed' }]
-      };
-    }
-    
     return {
-      content: [{ type: 'text', text: `✅ ${name} executed` }]
+      content: [{ type: 'text', text: '✅ SQL executed successfully' }]
     };
   });
 

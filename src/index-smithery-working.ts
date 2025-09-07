@@ -33,14 +33,6 @@ export default async function createServer({ config }) {
           type: 'object',
           properties: {}
         }
-      },
-      {
-        name: 'check_health',
-        description: 'Check database health',
-        inputSchema: {
-          type: 'object',
-          properties: {}
-        }
       }
     ]
   }));
@@ -57,12 +49,6 @@ export default async function createServer({ config }) {
     if (name === 'list_tables') {
       return {
         content: [{ type: 'text', text: '📋 Tables listed successfully' }]
-      };
-    }
-    
-    if (name === 'check_health') {
-      return {
-        content: [{ type: 'text', text: '✅ Database health check passed' }]
       };
     }
     
