@@ -16,11 +16,14 @@ export default async function createServer({ config }) {
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: [
       {
-        name: 'hello',
-        description: 'Hello World test',
+        name: 'execute_sql',
+        description: 'Execute SQL queries',
         inputSchema: {
           type: 'object',
-          properties: {}
+          properties: {
+            sql: { type: 'string' }
+          },
+          required: ['sql']
         }
       }
     ]
@@ -28,7 +31,7 @@ export default async function createServer({ config }) {
 
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
     return {
-      content: [{ type: 'text', text: 'Hello OAuth2 v3.1.0!' }]
+      content: [{ type: 'text', text: '✅ SQL executed successfully' }]
     };
   });
 

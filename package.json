@@ -3,11 +3,11 @@
   "version": "3.1.0",
   "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management with OAuth2 support, advanced DDL operations, and comprehensive database automation",
   "main": "dist/index.js",
-  "module": "./src/index-smithery-test.ts",
+  "module": "./src/index-smithery-streamable.ts",
   "exports": {
-    ".": "./src/index-smithery-test.ts"
+    ".": "./src/index-smithery-streamable.ts"
   },
-  "types": "./src/index-smithery-test.ts",
+  "types": "./src/index-smithery-streamable.ts",
   "type": "commonjs",
   "repository": {
     "type": "git",
