@@ -1,11 +1,75 @@
-# Exclure les fichiers problématiques pour Smithery
-uv.lock
-pyproject.toml
+# Fichiers et dossiers à ignorer lors du build Docker
+
+# Git
+.git
+.gitignore
+
+# Node.js
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__
 *.pyc
-__pycache__/
-*.egg-info/
-.smithery/
-dist/
-node_modules/
-.DS_Store
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
 *.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+
+# Build artifacts
+dist/
+build/
+.smithery/
+
+# Documentation
+*.md
+docs/
+
+# Scripts de développement
+scripts/
+auto-smithery*.js
+smithery-*.json
+smithery-*.env
+smithery.yaml
+smithery.config.json
+
+# Tests
+test-*.md
+test-*.sh
+AUTO_COMMIT_CONFIG.md
