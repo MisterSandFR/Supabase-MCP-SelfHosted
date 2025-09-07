@@ -2,3 +2,5 @@ runtime: "python"
 version: "3.1.0"
 description: "Supabase MCP OAuth2 Server - Python Pure"
 dockerfile: "Dockerfile"
+build:
+  dockerfile: "Dockerfile"
