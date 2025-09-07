@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-src/supabase_server.py
-src/supabase_mcp_oauth2.egg-info/PKG-INFO
-src/supabase_mcp_oauth2.egg-info/SOURCES.txt
-src/supabase_mcp_oauth2.egg-info/dependency_links.txt
-src/supabase_mcp_oauth2.egg-info/entry_points.txt
-src/supabase_mcp_oauth2.egg-info/requires.txt
-src/supabase_mcp_oauth2.egg-info/top_level.txt
