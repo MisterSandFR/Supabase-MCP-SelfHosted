@@ -4,6 +4,7 @@
 - Configuration automatique après chaque commit
 - Déploiement instantané via Smithery
 - Workflow 100% automatisé
+- **🚀 DÉPLOIEMENT ACTIF** - Serveur MCP opérationnel !
 
 [![smithery badge](https://smithery.ai/badge/@MisterSandFR/supabase-mcp-selfhosted)](https://smithery.ai/server/@MisterSandFR/supabase-mcp-selfhosted)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
