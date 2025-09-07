@@ -1,30 +1,38 @@
-# Use Python 3.12 slim image
+# Dockerfile pour Supabase MCP OAuth2 v3.1.0
+# Configuration Python pure sans uv
 FROM python:3.12-slim
 
-# Set working directory
+# Métadonnées
+LABEL maintainer="MisterSandFR"
+LABEL version="3.1.0"
+LABEL description="Supabase MCP OAuth2 Server"
+
+# Définir le répertoire de travail
 WORKDIR /app
 
-# Install system dependencies
+# Installer les dépendances système
 RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements files
+# Copier le fichier requirements
 COPY requirements.txt ./
 
-# Install dependencies using pip
+# Installer les dépendances Python avec pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy source code
+# Copier le code source
 COPY src ./src
 
-# Create non-root user for security
+# Créer un utilisateur non-root pour la sécurité
 RUN useradd --create-home --shell /bin/bash app && \
     chown -R app:app /app
+
+# Passer à l'utilisateur non-root
 USER app
 
-# Set Python path
+# Définir le chemin Python
 ENV PYTHONPATH=/app
 
-# Entrypoint for MCP server
+# Point d'entrée pour le serveur MCP
 ENTRYPOINT ["python", "src/supabase_server.py"]
