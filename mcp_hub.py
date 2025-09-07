@@ -14,6 +14,7 @@ from datetime import datetime
 
 class MCPHubHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        print(f"GET request to: {self.path}")
         if self.path == '/health':
             self.send_health_response()
         elif self.path == '/mcp':
@@ -24,10 +25,14 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             self.send_tools_api()
         elif self.path == '/':
             self.send_hub_page()
+        elif self.path.startswith('/mcp/'):
+            # Support pour les sous-endpoints MCP
+            self.send_mcp_endpoint()
         else:
             self.send_404_response()
 
     def do_POST(self):
+        print(f"POST request to: {self.path}")
         if self.path == '/mcp':
             # Lire le body de la requête POST
             content_length = int(self.headers.get('Content-Length', 0))
@@ -35,6 +40,24 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                 post_data = self.rfile.read(content_length)
                 print(f"POST /mcp - Body: {post_data.decode('utf-8', errors='ignore')}")
             self.send_mcp_endpoint()
+        elif self.path.startswith('/mcp/'):
+            # Support pour les sous-endpoints MCP
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                print(f"POST {self.path} - Body: {post_data.decode('utf-8', errors='ignore')}")
+            self.send_mcp_endpoint()
+        else:
+            self.send_404_response()
+
+    def do_OPTIONS(self):
+        print(f"OPTIONS request to: {self.path}")
+        if self.path == '/mcp' or self.path.startswith('/mcp/'):
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.end_headers()
         else:
             self.send_404_response()
 
@@ -686,10 +709,11 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         self.wfile.write(html_content.encode())
 
     def send_404_response(self):
+        print(f"404 - Path not found: {self.path}")
         self.send_response(404)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write(b"<h1>404 - Page not found</h1><p><a href='/'>Back to hub</a></p>")
+        self.wfile.write(f"<h1>404 - Page not found</h1><p>Path: {self.path}</p><p><a href='/'>Back to hub</a></p>".encode())
 
     def log_message(self, format, *args):
         pass
