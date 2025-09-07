@@ -27,6 +27,17 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         else:
             self.send_404_response()
 
+    def do_POST(self):
+        if self.path == '/mcp':
+            # Lire le body de la requête POST
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                print(f"POST /mcp - Body: {post_data.decode('utf-8', errors='ignore')}")
+            self.send_mcp_endpoint()
+        else:
+            self.send_404_response()
+
     def send_health_response(self):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
@@ -42,53 +53,61 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(response, indent=2).encode())
 
     def send_mcp_endpoint(self):
-        """Endpoint MCP pour Smithery"""
+        """Endpoint MCP pour Smithery - Support GET et POST"""
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
+        
         mcp_info = {
-            "name": "Supabase MCP Server v3.1.0",
-            "version": "3.1.0",
-            "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management",
-            "capabilities": {
-                "tools": True,
-                "resources": False,
-                "prompts": False
-            },
-            "tools": [
-                {
-                    "name": "ping",
-                    "description": "Simple ping test for Smithery scanning - Always works"
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": {
+                "name": "Supabase MCP Server v3.1.0",
+                "version": "3.1.0",
+                "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management",
+                "capabilities": {
+                    "tools": True,
+                    "resources": False,
+                    "prompts": False
                 },
-                {
-                    "name": "test_connection",
-                    "description": "Test MCP server connection for Smithery scanning"
-                },
-                {
-                    "name": "get_server_info",
-                    "description": "Get server information and capabilities"
-                },
-                {
-                    "name": "get_capabilities",
-                    "description": "Get server capabilities for Smithery scanning"
-                },
-                {
-                    "name": "smithery_scan_test",
-                    "description": "Special tool for Smithery scanning compatibility"
-                },
-                {
-                    "name": "execute_sql",
-                    "description": "Enhanced SQL with advanced database management"
-                },
-                {
-                    "name": "check_health",
-                    "description": "Check database health and connectivity"
-                },
-                {
-                    "name": "list_tables",
-                    "description": "List database tables and schemas"
-                }
-            ]
+                "tools": [
+                    {
+                        "name": "ping",
+                        "description": "Simple ping test for Smithery scanning - Always works"
+                    },
+                    {
+                        "name": "test_connection",
+                        "description": "Test MCP server connection for Smithery scanning"
+                    },
+                    {
+                        "name": "get_server_info",
+                        "description": "Get server information and capabilities"
+                    },
+                    {
+                        "name": "get_capabilities",
+                        "description": "Get server capabilities for Smithery scanning"
+                    },
+                    {
+                        "name": "smithery_scan_test",
+                        "description": "Special tool for Smithery scanning compatibility"
+                    },
+                    {
+                        "name": "execute_sql",
+                        "description": "Enhanced SQL with advanced database management"
+                    },
+                    {
+                        "name": "check_health",
+                        "description": "Check database health and connectivity"
+                    },
+                    {
+                        "name": "list_tables",
+                        "description": "List database tables and schemas"
+                    }
+                ]
+            }
         }
         self.wfile.write(json.dumps(mcp_info, indent=2).encode())
 
