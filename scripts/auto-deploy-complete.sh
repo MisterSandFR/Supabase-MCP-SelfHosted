@@ -96,7 +96,12 @@ check_railway_deployment() {
     
     if [ -z "$RAILWAY_PROJECT_ID" ]; then
         log_warning "RAILWAY_PROJECT_ID non configuré. Tentative de détection..."
-        RAILWAY_PROJECT_ID=$(railway status --json | jq -r '.project.id' 2>/dev/null || echo "")
+        # Détecter le projet Railway depuis le statut
+        RAILWAY_PROJECT_NAME=$(railway status 2>/dev/null | grep "Project:" | cut -d' ' -f2 || echo "")
+        if [ ! -z "$RAILWAY_PROJECT_NAME" ]; then
+            log_success "Projet Railway détecté: $RAILWAY_PROJECT_NAME"
+            RAILWAY_PROJECT_ID="$RAILWAY_PROJECT_NAME"
+        fi
     fi
     
     if [ -z "$RAILWAY_PROJECT_ID" ]; then
@@ -109,9 +114,18 @@ check_railway_deployment() {
     while [ $retry_count -lt $MAX_RETRIES ]; do
         log "Tentative $((retry_count + 1))/$MAX_RETRIES - Vérification Railway..."
         
-        if railway status --project $RAILWAY_PROJECT_ID | grep -q "deployed"; then
-            log_success "Déploiement Railway réussi"
-            return 0
+        # Vérifier si le service est actif
+        if railway status | grep -q "Service:"; then
+            log_success "Service Railway actif"
+            
+            # Déclencher un déploiement si nécessaire
+            log "Déclenchement du déploiement Railway..."
+            if railway up --detach; then
+                log_success "Déploiement Railway déclenché"
+                return 0
+            else
+                log_warning "Échec du déploiement Railway"
+            fi
         fi
         
         log_warning "Déploiement Railway en cours... Attente $RETRY_DELAY secondes"
