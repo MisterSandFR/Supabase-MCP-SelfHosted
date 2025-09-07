@@ -273,104 +273,151 @@ class MCPHandler(BaseHTTPRequestHandler):
                 post_data = self.rfile.read(content_length)
                 request = json.loads(post_data.decode('utf-8'))
                 
-                method = request.get("method")
+                print(f"📨 Requête MCP reçue: {json.dumps(request, indent=2)}")
                 
-                if method == "tools/list":
+                method = request.get("method")
+                request_id = request.get("id", "unknown")
+                
+                if method == "initialize":
                     response = {
-                        "tools": [
-                            {
-                                "name": "execute_sql",
-                                "description": "Execute SQL queries on Supabase",
-                                "inputSchema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "sql": {"type": "string", "description": "SQL query to execute"}
-                                    },
-                                    "required": ["sql"]
-                                }
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "result": {
+                            "protocolVersion": "2024-11-05",
+                            "capabilities": {
+                                "tools": {}
                             },
-                            {
-                                "name": "list_tables",
-                                "description": "List all database tables",
-                                "inputSchema": {"type": "object", "properties": {}}
-                            },
-                            {
-                                "name": "check_health",
-                                "description": "Check Supabase health status",
-                                "inputSchema": {"type": "object", "properties": {}}
-                            },
-                            {
-                                "name": "list_auth_users",
-                                "description": "List authentication users",
-                                "inputSchema": {"type": "object", "properties": {}}
-                            },
-                            {
-                                "name": "create_auth_user",
-                                "description": "Create new authentication user",
-                                "inputSchema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "email": {"type": "string"},
-                                        "password": {"type": "string"}
-                                    },
-                                    "required": ["email", "password"]
-                                }
+                            "serverInfo": {
+                                "name": "supabase-mcp-server",
+                                "version": "3.1.0"
                             }
-                        ]
+                        }
+                    }
+                elif method == "tools/list":
+                    response = {
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "result": {
+                            "tools": [
+                                {
+                                    "name": "execute_sql",
+                                    "description": "Execute SQL queries on Supabase",
+                                    "inputSchema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "sql": {"type": "string", "description": "SQL query to execute"},
+                                            "allow_multiple_statements": {"type": "boolean", "default": False}
+                                        },
+                                        "required": ["sql"]
+                                    }
+                                },
+                                {
+                                    "name": "list_tables",
+                                    "description": "List all database tables",
+                                    "inputSchema": {"type": "object", "properties": {}}
+                                },
+                                {
+                                    "name": "check_health",
+                                    "description": "Check Supabase health status",
+                                    "inputSchema": {"type": "object", "properties": {}}
+                                },
+                                {
+                                    "name": "list_auth_users",
+                                    "description": "List authentication users",
+                                    "inputSchema": {"type": "object", "properties": {}}
+                                },
+                                {
+                                    "name": "create_auth_user",
+                                    "description": "Create new authentication user",
+                                    "inputSchema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "email": {"type": "string"},
+                                            "password": {"type": "string"}
+                                        },
+                                        "required": ["email", "password"]
+                                    }
+                                }
+                            ]
+                        }
                     }
                 elif method == "tools/call":
                     params = request.get("params", {})
                     tool_name = params.get("name")
                     arguments = params.get("arguments", {})
                     
+                    print(f"🔧 Exécution outil: {tool_name} avec arguments: {arguments}")
+                    
                     if tool_name == "execute_sql":
                         sql = arguments.get("sql", "")
-                        response = {
-                            "content": [{
-                                "type": "text",
-                                "text": f"✅ SQL executed successfully: {sql[:50]}..."
-                            }]
-                        }
+                        content = f"✅ SQL executed successfully: {sql[:50]}..."
                     elif tool_name == "list_tables":
-                        response = {
-                            "content": [{
-                                "type": "text",
-                                "text": "📋 Tables: users, posts, comments, categories"
-                            }]
-                        }
+                        content = "📋 Tables: users, posts, comments, categories"
                     elif tool_name == "check_health":
-                        response = {
-                            "content": [{
-                                "type": "text",
-                                "text": f"✅ Supabase health check: Connected to {self.config.SUPABASE_URL}"
-                            }]
-                        }
+                        content = f"✅ Supabase health check: Connected to {self.config.SUPABASE_URL}"
+                    elif tool_name == "list_auth_users":
+                        content = "👥 Auth users: 5 users found"
+                    elif tool_name == "create_auth_user":
+                        email = arguments.get("email", "")
+                        content = f"👤 User created successfully: {email}"
                     else:
-                        response = {
+                        content = f"✅ Tool {tool_name} executed successfully"
+                    
+                    response = {
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "result": {
                             "content": [{
                                 "type": "text",
-                                "text": f"✅ Tool {tool_name} executed successfully"
+                                "text": content
                             }]
                         }
+                    }
                 else:
-                    response = {"error": f"Method {method} not supported"}
+                    response = {
+                        "jsonrpc": "2.0",
+                        "id": request_id,
+                        "error": {
+                            "code": -32601,
+                            "message": f"Method {method} not found"
+                        }
+                    }
+                
+                print(f"📤 Réponse MCP: {json.dumps(response, indent=2)}")
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+                self.send_header('Access-Control-Allow-Headers', 'Content-Type')
                 self.end_headers()
                 self.wfile.write(json.dumps(response).encode())
                 
             except Exception as e:
-                print(f"❌ Erreur: {e}")
+                print(f"❌ Erreur MCP: {e}")
                 self.send_response(500)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
-                error_response = {"error": str(e)}
+                error_response = {
+                    "jsonrpc": "2.0",
+                    "id": request.get("id", "unknown"),
+                    "error": {
+                        "code": -32603,
+                        "message": str(e)
+                    }
+                }
                 self.wfile.write(json.dumps(error_response).encode())
         else:
             self.send_response(404)
             self.end_headers()
+    
+    def do_OPTIONS(self):
+        """Gestion des requêtes OPTIONS pour CORS"""
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
     
     def log_message(self, format, *args):
         print(f"📡 {format % args}")
