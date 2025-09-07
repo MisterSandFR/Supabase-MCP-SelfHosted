@@ -136,7 +136,7 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
             self.wfile.write(b"Not Found")
     
     def do_POST(self):
-        if self.path == "/" or self.path.startswith("/?config="):
+        if self.path == "/" or self.path.startswith("/?config=") or self.path.startswith("/mcp?config="):
             # Gestion des requêtes POST sur la racine avec config
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
@@ -224,7 +224,7 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 error = {"error": str(e)}
                 self.wfile.write(json.dumps(error).encode())
-        elif self.path == "/mcp":
+        elif self.path == "/mcp" or self.path.startswith("/mcp?"):
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
                 post_data = self.rfile.read(content_length)
