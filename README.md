@@ -3,15 +3,16 @@
 [![smithery badge](https://smithery.ai/badge/@MisterSandFR/supabase-mcp-selfhosted)](https://smithery.ai/server/@MisterSandFR/supabase-mcp-selfhosted)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Security: Enhanced](https://img.shields.io/badge/Security-Enhanced-green.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/wiki/Security-Guide)
-[![Version: 3.0.0](https://img.shields.io/badge/Version-3.0.0-blue.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/releases)
-[![Tools: 50+](https://img.shields.io/badge/Tools-50%2B-brightgreen.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp#features)
+[![Version: 3.1.0](https://img.shields.io/badge/Version-3.1.0-blue.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp/releases)
+[![Tools: 12 Core + 50+](https://img.shields.io/badge/Tools-12%20Core%20%2B%2050%2B-brightgreen.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp#features)
+[![OAuth2: Ready](https://img.shields.io/badge/OAuth2-Ready-success.svg)](https://github.com/MisterSandFR/selfhosted-supabase-mcp#oauth2)
 [![Node: 18+](https://img.shields.io/badge/Node-18%2B-brightgreen.svg)](https://nodejs.org)
 
 > 🚀 **Complete Autonomy Edition** - **50+ MCP tools for 100% autonomous Supabase management!** A production-ready fork of the original [selfhosted-supabase-mcp](https://github.com/HenkDz/selfhosted-supabase-mcp) by [@HenkDz](https://github.com/HenkDz) with comprehensive security improvements, complete automation tools, and enterprise-grade features for self-hosted deployments.
 
 ## 🌟 Overview
 
-The **most comprehensive** [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol/specification) server for **self-hosted Supabase instances**. Version 3.0 introduces **19 NEW TOOLS** bringing the total to **50+ tools** for complete autonomous control over every aspect of your Supabase infrastructure.
+The **most comprehensive** [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol/specification) server for **self-hosted Supabase instances**. Version 3.1 introduces **5 ENHANCED TOOLS** with **OAuth2 support** and **advanced DDL operations** for complete autonomous control over complex Supabase deployments.
 
 Built upon the solid foundation created by [@HenkDz](https://github.com/HenkDz), this enhanced edition provides:
 - 🔐 **Complete Security Management** - RLS, roles, policies, audit trails
@@ -20,16 +21,16 @@ Built upon the solid foundation created by [@HenkDz](https://github.com/HenkDz),
 - 📊 **Advanced Monitoring** - Real-time metrics, performance analysis, alerting
 - 🔧 **100% Autonomous Operations** - No manual intervention needed!
 
-### Why Choose the Complete Autonomy Edition?
+### Why Choose the Enhanced Edition v3.1?
 
-- ✅ **50+ Comprehensive Tools** - Complete control over your Supabase instance
-- 🤖 **100% Autonomous** - Manage everything via MCP, no manual SQL needed
-- 🛡️ **Enterprise Security** - Advanced RLS, audit trails, security scanning
-- ⚡ **Performance Optimized** - Auto-indexing, query optimization, caching
-- 🔄 **Smart Migrations** - Breaking change detection, auto-rollback
-- 📈 **Real-time Monitoring** - Metrics dashboard, alerting, performance tracking
-- 🐳 **Docker Ready** - Full container management for self-hosted setups
-- 🚀 **Production Ready** - Battle-tested with enterprise deployments
+- ✅ **OAuth2 Ready** - Complete OAuth2 system deployment in one command
+- 🚀 **DDL Multi-statements** - Complex schema operations without manual intervention
+- 🔧 **PostgreSQL Native** - Direct psql access with advanced formatting
+- 📊 **TypeScript Generation** - Automatic type generation from schema
+- 🛡️ **Advanced Migrations** - Validation, dry-run, and rollback support
+- 🤖 **100% Autonomous** - Deploy complex systems via MCP only
+- 🎯 **12 Core Tools** - Essential tools available via Smithery
+- 🔒 **Production Ready** - Battle-tested with complex deployments
 
 ## 📦 Installation
 
@@ -93,18 +94,16 @@ npm start -- --url YOUR_SUPABASE_URL --anon-key YOUR_ANON_KEY
 
 ## 🆕 New in Version 3.1.0 - Enhanced OAuth2 & DDL Support!
 
-### 🎯 23 NEW TOOLS for 100% Autonomous Management
+### 🎯 5 MAJOR ENHANCED TOOLS for OAuth2 & Complex Deployments
 
-#### 🔧 Enhanced Core Tools (4 MAJOR IMPROVEMENTS)
+#### 🔧 Core Enhanced Tools (OAuth2-Ready)
 - **execute_sql** - Enhanced with multi-statement DDL support for complex operations
 - **apply_migration** - Advanced migration system with validation, dry-run, and rollback
 - **inspect_schema** - Complete schema inspection with TypeScript generation
 - **import_schema** - NEW! Import complete SQL schemas with transaction safety
-
-#### 🆕 Direct PostgreSQL Access (1 NEW TOOL)
 - **execute_psql** - NEW! Native psql command execution with advanced formatting
 
-### 🎯 19 EXISTING TOOLS for Complete Management
+### 🎯 50+ TOTAL TOOLS Available (12 Core Tools on Smithery)
 
 #### 🔐 Security & Access Control (NEW!)
 - **manage_rls_policies** - Complete RLS policy management with templates
@@ -134,16 +133,26 @@ npm start -- --url YOUR_SUPABASE_URL --anon-key YOUR_ANON_KEY
 - **manage_secrets** - Secrets and environment variables
 - **manage_storage_policies** - Storage bucket security
 
-## 🛠️ Complete Tool Reference (54+ Tools)
+## 🛠️ Tool Reference
 
-### 🔧 Enhanced Core Database Operations
+### 🔧 Core Enhanced Tools (Available on Smithery)
 | Tool | Description | Status |
 |------|-------------|---------|
-| `execute_sql` | **ENHANCED** - Execute SQL with multi-statement DDL support | 🆕 v3.1 |
+| `execute_sql` | **ENHANCED** - Execute SQL with multi-statement DDL support for OAuth2 | 🆕 v3.1 |
 | `import_schema` | **NEW** - Import complete SQL schemas with transaction safety | 🆕 v3.1 |
 | `execute_psql` | **NEW** - Direct psql access with native PostgreSQL features | 🆕 v3.1 |
 | `inspect_schema` | **ENHANCED** - Complete schema inspection + TypeScript generation | 🆕 v3.1 |
 | `apply_migration` | **ENHANCED** - Advanced migrations with validation & rollback | 🆕 v3.1 |
+| `list_tables` | List database tables and schemas | Core |
+| `check_health` | Comprehensive Supabase health monitoring | Core |
+| `list_auth_users` | List authentication users with pagination | Core |
+| `create_auth_user` | Create new authentication users | Core |
+| `manage_extensions` | PostgreSQL extension management | Core |
+| `generate_typescript_types` | Generate TypeScript from schema | Core |
+| `backup_database` | Create database backups | Core |
+
+### 🎯 Additional 50+ Tools Available via Direct Installation
+The full MCP server includes 50+ additional tools for complete Supabase management. Install locally for access to all tools:
 
 ### 🔐 Security & Access Control
 | Tool | Description |
@@ -233,29 +242,31 @@ npm start -- --url YOUR_SUPABASE_URL --anon-key YOUR_ANON_KEY
 ```javascript
 // NEW v3.1: Complete OAuth2 schema deployment in one command
 await mcp.import_schema({
-  source: "./oauth2_complete_schema.sql",
+  source: "CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE TABLE oauth2_clients (...);",
+  source_type: "content",
   enable_extensions: ["pgcrypto", "uuid-ossp"],
-  transaction: true,
-  validate_before: true
+  transaction: true
+})
+
+// NEW v3.1: Multi-statement DDL operations  
+await mcp.execute_sql({
+  sql: `
+    CREATE EXTENSION IF NOT EXISTS pgcrypto;
+    CREATE TABLE oauth2_clients (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      client_id VARCHAR(255) UNIQUE NOT NULL,
+      client_secret VARCHAR(255) NOT NULL
+    );
+  `,
+  allow_multiple_statements: true
 })
 
 // NEW v3.1: Advanced migration with validation
 await mcp.apply_migration({
   version: "20250106120000",
-  file: "./oauth2_migration.sql",
+  sql: "CREATE TABLE oauth2_tokens (...);",
   dry_run: true,
-  validate_before: true,
-  rollback_sql: "DROP TABLE IF EXISTS oauth2_clients CASCADE;"
-})
-
-// NEW v3.1: Multi-statement DDL operations
-await mcp.execute_sql({
-  sql: `
-    CREATE EXTENSION IF NOT EXISTS pgcrypto;
-    CREATE TABLE oauth2_clients (...);
-    CREATE FUNCTION generate_oauth2_client_secret() RETURNS TEXT ...;
-  `,
-  allow_multiple_statements: true
+  validate_before: true
 })
 ```
 
@@ -263,15 +274,14 @@ await mcp.execute_sql({
 ```javascript
 // NEW v3.1: Complete schema inspection with TypeScript generation
 await mcp.inspect_schema({
-  schema_name: "public",
-  include: ["tables", "functions", "policies", "constraints"],
-  format: "typescript",
-  include_statistics: true
+  schema_name: "public", 
+  include: ["tables", "functions"],
+  format: "typescript"
 })
 
-// NEW v3.1: Direct psql access for advanced operations
+// NEW v3.1: Direct psql access
 await mcp.execute_psql({
-  command: "describe",
+  command: "list_tables",
   output_format: "json"
 })
 ```
