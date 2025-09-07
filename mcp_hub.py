@@ -19,7 +19,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             self.send_health_response()
         elif self.path == '/mcp':
             self.send_mcp_endpoint()
-        elif self.path == '/.well-known/mcp-config':
+        elif self.path == '/.well-known/mcp-config' or self.path.startswith('/.well-known/mcp-config?'):
             self.send_mcp_config()
         elif self.path == '/api/servers':
             self.send_servers_api()
@@ -80,7 +80,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         print(f"OPTIONS request to: {self.path}")
         if (self.path == '/mcp' or self.path.startswith('/mcp/') or 
-            self.path == '/.well-known/mcp-config' or 
+            self.path == '/.well-known/mcp-config' or self.path.startswith('/.well-known/mcp-config?') or 
             self.path == '/' or self.path.startswith('/?config=')):
             self.send_response(200)
             self.send_header('Access-Control-Allow-Origin', '*')
@@ -97,7 +97,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             self.send_health_response()
         elif self.path == '/mcp':
             self.send_mcp_endpoint()
-        elif self.path == '/.well-known/mcp-config':
+        elif self.path == '/.well-known/mcp-config' or self.path.startswith('/.well-known/mcp-config?'):
             self.send_mcp_config()
         elif self.path == '/api/servers':
             self.send_servers_api()
