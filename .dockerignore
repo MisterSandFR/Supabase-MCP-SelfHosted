@@ -1,0 +1,11 @@
+# Exclure les fichiers problématiques pour Smithery
+uv.lock
+pyproject.toml
+*.pyc
+__pycache__/
+*.egg-info/
+.smithery/
+dist/
+node_modules/
+.DS_Store
+*.log
