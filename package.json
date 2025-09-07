@@ -8,7 +8,12 @@
   "scripts": {
     "dev": "python src/supabase_server.py",
     "start": "python src/supabase_server.py",
-    "build": "tsc && node dist/index.js"
+    "build": "tsc && node dist/index.js",
+    "auto-commit": "node scripts/auto-commit-watcher.js",
+    "auto-push": "git add . && git commit -m \"🤖 Auto-commit: $(date)\" && git push origin main",
+    "smithery-build": "npx smithery build",
+    "full-auto": "npm run auto-push && npm run smithery-build",
+    "watch": "npm run auto-commit"
   },
   "dependencies": {
     "@types/node": "^20.0.0"
