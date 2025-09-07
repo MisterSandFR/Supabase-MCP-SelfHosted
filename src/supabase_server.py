@@ -84,20 +84,26 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                     <div class="header">
                         <h1>🚀 MCP Hub</h1>
                         <p>Centre de contrôle de tous mes serveurs MCP</p>
-                        <p>Développé par <strong>@MisterSandFR</strong></p>
+                        <p><strong>Supabase Self-Hosted</strong> • Développé par <strong>@MisterSandFR</strong></p>
                     </div>
                     
                     <div class="servers-grid">
                         <div class="server-card">
                             <div class="server-header">
                                 <div class="server-icon">🗄️</div>
-                                <h3 class="server-title">Supabase MCP</h3>
+                                <h3 class="server-title">Supabase MCP Self-Hosted</h3>
                                 <span class="server-status">En ligne</span>
                             </div>
                             
                             <div class="server-description">
-                                Serveur MCP pour la gestion complète de Supabase. 
-                                Exécution SQL, gestion des utilisateurs, monitoring et plus.
+                                <strong>Serveur MCP Self-Hosted</strong> pour la gestion complète de votre instance Supabase privée. 
+                                Exécution SQL, gestion des utilisateurs, monitoring et plus. 
+                                <br><br>
+                                <strong>🔒 Avantages Self-Hosted :</strong>
+                                <br>• Instance Supabase privée et sécurisée
+                                <br>• Aucune dépendance aux services externes
+                                <br>• Contrôle total de vos données
+                                <br>• Performance optimisée
                             </div>
                             
                             <div class="server-actions">
@@ -115,8 +121,9 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                     </div>
                     
                     <div class="footer">
-                        <p>🌐 <strong>mcp.coupaul.fr</strong> - Hub MCP de @MisterSandFR</p>
-                        <p>Serveurs MCP auto-hébergés sur Railway</p>
+                        <p>🌐 <strong>mcp.coupaul.fr</strong> - Hub MCP Self-Hosted de @MisterSandFR</p>
+                        <p><strong>Supabase Self-Hosted</strong> • Serveurs MCP auto-hébergés sur Railway</p>
+                        <p><em>Instance Supabase privée • 100% sécurisé • Aucune dépendance externe</em></p>
                     </div>
                 </div>
             </body>
