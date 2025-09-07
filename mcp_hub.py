@@ -455,7 +455,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         self.send_response(404)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write(b"<h1>404 - Page non trouvée</h1><p><a href='/'>Retour au hub</a></p>")
+        self.wfile.write(b"<h1>404 - Page not found</h1><p><a href='/'>Back to hub</a></p>")
 
     def log_message(self, format, *args):
         pass
