@@ -25,7 +25,8 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             self.send_servers_api()
         elif self.path == '/api/tools':
             self.send_tools_api()
-        elif self.path == '/':
+        elif self.path == '/' or self.path.startswith('/?config='):
+            # Support pour l'endpoint racine avec paramètres config
             self.send_hub_page()
         elif self.path.startswith('/mcp/'):
             # Support pour les sous-endpoints MCP
@@ -49,6 +50,13 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                 post_data = self.rfile.read(content_length)
                 print(f"POST /.well-known/mcp-config - Body: {post_data.decode('utf-8', errors='ignore')}")
             self.send_mcp_config()
+        elif self.path == '/' or self.path.startswith('/?config='):
+            # Support POST pour l'endpoint racine avec paramètres config
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                print(f"POST {self.path} - Body: {post_data.decode('utf-8', errors='ignore')}")
+            self.send_hub_page()
         elif self.path.startswith('/mcp/'):
             # Support pour les sous-endpoints MCP
             content_length = int(self.headers.get('Content-Length', 0))
@@ -61,7 +69,9 @@ class MCPHubHandler(BaseHTTPRequestHandler):
 
     def do_OPTIONS(self):
         print(f"OPTIONS request to: {self.path}")
-        if self.path == '/mcp' or self.path.startswith('/mcp/') or self.path == '/.well-known/mcp-config':
+        if (self.path == '/mcp' or self.path.startswith('/mcp/') or 
+            self.path == '/.well-known/mcp-config' or 
+            self.path == '/' or self.path.startswith('/?config=')):
             self.send_response(200)
             self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
