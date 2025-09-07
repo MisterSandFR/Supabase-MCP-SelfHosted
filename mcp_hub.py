@@ -1060,14 +1060,11 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(servers, indent=2).encode())
 
     def get_tools_list(self):
-        """Récupérer la liste des outils depuis tools/list"""
+        """Récupérer la liste des outils optimisée - Suppression des doublons et outils inutiles"""
         return [
             # === OUTILS DE BASE ===
-            {"name": "ping", "description": "Simple ping test for Smithery scanning - Always works"},
-            {"name": "test_connection", "description": "Test MCP server connection for Smithery scanning"},
+            {"name": "ping", "description": "Simple ping test for server connectivity"},
             {"name": "get_server_info", "description": "Get server information and capabilities"},
-            {"name": "get_capabilities", "description": "Get server capabilities for Smithery scanning"},
-            {"name": "smithery_scan_test", "description": "Special tool for Smithery scanning compatibility"},
             
             # === GESTION DE BASE DE DONNÉES ===
             {"name": "execute_sql", "description": "Execute SQL queries with advanced database management"},
@@ -1082,6 +1079,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             {"name": "list_migrations", "description": "List all database migrations"},
             {"name": "push_migrations", "description": "Push migrations to remote database"},
             {"name": "validate_migration", "description": "Validate migration before applying"},
+            {"name": "smart_migration", "description": "Smart migration with conflict resolution"},
             
             # === AUTHENTIFICATION ===
             {"name": "create_auth_user", "description": "Create a new authenticated user"},
@@ -1103,10 +1101,8 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             {"name": "list_extensions", "description": "List installed PostgreSQL extensions"},
             {"name": "manage_extensions", "description": "Manage PostgreSQL extensions"},
             
-            # === FONCTIONS ===
+            # === FONCTIONS & TRIGGERS ===
             {"name": "manage_functions", "description": "Manage database functions"},
-            
-            # === TRIGGERS ===
             {"name": "manage_triggers", "description": "Manage database triggers"},
             
             # === RÔLES ===
@@ -1132,31 +1128,22 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             {"name": "auto_create_indexes", "description": "Automatically create missing indexes"},
             {"name": "vacuum_analyze", "description": "Run VACUUM ANALYZE on database"},
             
-            # === BACKUP & RESTORE ===
+            # === BACKUP ===
             {"name": "backup_database", "description": "Create database backup"},
             
             # === CACHE ===
             {"name": "cache_management", "description": "Manage application cache"},
             
-            # === ENVIRONNEMENT ===
-            {"name": "environment_management", "description": "Manage environment variables"},
-            
             # === SECRETS ===
             {"name": "manage_secrets", "description": "Manage application secrets"},
-            
-            # === DOCKER ===
-            {"name": "manage_docker", "description": "Manage Docker containers"},
             
             # === UTILITAIRES ===
             {"name": "get_project_url", "description": "Get project URL"},
             {"name": "get_anon_key", "description": "Get anonymous key"},
             {"name": "get_service_key", "description": "Get service role key"},
             {"name": "get_database_connections", "description": "Get database connection info"},
-            {"name": "sync_schema", "description": "Sync database schema"},
-            {"name": "import_schema", "description": "Import database schema"},
-            {"name": "rebuild_hooks", "description": "Rebuild database hooks"},
-            {"name": "smart_migration", "description": "Smart migration with conflict resolution"},
-            {"name": "auto_migrate", "description": "Automatically migrate database"},
+            
+            # === GÉNÉRATION ===
             {"name": "generate_crud_api", "description": "Generate CRUD API for table"},
             {"name": "generate_typescript_types", "description": "Generate TypeScript types from schema"}
         ]
@@ -1164,14 +1151,12 @@ class MCPHubHandler(BaseHTTPRequestHandler):
     def get_tool_category(self, tool_name):
         """Déterminer la catégorie d'un outil"""
         categories = {
-            "ping": "utility", "test_connection": "utility", "get_server_info": "info", 
-            "get_capabilities": "info", "smithery_scan_test": "smithery",
+            "ping": "utility", "get_server_info": "info",
             "execute_sql": "database", "check_health": "monitoring", "list_tables": "database",
             "inspect_schema": "database", "get_database_stats": "monitoring",
             "create_migration": "migration", "apply_migration": "migration", 
             "list_migrations": "migration", "push_migrations": "migration", 
-            "validate_migration": "migration", "smart_migration": "migration", 
-            "auto_migrate": "migration", "sync_schema": "migration", "import_schema": "migration",
+            "validate_migration": "migration", "smart_migration": "migration",
             "create_auth_user": "auth", "get_auth_user": "auth", "list_auth_users": "auth",
             "update_auth_user": "auth", "delete_auth_user": "auth",
             "list_storage_buckets": "storage", "list_storage_objects": "storage", 
@@ -1185,20 +1170,17 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             "get_logs": "monitoring", "metrics_dashboard": "monitoring",
             "analyze_performance": "performance", "auto_create_indexes": "performance", 
             "vacuum_analyze": "performance", "backup_database": "backup",
-            "cache_management": "cache", "environment_management": "environment",
-            "manage_secrets": "secrets", "manage_docker": "docker",
+            "cache_management": "cache", "manage_secrets": "secrets",
             "get_project_url": "utility", "get_anon_key": "utility", 
             "get_service_key": "utility", "get_database_connections": "utility",
-            "rebuild_hooks": "utility", "generate_crud_api": "generation",
-            "generate_typescript_types": "generation"
+            "generate_crud_api": "generation", "generate_typescript_types": "generation"
         }
         return categories.get(tool_name, "utility")
 
     def is_tool_always_works(self, tool_name):
         """Déterminer si un outil fonctionne toujours"""
         always_works = [
-            "ping", "test_connection", "get_server_info", "get_capabilities", 
-            "smithery_scan_test", "get_project_url", "get_anon_key", 
+            "ping", "get_server_info", "get_project_url", "get_anon_key", 
             "get_service_key", "get_database_connections"
         ]
         return tool_name in always_works
@@ -1259,8 +1241,8 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             <h1 class="text-4xl font-bold text-primary mb-4">MCP Hub</h1>
             <p class="text-xl text-gray-300 mb-6">Centre de contrôle pour tous vos serveurs MCP</p>
             <div class="flex justify-center space-x-4">
-                <span class="bg-green-600 px-3 py-1 rounded-full text-sm">2 Serveurs</span>
-                <span class="bg-blue-600 px-3 py-1 rounded-full text-sm">54 Outils</span>
+                <span class="bg-green-600 px-3 py-1 rounded-full text-sm">1 Serveur</span>
+                <span class="bg-blue-600 px-3 py-1 rounded-full text-sm">47 Outils</span>
                 <span class="bg-purple-600 px-3 py-1 rounded-full text-sm">En ligne</span>
             </div>
         </header>
@@ -1274,11 +1256,11 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                         <h3 class="text-xl font-semibold text-primary">Supabase MCP Server v3.1.0</h3>
                         <span class="bg-green-600 px-2 py-1 rounded text-sm">En ligne</span>
                     </div>
-                    <p class="text-gray-300 mb-4">Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management</p>
+                    <p class="text-gray-300 mb-4">Enhanced Edition v3.1 - 47 MCP tools for 100% autonomous Supabase management</p>
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                         <div class="text-center">
-                            <div class="text-2xl font-bold text-primary">54</div>
+                            <div class="text-2xl font-bold text-primary">47</div>
                             <div class="text-sm text-gray-400">Outils</div>
                         </div>
                         <div class="text-center">
@@ -1396,7 +1378,7 @@ if __name__ == "__main__":
     PORT = int(os.environ.get('PORT', 8000))
     
     print(f"🚀 Starting MCP Hub on port {PORT}")
-    print(f"📊 Serving 2 MCP servers with 54 tools")
+    print(f"📊 Serving 1 MCP server with 47 tools")
     print(f"🌐 Access at: http://localhost:{PORT}")
     print(f"🔧 Well-known endpoint: /.well-known/mcp-config")
     
