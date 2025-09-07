@@ -19,6 +19,8 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             self.send_health_response()
         elif self.path == '/mcp':
             self.send_mcp_endpoint()
+        elif self.path == '/.well-known/mcp-config':
+            self.send_mcp_config()
         elif self.path == '/api/servers':
             self.send_servers_api()
         elif self.path == '/api/tools':
@@ -40,6 +42,13 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                 post_data = self.rfile.read(content_length)
                 print(f"POST /mcp - Body: {post_data.decode('utf-8', errors='ignore')}")
             self.send_mcp_endpoint()
+        elif self.path == '/.well-known/mcp-config':
+            # Support POST pour well-known MCP config
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                print(f"POST /.well-known/mcp-config - Body: {post_data.decode('utf-8', errors='ignore')}")
+            self.send_mcp_config()
         elif self.path.startswith('/mcp/'):
             # Support pour les sous-endpoints MCP
             content_length = int(self.headers.get('Content-Length', 0))
@@ -52,7 +61,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
 
     def do_OPTIONS(self):
         print(f"OPTIONS request to: {self.path}")
-        if self.path == '/mcp' or self.path.startswith('/mcp/'):
+        if self.path == '/mcp' or self.path.startswith('/mcp/') or self.path == '/.well-known/mcp-config':
             self.send_response(200)
             self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
@@ -133,6 +142,45 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             }
         }
         self.wfile.write(json.dumps(mcp_info, indent=2).encode())
+
+    def send_mcp_config(self):
+        """Endpoint /.well-known/mcp-config pour découverte MCP"""
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
+        
+        mcp_config = {
+            "mcpServers": {
+                "supabase-mcp": {
+                    "command": "python",
+                    "args": ["mcp_hub.py"],
+                    "env": {
+                        "MCP_SERVER_NAME": "Supabase MCP Server",
+                        "MCP_SERVER_VERSION": "3.1.0"
+                    }
+                }
+            },
+            "capabilities": {
+                "tools": True,
+                "resources": False,
+                "prompts": False
+            },
+            "server": {
+                "name": "Supabase MCP Server v3.1.0",
+                "version": "3.1.0",
+                "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management",
+                "url": "https://mcp.coupaul.fr/mcp",
+                "endpoints": {
+                    "mcp": "/mcp",
+                    "health": "/health",
+                    "config": "/.well-known/mcp-config"
+                }
+            }
+        }
+        self.wfile.write(json.dumps(mcp_config, indent=2).encode())
 
     def send_servers_api(self):
         """API des serveurs MCP"""
