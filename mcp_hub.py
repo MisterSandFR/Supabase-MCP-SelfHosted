@@ -1035,28 +1035,28 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
-               servers = [
-                   {
-                       "id": "supabase-mcp",
-                       "name": "Supabase MCP Server v3.1.0",
-                       "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management",
-                       "version": "3.1.0",
-                       "status": "online",
-                       "tools_count": 54,
-                       "endpoints": {
-                           "health": "/health",
-                           "mcp": "/mcp",
-                           "api": "/api/servers",
-                           "tools": "/api/tools"
-                       },
-                       "capabilities": ["tools", "production_mode", "database_management", "migrations", "auth", "storage", "rls", "realtime"],
-                       "self_hosted": True,
-                       "url": "mcp.coupaul.fr",
-                       "repository": "https://github.com/MisterSandFR/Supabase-MCP-SelfHosted",
-                       "github_stars": "⭐ 15+",
-                       "last_updated": datetime.now().isoformat()
-                   }
-               ]
+        servers = [
+            {
+                "id": "supabase-mcp",
+                "name": "Supabase MCP Server v3.1.0",
+                "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management",
+                "version": "3.1.0",
+                "status": "online",
+                "tools_count": 54,
+                "endpoints": {
+                    "health": "/health",
+                    "mcp": "/mcp",
+                    "api": "/api/servers",
+                    "tools": "/api/tools"
+                },
+                "capabilities": ["tools", "production_mode", "database_management", "migrations", "auth", "storage", "rls", "realtime"],
+                "self_hosted": True,
+                "url": "mcp.coupaul.fr",
+                "repository": "https://github.com/MisterSandFR/Supabase-MCP-SelfHosted",
+                "github_stars": "⭐ 15+",
+                "last_updated": datetime.now().isoformat()
+            }
+        ]
         self.wfile.write(json.dumps(servers, indent=2).encode())
 
     def get_tools_list(self):
