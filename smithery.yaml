@@ -1,3 +1,3 @@
 runtime: "typescript"
-entry: "src/index-smithery-copy.ts"
+entry: "src/index-smithery-henkdz-style.ts"
 dockerfile: "Dockerfile.smithery"
