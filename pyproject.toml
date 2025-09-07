@@ -4,6 +4,3 @@ version = "3.1.0"
 description = "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management with OAuth2 support"
 requires-python = ">=3.12"
 
-[tool.smithery] 
-server = "src.supabase_server:create_server"
-dockerfile = "Dockerfile"
