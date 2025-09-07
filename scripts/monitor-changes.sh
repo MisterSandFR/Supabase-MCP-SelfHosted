@@ -45,6 +45,30 @@ check_changes() {
 start_automation() {
     log "🚀 Démarrage de l'automatisation..."
     
+    # Vérifier s'il y a vraiment des changements significatifs
+    if git diff --quiet && git diff --cached --quiet; then
+        log "⚠️ Aucun changement significatif détecté, pas d'automatisation"
+        return 0
+    fi
+    
+    # Vérifier si les changements sont dans des fichiers importants
+    important_files=("src/" "requirements.txt" "Dockerfile" "pyproject.toml")
+    has_important_changes=false
+    
+    for file in "${important_files[@]}"; do
+        if git diff --quiet "$file" 2>/dev/null; then
+            continue
+        else
+            has_important_changes=true
+            log "📝 Changement important détecté dans: $file"
+        fi
+    done
+    
+    if [ "$has_important_changes" = "false" ]; then
+        log "⚠️ Aucun changement important détecté, pas d'automatisation"
+        return 0
+    fi
+    
     if bash scripts/auto-deploy-complete.sh automate; then
         log "✅ Automatisation réussie"
     else

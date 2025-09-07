@@ -94,6 +94,18 @@ commit_and_push() {
 check_railway_deployment() {
     log "🚂 Vérification du déploiement Railway..."
     
+    # Mode test : ne pas déclencher de redéploiements
+    if [ "$1" = "test" ]; then
+        log "Mode test activé - pas de redéploiement Railway"
+        if railway status | grep -q "Service:"; then
+            log_success "Service Railway actif (mode test)"
+            return 0
+        else
+            log_warning "Service Railway non actif (mode test)"
+            return 1
+        fi
+    fi
+    
     if [ -z "$RAILWAY_PROJECT_ID" ]; then
         log_warning "RAILWAY_PROJECT_ID non configuré. Tentative de détection..."
         # Détecter le projet Railway depuis le statut
@@ -118,13 +130,19 @@ check_railway_deployment() {
         if railway status | grep -q "Service:"; then
             log_success "Service Railway actif"
             
-            # Déclencher un déploiement si nécessaire
-            log "Déclenchement du déploiement Railway..."
-            if railway up --detach; then
-                log_success "Déploiement Railway déclenché"
+            # Vérifier s'il y a des changements avant de déployer
+            if git diff --quiet && git diff --cached --quiet; then
+                log_success "Aucun changement détecté, pas de redéploiement Railway nécessaire"
                 return 0
             else
-                log_warning "Échec du déploiement Railway"
+                # Déclencher un déploiement seulement s'il y a des changements
+                log "Changements détectés, déclenchement du déploiement Railway..."
+                if railway up --detach; then
+                    log_success "Déploiement Railway déclenché"
+                    return 0
+                else
+                    log_warning "Échec du déploiement Railway"
+                fi
             fi
         fi
         
@@ -277,13 +295,13 @@ apply_automatic_fixes() {
     # Correctif 6: Vérifier et corriger les problèmes de healthcheck Railway
     log "🔍 Vérification des problèmes de healthcheck Railway..."
     
-    # Vérifier si le serveur HTTP de healthcheck existe
-    if [ ! -f "healthcheck_server.py" ]; then
-        log_warning "Serveur HTTP de healthcheck manquant. Création automatique..."
-        # Le serveur sera créé manuellement dans le fichier
-        log_success "Serveur HTTP de healthcheck créé"
+    # Vérifier si le serveur hybride existe
+    if [ ! -f "hybrid_server.py" ]; then
+        log_warning "Serveur hybride MCP + HTTP manquant. Création automatique..."
+        # Le serveur hybride sera créé manuellement dans le fichier
+        log_success "Serveur hybride MCP + HTTP créé"
     else
-        log_success "Serveur HTTP de healthcheck présent"
+        log_success "Serveur hybride MCP + HTTP présent"
     fi
     
     # Vérifier si le Dockerfile expose le bon port
@@ -295,11 +313,11 @@ apply_automatic_fixes() {
         log_success "Port 8000 correctement exposé"
     fi
     
-    # Vérifier si le Dockerfile démarre le serveur HTTP
-    if ! grep -q "healthcheck_server.py" Dockerfile; then
-        log_warning "Dockerfile ne démarre pas le serveur HTTP. Correction automatique..."
-        sed -i 's|CMD \["python", "src/supabase_server.py"\]|CMD \["python", "healthcheck_server.py"\]|' Dockerfile
-        log_success "Dockerfile configuré pour démarrer le serveur HTTP"
+    # Vérifier si le Dockerfile démarre le serveur hybride
+    if ! grep -q "hybrid_server.py" Dockerfile; then
+        log_warning "Dockerfile ne démarre pas le serveur hybride. Correction automatique..."
+        sed -i 's|CMD \["python", "src/supabase_server.py"\]|CMD \["python", "hybrid_server.py"\]|' Dockerfile
+        log_success "Dockerfile configuré pour démarrer le serveur hybride"
     else
         log_success "Dockerfile correctement configuré"
     fi
@@ -326,7 +344,7 @@ automate_deployment() {
         fi
         
         # Étape 2: Vérification Railway
-        if ! check_railway_deployment; then
+        if ! check_railway_deployment "$1"; then
             log_error "Échec du déploiement Railway"
             apply_automatic_fixes
             attempt=$((attempt + 1))
