@@ -985,6 +985,10 @@ class MCPHubHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
+def create_server():
+    """Fonction pour Smithery - Créer le serveur MCP"""
+    return MCPHubHandler
+
 if __name__ == "__main__":
     PORT = int(os.environ.get('PORT', 8000))
     
