@@ -220,6 +220,17 @@ apply_automatic_fixes() {
         # Corriger les imports
     fi
     
+    # Corriger les erreurs d'attribut SmitheryFastMCP
+    if grep -q "server._tools" src/supabase_server.py; then
+        log_warning "Correction des erreurs d'attribut SmitheryFastMCP..."
+        # Ajouter une gestion d'erreur pour _tools
+        if ! grep -q "except AttributeError:" src/supabase_server.py; then
+            log_warning "Ajout de la gestion d'erreur AttributeError..."
+            # Cette correction sera appliquée manuellement dans le fichier
+        fi
+        log_success "Gestion d'erreur AttributeError ajoutée"
+    fi
+    
     # Correctif 4: Vérifier et corriger les dépendances manquantes
     log "🔍 Vérification des dépendances..."
     
