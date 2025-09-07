@@ -91,9 +91,20 @@ npm start -- --url YOUR_SUPABASE_URL --anon-key YOUR_ANON_KEY
 }
 ```
 
-## 🆕 New in Version 3.0.0 - Complete Autonomy!
+## 🆕 New in Version 3.1.0 - Enhanced OAuth2 & DDL Support!
 
-### 🎯 19 NEW TOOLS for 100% Autonomous Management
+### 🎯 23 NEW TOOLS for 100% Autonomous Management
+
+#### 🔧 Enhanced Core Tools (4 MAJOR IMPROVEMENTS)
+- **execute_sql** - Enhanced with multi-statement DDL support for complex operations
+- **apply_migration** - Advanced migration system with validation, dry-run, and rollback
+- **inspect_schema** - Complete schema inspection with TypeScript generation
+- **import_schema** - NEW! Import complete SQL schemas with transaction safety
+
+#### 🆕 Direct PostgreSQL Access (1 NEW TOOL)
+- **execute_psql** - NEW! Native psql command execution with advanced formatting
+
+### 🎯 19 EXISTING TOOLS for Complete Management
 
 #### 🔐 Security & Access Control (NEW!)
 - **manage_rls_policies** - Complete RLS policy management with templates
@@ -123,7 +134,16 @@ npm start -- --url YOUR_SUPABASE_URL --anon-key YOUR_ANON_KEY
 - **manage_secrets** - Secrets and environment variables
 - **manage_storage_policies** - Storage bucket security
 
-## 🛠️ Complete Tool Reference (50+ Tools)
+## 🛠️ Complete Tool Reference (54+ Tools)
+
+### 🔧 Enhanced Core Database Operations
+| Tool | Description | Status |
+|------|-------------|---------|
+| `execute_sql` | **ENHANCED** - Execute SQL with multi-statement DDL support | 🆕 v3.1 |
+| `import_schema` | **NEW** - Import complete SQL schemas with transaction safety | 🆕 v3.1 |
+| `execute_psql` | **NEW** - Direct psql access with native PostgreSQL features | 🆕 v3.1 |
+| `inspect_schema` | **ENHANCED** - Complete schema inspection + TypeScript generation | 🆕 v3.1 |
+| `apply_migration` | **ENHANCED** - Advanced migrations with validation & rollback | 🆕 v3.1 |
 
 ### 🔐 Security & Access Control
 | Tool | Description |
@@ -142,7 +162,6 @@ npm start -- --url YOUR_SUPABASE_URL --anon-key YOUR_ANON_KEY
 | `auto_create_indexes` | Analyze queries and automatically create optimal indexes |
 | `vacuum_analyze` | Automated VACUUM, ANALYZE, REINDEX operations |
 | `manage_extensions` | Install and configure PostgreSQL extensions |
-| `execute_sql` | Execute raw SQL with injection protection |
 | `list_tables` | List database tables and columns |
 
 ### 🚀 Migrations & Deployment
@@ -209,6 +228,53 @@ npm start -- --url YOUR_SUPABASE_URL --anon-key YOUR_ANON_KEY
 - **Audit Trails** - Complete activity logging and monitoring
 
 ## 🚀 Use Cases
+
+### 🆕 Enhanced OAuth2 & Complex Schema Deployment
+```javascript
+// NEW v3.1: Complete OAuth2 schema deployment in one command
+await mcp.import_schema({
+  source: "./oauth2_complete_schema.sql",
+  enable_extensions: ["pgcrypto", "uuid-ossp"],
+  transaction: true,
+  validate_before: true
+})
+
+// NEW v3.1: Advanced migration with validation
+await mcp.apply_migration({
+  version: "20250106120000",
+  file: "./oauth2_migration.sql",
+  dry_run: true,
+  validate_before: true,
+  rollback_sql: "DROP TABLE IF EXISTS oauth2_clients CASCADE;"
+})
+
+// NEW v3.1: Multi-statement DDL operations
+await mcp.execute_sql({
+  sql: `
+    CREATE EXTENSION IF NOT EXISTS pgcrypto;
+    CREATE TABLE oauth2_clients (...);
+    CREATE FUNCTION generate_oauth2_client_secret() RETURNS TEXT ...;
+  `,
+  allow_multiple_statements: true
+})
+```
+
+### 🆕 Advanced Schema Analysis & TypeScript Generation
+```javascript
+// NEW v3.1: Complete schema inspection with TypeScript generation
+await mcp.inspect_schema({
+  schema_name: "public",
+  include: ["tables", "functions", "policies", "constraints"],
+  format: "typescript",
+  include_statistics: true
+})
+
+// NEW v3.1: Direct psql access for advanced operations
+await mcp.execute_psql({
+  command: "describe",
+  output_format: "json"
+})
+```
 
 ### Complete Database Automation
 ```javascript

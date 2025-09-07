@@ -94,7 +94,19 @@ export function detectSqlInjection(query: string): boolean {
         return true; // Unbalanced quotes are suspicious
     }
     
-    // Check for multiple statements (semicolons not in strings)
+    return false;
+}
+
+/**
+ * Checks if a SQL query contains potential injection attempts (strict mode)
+ * Used for single-statement queries where semicolons are not allowed
+ */
+export function detectSqlInjectionStrict(query: string): boolean {
+    if (detectSqlInjection(query)) {
+        return true;
+    }
+    
+    // Check for multiple statements (semicolons not in strings) - strict mode
     const withoutStrings = query.replace(/'[^']*'/g, '').replace(/"[^"]*"/g, '');
     if (withoutStrings.includes(';')) {
         return true; // Multiple statements detected
@@ -107,19 +119,25 @@ export function detectSqlInjection(query: string): boolean {
  * Validates a SQL query for common safety issues
  * @throws Error if the query is potentially unsafe
  */
-export function validateSqlQuery(query: string): void {
+export function validateSqlQuery(query: string, allowMultipleStatements: boolean = false): void {
     if (!query || typeof query !== 'string') {
         throw new Error('Invalid SQL query: must be a non-empty string');
     }
     
     // Check for excessively long queries that might be attempts to overflow
-    if (query.length > 50000) {
+    if (query.length > 100000) { // Increased for migrations and complex DDL
         throw new Error('SQL query exceeds maximum allowed length');
     }
     
     // Detect potential SQL injection
-    if (detectSqlInjection(query)) {
-        throw new Error('Potential SQL injection detected in query');
+    if (allowMultipleStatements) {
+        if (detectSqlInjection(query)) {
+            throw new Error('Potential SQL injection detected in query');
+        }
+    } else {
+        if (detectSqlInjectionStrict(query)) {
+            throw new Error('Potential SQL injection detected in query');
+        }
     }
 }
 
