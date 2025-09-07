@@ -12,32 +12,39 @@ import socketserver
 from http.server import BaseHTTPRequestHandler
 from datetime import datetime
 
+# Timestamp de démarrage pour le healthcheck
+start_time = time.time()
+
 class MCPHubHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        print(f"GET request to: {self.path}")
-        if self.path == '/health':
-            self.send_health_response()
-        elif self.path == '/mcp':
-            self.send_mcp_endpoint()
-        elif self.path == '/.well-known/mcp-config' or self.path.startswith('/.well-known/mcp-config?'):
-            self.send_mcp_config()
-        elif self.path == '/api/servers':
-            self.send_servers_api()
-        elif self.path == '/api/tools':
-            self.send_tools_api()
-        elif self.path == '/' or self.path.startswith('/?config='):
-            # Support pour l'endpoint racine avec paramètres config
-            if self.path.startswith('/?config='):
-                # Si c'est une requête avec paramètres config, retourner JSON pour Smithery
+        try:
+            print(f"GET request to: {self.path}")
+            if self.path == '/health':
+                self.send_health_response()
+            elif self.path == '/mcp':
+                self.send_mcp_endpoint()
+            elif self.path == '/.well-known/mcp-config' or self.path.startswith('/.well-known/mcp-config?'):
+                self.send_mcp_config()
+            elif self.path == '/api/servers':
+                self.send_servers_api()
+            elif self.path == '/api/tools':
+                self.send_tools_api()
+            elif self.path == '/' or self.path.startswith('/?config='):
+                # Support pour l'endpoint racine avec paramètres config
+                if self.path.startswith('/?config='):
+                    # Si c'est une requête avec paramètres config, retourner JSON pour Smithery
+                    self.send_mcp_endpoint()
+                else:
+                    # Sinon, retourner la page HTML normale
+                    self.send_hub_page()
+            elif self.path.startswith('/mcp/'):
+                # Support pour les sous-endpoints MCP
                 self.send_mcp_endpoint()
             else:
-                # Sinon, retourner la page HTML normale
-                self.send_hub_page()
-        elif self.path.startswith('/mcp/'):
-            # Support pour les sous-endpoints MCP
-            self.send_mcp_endpoint()
-        else:
-            self.send_404_response()
+                self.send_404_response()
+        except Exception as e:
+            print(f"Error in GET {self.path}: {e}")
+            self.send_error_response(500, str(e))
 
     def do_POST(self):
         print(f"POST request to: {self.path}")
@@ -117,18 +124,50 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             self.send_404_response()
 
     def send_health_response(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
-        response = {
-            "status": "UP",
-            "timestamp": time.time(),
-            "service": "MCP Hub",
-            "version": "3.1.0",
-            "servers": 2,
-            "tools": 20
-        }
-        self.wfile.write(json.dumps(response, indent=2).encode())
+        """Endpoint de santé pour Railway healthcheck"""
+        try:
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Cache-Control', 'no-cache')
+            self.end_headers()
+            response = {
+                "status": "UP",
+                "timestamp": time.time(),
+                "service": "MCP Hub",
+                "version": "3.1.0",
+                "servers": 2,
+                "tools": 20,
+                "uptime": time.time() - start_time,
+                "healthcheck": "OK"
+            }
+            self.wfile.write(json.dumps(response, indent=2).encode())
+            print(f"Health check OK: {response['status']}")
+        except Exception as e:
+            print(f"Health check error: {e}")
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            error_response = {
+                "status": "DOWN",
+                "error": str(e),
+                "timestamp": time.time()
+            }
+            self.wfile.write(json.dumps(error_response).encode())
+
+    def send_error_response(self, status_code, error_message):
+        """Envoyer une réponse d'erreur"""
+        try:
+            self.send_response(status_code)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            error_response = {
+                "error": error_message,
+                "status": "ERROR",
+                "timestamp": time.time()
+            }
+            self.wfile.write(json.dumps(error_response).encode())
+        except Exception as e:
+            print(f"Error sending error response: {e}")
 
     def send_mcp_endpoint(self):
         """Endpoint MCP pour Smithery - Support GET et POST"""
@@ -244,9 +283,9 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                     "result": {
                         "protocolVersion": "2025-06-18",
                         "capabilities": {
-                            "tools": True,
-                            "resources": False,
-                            "prompts": False
+                            "tools": {},
+                            "resources": {},
+                            "prompts": {}
                         },
                         "serverInfo": {
                             "name": "Supabase MCP Server v3.1.0",

@@ -5,7 +5,7 @@
 builder = "dockerfile"
 
 [deploy]
-startCommand = "python src/supabase_server.py"
+startCommand = "python mcp_hub.py"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "always"
