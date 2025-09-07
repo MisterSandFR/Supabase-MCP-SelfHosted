@@ -3,12 +3,12 @@
   "version": "3.1.0",
   "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management with OAuth2 support, advanced DDL operations, and comprehensive database automation",
   "main": "dist/index.js",
-  "module": "./src/index-smithery-copy.ts",
+  "module": "./src/index-smithery-minimal.ts",
   "exports": {
-    ".": "./src/index-smithery-copy.ts"
+    ".": "./src/index-smithery-minimal.ts"
   },
-  "types": "./src/index-smithery-copy.ts",
-  "type": "module",
+  "types": "./src/index-smithery-minimal.ts",
+  "type": "commonjs",
   "repository": {
     "type": "git",
     "url": "https://github.com/MisterSandFR/selfhosted-supabase-mcp.git"
