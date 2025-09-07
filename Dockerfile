@@ -7,15 +7,13 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copier tous les fichiers nécessaires
+# Copier les fichiers de configuration
 COPY requirements.txt .
-COPY mcp_hub.py .
-COPY mcp_servers_config.json .
 
 # Installer les dépendances Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copier le reste du code source
+# Copier le code source
 COPY src/ ./src/
 
 # Créer les dossiers nécessaires
@@ -33,4 +31,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Commande de démarrage
-CMD ["python", "mcp_hub.py"]
+CMD ["python", "src/supabase_server.py"]
