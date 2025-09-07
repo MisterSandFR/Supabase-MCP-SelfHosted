@@ -170,13 +170,28 @@ test_server_connectivity() {
 apply_automatic_fixes() {
     log "🔧 Application de correctifs automatiques..."
     
-    # Correctif 1: Vérifier et corriger l'encodage UTF-8
+    # Correctif 1: Vérifier et corriger l'encodage UTF-8 et la syntaxe Python
     if ! python -c "import ast; ast.parse(open('src/supabase_server.py', 'r', encoding='utf-8').read())" 2>/dev/null; then
-        log_warning "Correction de l'encodage UTF-8..."
-        # Ajouter l'encodage UTF-8 au début du fichier
+        log_warning "Erreur de syntaxe Python détectée. Correction automatique..."
+        
+        # Ajouter l'encodage UTF-8 au début du fichier si manquant
         if ! grep -q "# -*- coding: utf-8 -*-" src/supabase_server.py; then
             sed -i '1i# -*- coding: utf-8 -*-' src/supabase_server.py
             log_success "Encodage UTF-8 ajouté"
+        fi
+        
+        # Corriger les erreurs de paramètres avec valeurs par défaut
+        if grep -q "def execute_sql(sql: str, allow_multiple_statements: bool = False, ctx: Context)" src/supabase_server.py; then
+            log_warning "Correction de l'ordre des paramètres dans execute_sql..."
+            sed -i 's/def execute_sql(sql: str, allow_multiple_statements: bool = False, ctx: Context)/def execute_sql(sql: str, ctx: Context, allow_multiple_statements: bool = False)/' src/supabase_server.py
+            log_success "Ordre des paramètres corrigé"
+        fi
+        
+        # Vérifier à nouveau la syntaxe
+        if python -c "import ast; ast.parse(open('src/supabase_server.py', 'r', encoding='utf-8').read())" 2>/dev/null; then
+            log_success "Syntaxe Python corrigée"
+        else
+            log_error "Impossible de corriger la syntaxe Python automatiquement"
         fi
     fi
     
