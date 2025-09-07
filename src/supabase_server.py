@@ -16,12 +16,14 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
         if self.path == "/health":
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
+            self.send_header('Cache-Control', 'no-cache')
             self.end_headers()
             response = {
                 "status": "healthy",
                 "message": "Supabase MCP Server is running",
                 "tools": 5,
-                "supabase_connected": True
+                "supabase_connected": True,
+                "timestamp": __import__('time').time()
             }
             self.wfile.write(json.dumps(response).encode())
         elif self.path.startswith("/.well-known/mcp-config"):
@@ -482,14 +484,33 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
 
 def run_server():
     port = int(os.getenv("PORT", 3000))
-    server = HTTPServer(('0.0.0.0', port), SupabaseMCPHandler)
+    
     print(f"🚀 Supabase MCP Server démarré sur le port {port}")
     print(f"🌐 URL: http://0.0.0.0:{port}")
     print(f"🔧 MCP Endpoint: http://0.0.0.0:{port}/mcp")
     print(f"🏥 Health Check: http://0.0.0.0:{port}/health")
     print(f"📡 Supabase URL: {os.getenv('SUPABASE_URL', 'Not configured')}")
     print(f"🔑 Anon Key: {os.getenv('SUPABASE_ANON_KEY', 'Not configured')[:20]}...")
-    server.serve_forever()
+    
+    try:
+        server = HTTPServer(('0.0.0.0', port), SupabaseMCPHandler)
+        print(f"✅ Serveur HTTP démarré avec succès")
+        
+        # Configuration pour Railway
+        server.timeout = 30  # Timeout de 30 secondes
+        server.allow_reuse_address = True
+        
+        print(f"🔄 Démarrage du serveur en mode production...")
+        server.serve_forever()
+        
+    except Exception as e:
+        print(f"❌ Erreur serveur: {e}")
+        import traceback
+        traceback.print_exc()
+    except KeyboardInterrupt:
+        print("\n🛑 Arrêt du serveur...")
+        if 'server' in locals():
+            server.shutdown()
 
 if __name__ == "__main__":
     run_server()
