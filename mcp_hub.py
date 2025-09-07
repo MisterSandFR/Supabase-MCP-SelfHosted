@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Hub MCP - Page d'accueil pour tous les serveurs MCP
-Interface moderne listant les serveurs, outils et endpoints
+Hub MCP - Page d'accueil moderne pour tous les serveurs MCP
+Interface moderne avec Tailwind CSS et shadcn/ui
 """
 
 import os
@@ -88,15 +88,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                     "name": "list_tables",
                     "description": "List database tables and schemas"
                 }
-            ],
-            "endpoints": {
-                "health": "/health",
-                "mcp": "/mcp",
-                "api": "/api/servers",
-                "tools": "/api/tools"
-            },
-            "self_hosted": "mcp.coupaul.fr",
-            "repository": "https://github.com/MisterSandFR/Supabase-MCP-SelfHosted"
+            ]
         }
         self.wfile.write(json.dumps(mcp_info, indent=2).encode())
 
@@ -292,7 +284,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(tools, indent=2).encode())
 
     def send_hub_page(self):
-        """Page hub principale"""
+        """Page hub principale avec design moderne Tailwind CSS"""
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
@@ -304,254 +296,389 @@ class MCPHubHandler(BaseHTTPRequestHandler):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCP Hub - Serveurs MCP Multiples</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(var(--popover))",
+                            foreground: "hsl(var(--popover-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222.2 84% 4.9%;
+            --primary: 221.2 83.2% 53.3%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96%;
+            --secondary-foreground: 222.2 84% 4.9%;
+            --muted: 210 40% 96%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96%;
+            --accent-foreground: 222.2 84% 4.9%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 221.2 83.2% 53.3%;
+            --radius: 0.5rem;
         }
         
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .dark {
+            --background: 222.2 84% 4.9%;
+            --foreground: 210 40% 98%;
+            --card: 222.2 84% 4.9%;
+            --card-foreground: 210 40% 98%;
+            --popover: 222.2 84% 4.9%;
+            --popover-foreground: 210 40% 98%;
+            --primary: 217.2 91.2% 59.8%;
+            --primary-foreground: 222.2 84% 4.9%;
+            --secondary: 217.2 32.6% 17.5%;
+            --secondary-foreground: 210 40% 98%;
+            --muted: 217.2 32.6% 17.5%;
+            --muted-foreground: 215 20.2% 65.1%;
+            --accent: 217.2 32.6% 17.5%;
+            --accent-foreground: 210 40% 98%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 217.2 32.6% 17.5%;
+            --input: 217.2 32.6% 17.5%;
+            --ring: 224.3 76.3% 94.1%;
+        }
+        
+        .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
         }
         
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        .glass-effect {
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            color: white;
+        .tool-card {
+            transition: all 0.2s ease-in-out;
         }
         
-        .header h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            background: #4CAF50;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            margin-top: 10px;
-        }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        }
-        
-        .card h2 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-        }
-        
-        .card h3 {
-            color: #764ba2;
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-        }
-        
-        .endpoint {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 5px 0;
-            font-family: 'Courier New', monospace;
-            border-left: 4px solid #667eea;
-        }
-        
-        .tool {
-            background: #e8f5e8;
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin: 5px 0;
-            font-size: 0.9rem;
-            border-left: 3px solid #4CAF50;
-        }
-        
-        .tool.always-works {
-            background: #e3f2fd;
-            border-left-color: #2196F3;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
         
         .stat-card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            color: white;
+            transition: all 0.3s ease;
         }
         
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .stat-label {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-        
-        .footer {
-            text-align: center;
-            color: white;
-            margin-top: 40px;
-            opacity: 0.8;
-        }
-        
-        .api-link {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        .api-link:hover {
-            text-decoration: underline;
-        }
-        
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .grid {
-                grid-template-columns: 1fr;
-            }
+        .stat-card:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 MCP Hub</h1>
-            <p>Serveurs MCP Multiples - Self-Hosted</p>
-            <div class="status-badge">✅ Online</div>
-        </div>
-        
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number">2</div>
-                <div class="stat-label">Serveurs MCP</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">20</div>
-                <div class="stat-label">Outils Disponibles</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">4</div>
-                <div class="stat-label">Endpoints API</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">100%</div>
-                <div class="stat-label">Mode Simulation</div>
-            </div>
-        </div>
-        
-        <div class="grid">
-            <div class="card">
-                <h2>🌐 Endpoints API</h2>
-                <div class="endpoint">GET /health - Health check</div>
-                <div class="endpoint">GET /mcp - Info MCP pour Smithery</div>
-                <div class="endpoint">GET /api/servers - Liste des serveurs</div>
-                <div class="endpoint">GET /api/tools - Liste des outils</div>
+<body class="min-h-screen gradient-bg">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="glass-effect rounded-2xl p-8 mb-6">
+                <h1 class="text-5xl font-bold text-white mb-4 drop-shadow-lg">
+                    🚀 MCP Hub
+                </h1>
+                <p class="text-xl text-white/90 mb-4">
+                    Serveurs MCP Multiples - Self-Hosted
+                </p>
+                <div class="inline-flex items-center px-4 py-2 bg-green-500 text-white rounded-full text-sm font-medium">
+                    ✅ Online
+                </div>
             </div>
             
-            <div class="card">
-                <h2>🛠️ Outils MCP</h2>
-                <h3>Supabase MCP Server</h3>
-                <div class="tool always-works">ping - Test ping simple</div>
-                <div class="tool always-works">test_connection - Test connexion MCP</div>
-                <div class="tool always-works">get_server_info - Infos serveur</div>
-                <div class="tool always-works">get_capabilities - Capacités serveur</div>
-                <div class="tool always-works">smithery_scan_test - Test Smithery</div>
-                <div class="tool">execute_sql - Exécution SQL avancée</div>
-                <div class="tool">check_health - Santé base de données</div>
-                <div class="tool">list_tables - Liste des tables</div>
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="stat-card glass-effect rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-white mb-2">2</div>
+                    <div class="text-white/80 text-sm">Serveurs MCP</div>
+                </div>
+                <div class="stat-card glass-effect rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-white mb-2">20</div>
+                    <div class="text-white/80 text-sm">Outils Disponibles</div>
+                </div>
+                <div class="stat-card glass-effect rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-white mb-2">4</div>
+                    <div class="text-white/80 text-sm">Endpoints API</div>
+                </div>
+                <div class="stat-card glass-effect rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-white mb-2">100%</div>
+                    <div class="text-white/80 text-sm">Mode Simulation</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Grid -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- API Endpoints -->
+            <div class="glass-effect rounded-xl p-6">
+                <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                    🌐 Endpoints API
+                </h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg">
+                        <span class="text-white font-mono text-sm">GET /health</span>
+                        <span class="text-white/70 text-xs">Health check</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg">
+                        <span class="text-white font-mono text-sm">GET /mcp</span>
+                        <span class="text-white/70 text-xs">Info MCP pour Smithery</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg">
+                        <span class="text-white font-mono text-sm">GET /api/servers</span>
+                        <span class="text-white/70 text-xs">Liste des serveurs</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg">
+                        <span class="text-white font-mono text-sm">GET /api/tools</span>
+                        <span class="text-white/70 text-xs">Liste des outils</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Server Info -->
+            <div class="glass-effect rounded-xl p-6">
+                <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                    📊 Serveur Supabase MCP
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-white mb-2">Informations</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-white/70">Version:</span>
+                                <span class="text-white font-medium">3.1.0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-white/70">Status:</span>
+                                <span class="text-green-400 font-medium">Online</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-white/70">Mode:</span>
+                                <span class="text-blue-400 font-medium">Simulation activé</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-white/70">Self-hosted:</span>
+                                <span class="text-white font-medium">mcp.coupaul.fr</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-semibold text-white mb-2">Capacités</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">✅ Outils MCP</span>
+                            <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">✅ Mode simulation</span>
+                            <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs">✅ Gestion d'erreurs</span>
+                            <span class="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs">✅ Configuration flexible</span>
+                            <span class="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs">✅ Gestion base de données</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tools Section -->
+        <div class="mt-8">
+            <div class="glass-effect rounded-xl p-6">
+                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    🛠️ Outils MCP
+                </h2>
                 
-                <h3>File Manager MCP</h3>
-                <div class="tool always-works">read_file - Lecture de fichiers</div>
-                <div class="tool always-works">write_file - Écriture de fichiers</div>
-                <div class="tool always-works">compress_files - Compression d'archives</div>
-                <div class="tool always-works">search_files - Recherche de fichiers</div>
-                <div class="tool always-works">sync_directory - Synchronisation</div>
-                <div class="tool always-works">get_file_info - Infos fichiers</div>
-                <div class="tool always-works">create_directory - Création dossiers</div>
-                <div class="tool always-works">copy_files - Copie de fichiers</div>
-                <div class="tool always-works">move_files - Déplacement fichiers</div>
-                <div class="tool always-works">watch_directory - Surveillance</div>
-            </div>
-            
-            <div class="card">
-                <h2>📊 Serveur Supabase MCP</h2>
-                <h3>Informations</h3>
-                <p><strong>Version:</strong> 3.1.0</p>
-                <p><strong>Status:</strong> Online</p>
-                <p><strong>Mode:</strong> Simulation activé</p>
-                <p><strong>Self-hosted:</strong> mcp.coupaul.fr</p>
+                <!-- Supabase Tools -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>
+                        Supabase MCP Server
+                    </h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">ping</div>
+                            <div class="text-white/70 text-xs">Test ping simple</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">test_connection</div>
+                            <div class="text-white/70 text-xs">Test connexion MCP</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">get_server_info</div>
+                            <div class="text-white/70 text-xs">Infos serveur</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">get_capabilities</div>
+                            <div class="text-white/70 text-xs">Capacités serveur</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">smithery_scan_test</div>
+                            <div class="text-white/70 text-xs">Test Smithery</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">execute_sql</div>
+                            <div class="text-white/70 text-xs">Exécution SQL avancée</div>
+                            <div class="w-2 h-2 bg-yellow-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">check_health</div>
+                            <div class="text-white/70 text-xs">Santé base de données</div>
+                            <div class="w-2 h-2 bg-yellow-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">list_tables</div>
+                            <div class="text-white/70 text-xs">Liste des tables</div>
+                            <div class="w-2 h-2 bg-yellow-400 rounded-full mt-2"></div>
+                        </div>
+                    </div>
+                </div>
                 
-                <h3>Capacités</h3>
-                <p>✅ Outils MCP</p>
-                <p>✅ Mode simulation</p>
-                <p>✅ Gestion d'erreurs robuste</p>
-                <p>✅ Configuration flexible</p>
-                <p>✅ Gestion base de données</p>
-            </div>
-            
-            <div class="card">
-                <h2>🔗 Liens Utiles</h2>
-                <p><a href="/health" class="api-link">Health Check</a></p>
-                <p><a href="/mcp" class="api-link">Endpoint MCP</a></p>
-                <p><a href="/api/servers" class="api-link">API Serveurs</a></p>
-                <p><a href="/api/tools" class="api-link">API Outils</a></p>
-                <p><a href="https://github.com/MisterSandFR/Supabase-MCP-SelfHosted" class="api-link" target="_blank">Repository GitHub</a></p>
-                <p><a href="https://smithery.ai" class="api-link" target="_blank">Smithery</a></p>
+                <!-- File Manager Tools -->
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+                        <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                        File Manager MCP
+                    </h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">read_file</div>
+                            <div class="text-white/70 text-xs">Lecture de fichiers</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">write_file</div>
+                            <div class="text-white/70 text-xs">Écriture de fichiers</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">compress_files</div>
+                            <div class="text-white/70 text-xs">Compression d'archives</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">search_files</div>
+                            <div class="text-white/70 text-xs">Recherche de fichiers</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">sync_directory</div>
+                            <div class="text-white/70 text-xs">Synchronisation</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">get_file_info</div>
+                            <div class="text-white/70 text-xs">Infos fichiers</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">create_directory</div>
+                            <div class="text-white/70 text-xs">Création dossiers</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">copy_files</div>
+                            <div class="text-white/70 text-xs">Copie de fichiers</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">move_files</div>
+                            <div class="text-white/70 text-xs">Déplacement fichiers</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                        <div class="tool-card bg-white/10 rounded-lg p-3 border border-white/20">
+                            <div class="text-white font-medium text-sm">watch_directory</div>
+                            <div class="text-white/70 text-xs">Surveillance</div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="footer">
-            <p>🚀 MCP Hub - Serveurs MCP Multiples</p>
-            <p>Self-hosted sur mcp.coupaul.fr | Compatible Smithery</p>
+        <!-- Links Section -->
+        <div class="mt-8">
+            <div class="glass-effect rounded-xl p-6">
+                <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                    🔗 Liens Utiles
+                </h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <a href="/health" class="flex items-center p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
+                        <div class="text-white font-medium">Health Check</div>
+                    </a>
+                    <a href="/mcp" class="flex items-center p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
+                        <div class="text-white font-medium">Endpoint MCP</div>
+                    </a>
+                    <a href="/api/servers" class="flex items-center p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
+                        <div class="text-white font-medium">API Serveurs</div>
+                    </a>
+                    <a href="/api/tools" class="flex items-center p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
+                        <div class="text-white font-medium">API Outils</div>
+                    </a>
+                    <a href="https://github.com/MisterSandFR/Supabase-MCP-SelfHosted" target="_blank" class="flex items-center p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
+                        <div class="text-white font-medium">Repository GitHub</div>
+                    </a>
+                    <a href="https://smithery.ai" target="_blank" class="flex items-center p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
+                        <div class="text-white font-medium">Smithery</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="mt-12 text-center">
+            <div class="glass-effect rounded-xl p-6">
+                <p class="text-white/80 text-lg font-medium mb-2">🚀 MCP Hub - Serveurs MCP Multiples</p>
+                <p class="text-white/60 text-sm">Self-hosted sur mcp.coupaul.fr | Compatible Smithery</p>
+            </div>
         </div>
     </div>
 </body>
@@ -571,16 +698,11 @@ class MCPHubHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     PORT = int(os.environ.get('PORT', 8000))
-    print(f"🚀 Démarrage du MCP Hub sur le port {PORT}")
-    print(f"🌐 Hub disponible sur: http://localhost:{PORT}")
-    print(f"🔗 Endpoint MCP: http://localhost:{PORT}/mcp")
-    print(f"📊 API Serveurs: http://localhost:{PORT}/api/servers")
-    print(f"🛠️ API Outils: http://localhost:{PORT}/api/tools")
     
-    try:
-        with socketserver.TCPServer(("", PORT), MCPHubHandler) as httpd:
-            print(f"✅ MCP Hub actif sur le port {PORT}")
-            httpd.serve_forever()
-    except Exception as e:
-        print(f"❌ Erreur lors du démarrage: {e}")
-        exit(1)
+    print(f"🚀 Starting MCP Hub on port {PORT}")
+    print(f"📊 Serving 2 MCP servers with 20 tools")
+    print(f"🌐 Access at: http://localhost:{PORT}")
+    
+    with socketserver.TCPServer(("", PORT), MCPHubHandler) as httpd:
+        print(f"✅ MCP Hub running on port {PORT}")
+        httpd.serve_forever()
