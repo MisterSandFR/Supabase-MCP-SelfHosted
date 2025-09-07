@@ -27,7 +27,12 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             self.send_tools_api()
         elif self.path == '/' or self.path.startswith('/?config='):
             # Support pour l'endpoint racine avec paramètres config
-            self.send_hub_page()
+            if self.path.startswith('/?config='):
+                # Si c'est une requête avec paramètres config, retourner JSON pour Smithery
+                self.send_mcp_endpoint()
+            else:
+                # Sinon, retourner la page HTML normale
+                self.send_hub_page()
         elif self.path.startswith('/mcp/'):
             # Support pour les sous-endpoints MCP
             self.send_mcp_endpoint()
@@ -56,7 +61,12 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             if content_length > 0:
                 post_data = self.rfile.read(content_length)
                 print(f"POST {self.path} - Body: {post_data.decode('utf-8', errors='ignore')}")
-            self.send_hub_page()
+            if self.path.startswith('/?config='):
+                # Si c'est une requête avec paramètres config, retourner JSON pour Smithery
+                self.send_mcp_endpoint()
+            else:
+                # Sinon, retourner la page HTML normale
+                self.send_hub_page()
         elif self.path.startswith('/mcp/'):
             # Support pour les sous-endpoints MCP
             content_length = int(self.headers.get('Content-Length', 0))
