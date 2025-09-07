@@ -4,3 +4,4 @@ description: "Supabase MCP OAuth2 Server - Python Pure"
 dockerfile: "Dockerfile"
 build:
   dockerfile: "Dockerfile"
+  use_custom_dockerfile: true
