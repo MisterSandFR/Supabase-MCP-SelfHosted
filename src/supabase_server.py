@@ -39,7 +39,7 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                         "args": ["src/supabase_server.py"],
                         "env": {
                             "SUPABASE_URL": self.supabase_url,
-                            "SUPABASE_ANON_KEY": os.getenv("SUPABASE_ANON_KEY", "")
+                            "SUPABASE_ANON_KEY": "[CONFIGURED]"
                         }
                     }
                 }
