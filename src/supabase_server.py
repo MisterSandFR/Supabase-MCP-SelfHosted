@@ -24,6 +24,25 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                 "supabase_connected": True
             }
             self.wfile.write(json.dumps(response).encode())
+        elif self.path.startswith("/.well-known/mcp-config"):
+            # Endpoint de configuration MCP standard
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            config = {
+                "mcpServers": {
+                    "supabase": {
+                        "command": "python",
+                        "args": ["src/supabase_server.py"],
+                        "env": {
+                            "SUPABASE_URL": self.supabase_url,
+                            "SUPABASE_ANON_KEY": os.getenv("SUPABASE_ANON_KEY", "")
+                        }
+                    }
+                }
+            }
+            self.wfile.write(json.dumps(config).encode())
         elif self.path == "/":
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
@@ -227,7 +246,43 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
             self.wfile.write(b"Not Found")
     
     def do_POST(self):
-        if self.path == "/mcp":
+        if self.path == "/" or self.path.startswith("/?config="):
+            # Gestion des requêtes POST sur la racine avec config
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                request = json.loads(post_data.decode('utf-8')) if post_data else {}
+                
+                print(f"📨 POST / (config) - Requête: {request}")
+                
+                # Réponse de configuration MCP
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": request.get("id", "config"),
+                    "result": {
+                        "protocolVersion": "2024-11-05",
+                        "capabilities": {"tools": {}},
+                        "serverInfo": {
+                            "name": "supabase-mcp-server",
+                            "version": "3.1.0"
+                        }
+                    }
+                }
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(response).encode())
+                
+            except Exception as e:
+                print(f"❌ Erreur POST /: {e}")
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                error = {"error": str(e)}
+                self.wfile.write(json.dumps(error).encode())
+        elif self.path == "/mcp":
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
                 post_data = self.rfile.read(content_length)
