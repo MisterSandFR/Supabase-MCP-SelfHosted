@@ -207,7 +207,50 @@ apply_automatic_fixes() {
         # Corriger les imports
     fi
     
-    # Correctif 4: Vérifier le build
+    # Correctif 4: Vérifier et corriger les dépendances manquantes
+    log "🔍 Vérification des dépendances..."
+    
+    # Vérifier si requirements.txt contient toutes les dépendances nécessaires
+    required_deps=("mcp" "smithery" "pydantic" "fastapi" "uvicorn")
+    missing_deps=()
+    
+    for dep in "${required_deps[@]}"; do
+        if ! grep -q "$dep" requirements.txt; then
+            missing_deps+=("$dep")
+        fi
+    done
+    
+    if [ ${#missing_deps[@]} -gt 0 ]; then
+        log_warning "Dépendances manquantes détectées: ${missing_deps[*]}"
+        log "Correction automatique des dépendances..."
+        
+        # Ajouter les dépendances manquantes
+        for dep in "${missing_deps[@]}"; do
+            case $dep in
+                "mcp")
+                    echo "mcp>=1.13.0" >> requirements.txt
+                    ;;
+                "smithery")
+                    echo "smithery>=0.1.23" >> requirements.txt
+                    ;;
+                "pydantic")
+                    echo "pydantic>=2.0.0" >> requirements.txt
+                    ;;
+                "fastapi")
+                    echo "fastapi>=0.104.0" >> requirements.txt
+                    ;;
+                "uvicorn")
+                    echo "uvicorn>=0.24.0" >> requirements.txt
+                    ;;
+            esac
+        done
+        
+        log_success "Dépendances manquantes ajoutées à requirements.txt"
+    else
+        log_success "Toutes les dépendances sont présentes"
+    fi
+    
+    # Correctif 5: Vérifier le build
     if ! npx smithery build; then
         log_warning "Correction du build Smithery..."
         # Appliquer des correctifs de build
