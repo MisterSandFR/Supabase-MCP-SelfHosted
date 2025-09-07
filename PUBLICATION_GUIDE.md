@@ -14,7 +14,7 @@ Votre projet **Supabase MCP OAuth2 v3.1.0** est maintenant **100% configuré** p
 
 ### 🔑 Clé API Configurée
 
-- **Clé API** : `01492887-6ca9-499e-8a0e-f5325375baa1`
+- **Clé API** : `[CONFIGURÉE LOCALEMENT]`
 - **Connexion** : Automatique via les scripts
 - **Build** : Fonctionnel avec `smithery build`
 
