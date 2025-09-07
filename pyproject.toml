@@ -10,4 +10,4 @@ dependencies = [
 ]
 
 [tool.smithery]
-server = "mcp_hub:create_server"
+server = "src.supabase_server:create_server"
