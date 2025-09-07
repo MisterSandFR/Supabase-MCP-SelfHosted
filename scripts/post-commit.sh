@@ -3,6 +3,12 @@
 # Script de post-commit pour automatiser le push via Smithery CLI
 # Ce script s'exécute automatiquement après chaque commit
 
+# Charger la configuration Smithery
+if [ -f "smithery-config.env" ]; then
+    source smithery-config.env
+    echo "🔑 Clé API Smithery chargée automatiquement"
+fi
+
 echo "🚀 Démarrage du push automatique via Smithery CLI..."
 
 # Vérifier si nous sommes dans un dépôt git
@@ -20,11 +26,19 @@ fi
 
 # Vérifier si l'utilisateur est connecté à Smithery
 if ! smithery login --check 2>/dev/null; then
-    echo "⚠️  Vous n'êtes pas connecté à Smithery dans le contexte du hook"
-    echo "💡 Le build a été créé avec succès, mais le push nécessite une connexion manuelle"
-    echo "🔑 Connectez-vous avec: smithery login"
-    echo "📤 Puis utilisez: smithery push (si disponible)"
-    exit 0
+    echo "🔑 Connexion automatique à Smithery avec la clé API..."
+    if [ -n "$SMITHERY_API_KEY" ]; then
+        echo "$SMITHERY_API_KEY" | smithery login --api-key 2>/dev/null
+        if [ $? -eq 0 ]; then
+            echo "✅ Connexion automatique réussie"
+        else
+            echo "⚠️  Connexion automatique échouée, build sans push"
+            exit 0
+        fi
+    else
+        echo "⚠️  Aucune clé API trouvée, build sans push"
+        exit 0
+    fi
 fi
 
 # Construire le projet avec Smithery
