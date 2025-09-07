@@ -7,64 +7,120 @@ import { z } from 'zod';
 
 import type { ToolContext, AppTool } from "./tools/types.js";
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
+// --- STATIC TOOL IMPORTS FOR SMITHERY ---
+// Import all tools statically for better Smithery compatibility
+import { listTablesTool } from './tools/list_tables.js';
+import { listExtensionsTool } from './tools/list_extensions.js';
+import { listMigrationsTool } from './tools/list_migrations.js';
+import { applyMigrationTool } from './tools/apply_migration.js';
+import { executeSqlTool } from './tools/execute_sql.js';
+import { getDatabaseConnectionsTool } from './tools/get_database_connections.js';
+import { getDatabaseStatsTool } from './tools/get_database_stats.js';
+import { getProjectUrlTool } from './tools/get_project_url.js';
+import { getAnonKeyTool } from './tools/get_anon_key.js';
+import { getServiceKeyTool } from './tools/get_service_key.js';
+import { generateTypesTool } from './tools/generate_typescript_types.js';
+import { rebuildHooksTool } from './tools/rebuild_hooks.js';
+import { verifyJwtSecretTool } from './tools/verify_jwt_secret.js';
+import { listAuthUsersTool } from './tools/list_auth_users.js';
+import { getAuthUserTool } from './tools/get_auth_user.js';
+import { deleteAuthUserTool } from './tools/delete_auth_user.js';
+import { createAuthUserTool } from './tools/create_auth_user.js';
+import { updateAuthUserTool } from './tools/update_auth_user.js';
+import { listStorageBucketsTool } from './tools/list_storage_buckets.js';
+import { listStorageObjectsTool } from './tools/list_storage_objects.js';
+import { listRealtimePublicationsTool } from './tools/list_realtime_publications.js';
+import { getLogsTool } from './tools/get_logs.js';
+import { checkHealthTool } from './tools/check_health.js';
+import { backupDatabaseTool } from './tools/backup_database.js';
+import { manageDockerTool } from './tools/manage_docker.js';
+import { analyzePerformanceTool } from './tools/analyze_performance.js';
+import { validateMigrationTool } from './tools/validate_migration.js';
+import { pushMigrationsTool } from './tools/push_migrations.js';
+import { createMigrationTool } from './tools/create_migration.js';
+import { autoMigrateTool } from './tools/auto_migrate.js';
+import { analyzeRlsCoverageTool } from './tools/analyze_rls_coverage.js';
+import { auditSecurityTool } from './tools/audit_security.js';
+import { autoCreateIndexesTool } from './tools/auto_create_indexes.js';
+import { cacheManagementTool } from './tools/cache_management.js';
+import { environmentManagementTool } from './tools/environment_management.js';
+import { generateCrudApiTool } from './tools/generate_crud_api.js';
+import { manageFunctionsTool } from './tools/manage_functions.js';
+import { manageRlsPoliciesTool } from './tools/manage_rls_policies.js';
+import { manageRolesTool } from './tools/manage_roles.js';
+import { manageSecretsTool } from './tools/manage_secrets.js';
+import { manageStoragePolicies } from './tools/manage_storage_policies.js';
+import { manageTriggersTool } from './tools/manage_triggers.js';
+import { manageWebhooksTool } from './tools/manage_webhooks.js';
+import { metricsDashboardTool } from './tools/metrics_dashboard.js';
+import { realtimeManagementTool } from './tools/realtime_management.js';
+import { smartMigrationTool } from './tools/smart_migration.js';
+import { syncSchemaTool } from './tools/sync_schema.js';
+import { vacuumAnalyzeTool } from './tools/vacuum_analyze.js';
+import { manageExtensionsTool } from './tools/manage_extensions.js';
+// NEW v3.1.0 tools
+import { importSchemaTool } from './tools/import_schema.js';
+import { executePsqlTool } from './tools/execute_psql.js';
+import { inspectSchemaTool } from './tools/inspect_schema.js';
 
-// --- DYNAMIC TOOL LOADING ---
-const __filename = typeof import.meta !== 'undefined' && import.meta.url 
-    ? fileURLToPath(import.meta.url) 
-    : __filename;
-const __dirname = path.dirname(__filename);
-
-// This interface is a simplified version for the purpose of loading tools.
-
-
-async function loadTools(): Promise<Record<string, AppTool>> {
-    const toolsDir = path.join(__dirname, 'tools');
-    // Support both TS (Smithery typescript runtime) and JS (compiled) environments
-    const toolFiles = fs
-        .readdirSync(toolsDir)
-        .filter((file) =>
-            (file.endsWith('.ts') || file.endsWith('.js')) &&
-            !file.endsWith('.d.ts') &&
-            file !== 'types.ts' &&
-            file !== 'utils.ts'
-        );
-
-    const tools: Record<string, AppTool> = {};
-    for (const file of toolFiles) {
-        const absolutePath = path.join(toolsDir, file);
-        try {
-            const module = await import(pathToFileURL(absolutePath).href);
-            const toolObject = Object.values(module).find(
-                (exp: any) => exp && typeof exp === 'object' && 'name' in exp && 'execute' in exp
-            ) as AppTool | undefined;
-
-            if (toolObject) {
-                tools[toolObject.name] = toolObject;
-            }
-        } catch (_) {
-            // Fallback: try sibling extension variant
-            const alt = absolutePath.endsWith('.ts')
-                ? absolutePath.replace(/\.ts$/, '.js')
-                : absolutePath.replace(/\.js$/, '.ts');
-            try {
-                const module = await import(pathToFileURL(alt).href);
-                const toolObject = Object.values(module).find(
-                    (exp: any) => exp && typeof exp === 'object' && 'name' in exp && 'execute' in exp
-                ) as AppTool | undefined;
-                if (toolObject) {
-                    tools[toolObject.name] = toolObject;
-                }
-            } catch {
-                // Silently ignore to keep Smithery scan resilient
-            }
-        }
-    }
-    return tools;
+function loadTools(): Record<string, AppTool> {
+    return {
+        [listTablesTool.name]: listTablesTool,
+        [listExtensionsTool.name]: listExtensionsTool,
+        [listMigrationsTool.name]: listMigrationsTool,
+        [applyMigrationTool.name]: applyMigrationTool,
+        [executeSqlTool.name]: executeSqlTool,
+        [getDatabaseConnectionsTool.name]: getDatabaseConnectionsTool,
+        [getDatabaseStatsTool.name]: getDatabaseStatsTool,
+        [getProjectUrlTool.name]: getProjectUrlTool,
+        [getAnonKeyTool.name]: getAnonKeyTool,
+        [getServiceKeyTool.name]: getServiceKeyTool,
+        [generateTypesTool.name]: generateTypesTool,
+        [rebuildHooksTool.name]: rebuildHooksTool,
+        [verifyJwtSecretTool.name]: verifyJwtSecretTool,
+        [listAuthUsersTool.name]: listAuthUsersTool,
+        [getAuthUserTool.name]: getAuthUserTool,
+        [deleteAuthUserTool.name]: deleteAuthUserTool,
+        [createAuthUserTool.name]: createAuthUserTool,
+        [updateAuthUserTool.name]: updateAuthUserTool,
+        [listStorageBucketsTool.name]: listStorageBucketsTool,
+        [listStorageObjectsTool.name]: listStorageObjectsTool,
+        [listRealtimePublicationsTool.name]: listRealtimePublicationsTool,
+        [getLogsTool.name]: getLogsTool,
+        [checkHealthTool.name]: checkHealthTool,
+        [backupDatabaseTool.name]: backupDatabaseTool,
+        [manageDockerTool.name]: manageDockerTool,
+        [analyzePerformanceTool.name]: analyzePerformanceTool,
+        [validateMigrationTool.name]: validateMigrationTool,
+        [pushMigrationsTool.name]: pushMigrationsTool,
+        [createMigrationTool.name]: createMigrationTool,
+        [autoMigrateTool.name]: autoMigrateTool,
+        [analyzeRlsCoverageTool.name]: analyzeRlsCoverageTool,
+        [auditSecurityTool.name]: auditSecurityTool,
+        [autoCreateIndexesTool.name]: autoCreateIndexesTool,
+        [cacheManagementTool.name]: cacheManagementTool,
+        [environmentManagementTool.name]: environmentManagementTool,
+        [generateCrudApiTool.name]: generateCrudApiTool,
+        [manageFunctionsTool.name]: manageFunctionsTool,
+        [manageRlsPoliciesTool.name]: manageRlsPoliciesTool,
+        [manageRolesTool.name]: manageRolesTool,
+        [manageSecretsTool.name]: manageSecretsTool,
+        [manageStoragePolicies.name]: manageStoragePolicies,
+        [manageTriggersTool.name]: manageTriggersTool,
+        [manageWebhooksTool.name]: manageWebhooksTool,
+        [metricsDashboardTool.name]: metricsDashboardTool,
+        [realtimeManagementTool.name]: realtimeManagementTool,
+        [smartMigrationTool.name]: smartMigrationTool,
+        [syncSchemaTool.name]: syncSchemaTool,
+        [vacuumAnalyzeTool.name]: vacuumAnalyzeTool,
+        [manageExtensionsTool.name]: manageExtensionsTool,
+        // NEW v3.1.0 tools
+        [importSchemaTool.name]: importSchemaTool,
+        [executePsqlTool.name]: executePsqlTool,
+        [inspectSchemaTool.name]: inspectSchemaTool,
+    };
 }
-// --- END DYNAMIC TOOL LOADING ---
+// --- END STATIC TOOL IMPORTS ---
 
 
 // Configuration schema for Smithery
@@ -78,8 +134,8 @@ export const configSchema = z.object({
 
 // Export default async function for Smithery
 export default async function createServer({ config }: { config: z.infer<typeof configSchema> } = { config: { SUPABASE_URL: '', SUPABASE_ANON_KEY: '' } }) {
-    // Collect all tools dynamically
-    const availableTools = await loadTools();
+    // Collect all tools statically
+    const availableTools = loadTools();
 
     // Prepare capabilities
     const capabilitiesTools: Record<string, any> = {};
