@@ -203,7 +203,11 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                         "id": request.get("id", "config"),
                         "result": {
                             "protocolVersion": "2024-11-05",
-                            "capabilities": {"tools": {}},
+                            "capabilities": {
+                                "tools": {
+                                    "listChanged": True
+                                }
+                            },
                             "serverInfo": {
                                 "name": "supabase-mcp-server",
                                 "version": "3.1.0"
@@ -238,7 +242,11 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                 if method == "initialize":
                     response["result"] = {
                         "protocolVersion": "2024-11-05",
-                        "capabilities": {"tools": {}},
+                        "capabilities": {
+                            "tools": {
+                                "listChanged": True
+                            }
+                        },
                         "serverInfo": {
                             "name": "supabase-mcp-server",
                             "version": "3.1.0"
