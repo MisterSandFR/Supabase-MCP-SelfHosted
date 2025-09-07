@@ -12,7 +12,9 @@ import * as path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
 // --- DYNAMIC TOOL LOADING ---
-const __filename = fileURLToPath(import.meta.url);
+const __filename = typeof import.meta !== 'undefined' && import.meta.url 
+    ? fileURLToPath(import.meta.url) 
+    : __filename;
 const __dirname = path.dirname(__filename);
 
 // This interface is a simplified version for the purpose of loading tools.
