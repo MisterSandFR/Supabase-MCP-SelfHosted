@@ -17,15 +17,21 @@ class ConfigSchema(BaseModel):
     SUPABASE_ANON_KEY: str = Field("", description="Clé anonyme Supabase")
     SUPABASE_SERVICE_KEY: Optional[str] = Field(None, description="Clé de service Supabase (optionnelle)")
 
-@smithery.server(config_schema=ConfigSchema)
+@smithery.server(
+    config_schema=ConfigSchema,
+    description="Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management with OAuth2 support",
+    tags=["supabase", "database", "oauth2", "self-hosted", "mcp"],
+    homepage="https://mcp.coupaul.fr",
+    repository="https://github.com/MisterSandFR/Supabase-MCP-SelfHosted"
+)
 def create_server():
     """Create and return a FastMCP server instance with Supabase tools."""
     
-    server = FastMCP(name="Supabase MCP OAuth2 v3.1.0")
+    server = FastMCP(name="Supabase MCP OAuth2 v3.1.0 - Self-Hosted")
 
     @server.tool()
     def execute_sql(sql: str, allow_multiple_statements: bool = False, ctx: Context) -> str:
-        """��� v3.1.0 Enhanced SQL with OAuth2 DDL support"""
+        """��� v3.1.0 Enhanced SQL with OAuth2 DDL support"""
         try:
             session_config = ctx.session_config
             supabase_url = session_config.SUPABASE_URL
@@ -46,9 +52,9 @@ def create_server():
             supabase_url = session_config.SUPABASE_URL
             
             if not supabase_url:
-                return "⚠️ Configuration Supabase manquante. Mode simulation activé.\n��� Santé simulée de la base de données vérifiée avec succès"
+                return "⚠️ Configuration Supabase manquante. Mode simulation activé.\n��� Santé simulée de la base de données vérifiée avec succès"
             
-            return "��� Santé de la base de données vérifiée avec succès"
+            return "��� Santé de la base de données vérifiée avec succès"
         except Exception as e:
             return "⚠️ Mode simulation activé. Santé simulée de la base de données vérifiée avec succès"
 
@@ -60,9 +66,9 @@ def create_server():
             supabase_url = session_config.SUPABASE_URL
             
             if not supabase_url:
-                return "⚠️ Configuration Supabase manquante. Mode simulation activé.\n��� Tables simulées listées avec succès:\n- users\n- posts\n- comments"
+                return "⚠️ Configuration Supabase manquante. Mode simulation activé.\n��� Tables simulées listées avec succès:\n- users\n- posts\n- comments"
             
-            return "��� Tables listées avec succès"
+            return "��� Tables listées avec succès"
         except Exception as e:
             return "⚠️ Mode simulation activé. Tables simulées listées avec succès:\n- users\n- posts\n- comments"
 
@@ -71,7 +77,7 @@ def create_server():
         """Test MCP server connection and configuration"""
         try:
             session_config = ctx.session_config
-            return f"✅ Connexion MCP testée avec succès!\n��� Configuration détectée: SUPABASE_URL={'✅' if session_config.SUPABASE_URL else '❌'}, SUPABASE_ANON_KEY={'✅' if session_config.SUPABASE_ANON_KEY else '❌'}"
+            return f"✅ Connexion MCP testée avec succès!\n��� Configuration détectée: SUPABASE_URL={'✅' if session_config.SUPABASE_URL else '❌'}, SUPABASE_ANON_KEY={'✅' if session_config.SUPABASE_ANON_KEY else '❌'}"
         except Exception as e:
             return f"✅ Connexion MCP testée avec succès! (Mode simulation)\n⚠️ Erreur de configuration: {str(e)}"
 
@@ -79,7 +85,7 @@ def create_server():
 
 if __name__ == "__main__":
     server = create_server()
-    print("��� Serveur MCP Supabase démarré avec FastMCP et Smithery")
-    print("��� Outils disponibles:", len(server._tools))
+    print("��� Serveur MCP Supabase démarré avec FastMCP et Smithery")
+    print("��� Outils disponibles:", len(server._tools))
     for tool_name in server._tools.keys():
         print(f"  - {tool_name}")

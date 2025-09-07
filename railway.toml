@@ -1,0 +1,21 @@
+# Railway Configuration pour mcp.coupaul.fr
+# Ce fichier configure Railway pour déployer votre serveur MCP
+
+[build]
+builder = "dockerfile"
+
+[deploy]
+startCommand = "python src/supabase_server.py"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "always"
+
+[env]
+PYTHONUNBUFFERED = "1"
+PYTHONDONTWRITEBYTECODE = "1"
+PYTHONPATH = "/app"
+
+# Variables d'environnement à configurer dans Railway:
+# SUPABASE_URL = votre-url-supabase
+# SUPABASE_ANON_KEY = votre-cle-anonyme
+# SUPABASE_SERVICE_KEY = votre-cle-service (optionnel)

@@ -1,0 +1,20 @@
+# Render Configuration pour mcp.coupaul.fr
+# Ce fichier configure Render pour déployer votre serveur MCP
+
+services:
+  - type: web
+    name: supabase-mcp-server
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: PYTHONDONTWRITEBYTECODE
+        value: 1
+      - key: PYTHONPATH
+        value: /app
+    # Variables d'environnement à configurer dans Render:
+    # SUPABASE_URL = votre-url-supabase
+    # SUPABASE_ANON_KEY = votre-cle-anonyme
+    # SUPABASE_SERVICE_KEY = votre-cle-service (optionnel)
