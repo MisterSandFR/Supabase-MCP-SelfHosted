@@ -1,14 +1,12 @@
 [build]
-builder = "nixpacks"
+builder = "dockerfile"
 
 [deploy]
-startCommand = "cd server && npm start"
+startCommand = "python mcp_hub.py"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "always"
 
 [env]
-PORT = "8002"
-NODE_ENV = "production"
-MINECRAFT_VERSION = "1.6.4"
-FORGE_VERSION = "1.6.4-9.11.1.965"
+PORT = "8000"
+PYTHONUNBUFFERED = "1"
