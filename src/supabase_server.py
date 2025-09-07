@@ -47,6 +47,73 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                 }
             }
             self.wfile.write(json.dumps(config).encode())
+        elif self.path == "/smithery-test":
+            # Endpoint spécifique pour Smithery
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.end_headers()
+            
+            smithery_response = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "protocolVersion": "2025-06-18",
+                    "capabilities": {
+                        "tools": {
+                            "listChanged": True
+                        }
+                    },
+                    "serverInfo": {
+                        "name": "supabase-mcp-server",
+                        "version": "3.1.0"
+                    },
+                    "tools": [
+                        {
+                            "name": "execute_sql",
+                            "description": "Execute SQL queries on Supabase",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "sql": {"type": "string", "description": "SQL query to execute"},
+                                    "allow_multiple_statements": {"type": "boolean", "default": False}
+                                },
+                                "required": ["sql"]
+                            }
+                        },
+                        {
+                            "name": "list_tables",
+                            "description": "List all database tables",
+                            "inputSchema": {"type": "object", "properties": {}}
+                        },
+                        {
+                            "name": "check_health",
+                            "description": "Check Supabase health status",
+                            "inputSchema": {"type": "object", "properties": {}}
+                        },
+                        {
+                            "name": "list_auth_users",
+                            "description": "List authentication users",
+                            "inputSchema": {"type": "object", "properties": {}}
+                        },
+                        {
+                            "name": "create_auth_user",
+                            "description": "Create new authentication user",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {"type": "string"},
+                                    "password": {"type": "string"}
+                                },
+                                "required": ["email", "password"]
+                            }
+                        }
+                    ]
+                }
+            }
+            self.wfile.write(json.dumps(smithery_response).encode())
         elif self.path == "/test":
             # Endpoint de test pour Smithery
             self.send_response(200)
@@ -259,7 +326,7 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                         "jsonrpc": "2.0",
                         "id": request.get("id", "config"),
                         "result": {
-                            "protocolVersion": "2024-11-05",
+                            "protocolVersion": "2025-06-18",
                             "capabilities": {
                                 "tools": {
                                     "listChanged": True
@@ -339,7 +406,7 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
                 
                 if method == "initialize":
                     response["result"] = {
-                        "protocolVersion": "2024-11-05",
+                        "protocolVersion": "2025-06-18",
                         "capabilities": {
                             "tools": {
                                 "listChanged": True
