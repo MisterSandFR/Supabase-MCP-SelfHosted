@@ -21,7 +21,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             print(f"GET request to: {self.path}")
             if self.path == '/health':
                 self.send_health_response()
-            elif self.path == '/mcp':
+            elif self.path == '/mcp' or self.path.startswith('/mcp?'):
                 self.send_mcp_endpoint()
             elif self.path == '/.well-known/mcp-config' or self.path.startswith('/.well-known/mcp-config?'):
                 self.send_mcp_config()
@@ -48,13 +48,16 @@ class MCPHubHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         print(f"POST request to: {self.path}")
-        if self.path == '/mcp':
+        if self.path == '/mcp' or self.path.startswith('/mcp?'):
             # Lire le body de la requête POST
             content_length = int(self.headers.get('Content-Length', 0))
             if content_length > 0:
                 post_data = self.rfile.read(content_length)
-                print(f"POST /mcp - Body: {post_data.decode('utf-8', errors='ignore')}")
-            self.send_mcp_endpoint()
+                print(f"POST {self.path} - Body: {post_data.decode('utf-8', errors='ignore')}")
+                # Traiter la requête JSON-RPC
+                self.handle_jsonrpc_request(post_data.decode('utf-8', errors='ignore'))
+            else:
+                self.send_mcp_endpoint()
         elif self.path == '/.well-known/mcp-config':
             # Support POST pour well-known MCP config
             content_length = int(self.headers.get('Content-Length', 0))
@@ -1032,47 +1035,173 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
-        servers = [
-            {
-                "id": "supabase-mcp",
-                "name": "Supabase MCP Server v3.1.0",
-                "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management",
-                "version": "3.1.0",
-                "status": "online",
-                "tools_count": 54,
-                "endpoints": {
-                    "health": "/health",
-                    "mcp": "/mcp",
-                    "api": "/api/servers",
-                    "tools": "/api/tools"
-                },
-                "capabilities": ["tools", "production_mode", "database_management"],
-                "self_hosted": True,
-                "url": "mcp.coupaul.fr",
-                "repository": "https://github.com/MisterSandFR/Supabase-MCP-SelfHosted",
-                "last_updated": datetime.now().isoformat()
-            },
-            {
-                "id": "file-manager-mcp",
-                "name": "File Manager MCP v2.0.0",
-                "description": "Gestionnaire de fichiers avancé avec compression, recherche et synchronisation",
-                "version": "2.0.0",
-                "status": "online",
-                "tools_count": 12,
-                "endpoints": {
-                    "health": "/health",
-                    "mcp": "/mcp",
-                    "api": "/api/servers",
-                    "tools": "/api/tools"
-                },
-                "capabilities": ["file_operations", "compression", "search", "sync"],
-                "self_hosted": True,
-                "url": "files.mcp.example.com",
-                "repository": "https://github.com/example/file-manager-mcp",
-                "last_updated": datetime.now().isoformat()
-            }
-        ]
+               servers = [
+                   {
+                       "id": "supabase-mcp",
+                       "name": "Supabase MCP Server v3.1.0",
+                       "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management",
+                       "version": "3.1.0",
+                       "status": "online",
+                       "tools_count": 54,
+                       "endpoints": {
+                           "health": "/health",
+                           "mcp": "/mcp",
+                           "api": "/api/servers",
+                           "tools": "/api/tools"
+                       },
+                       "capabilities": ["tools", "production_mode", "database_management", "migrations", "auth", "storage", "rls", "realtime"],
+                       "self_hosted": True,
+                       "url": "mcp.coupaul.fr",
+                       "repository": "https://github.com/MisterSandFR/Supabase-MCP-SelfHosted",
+                       "github_stars": "⭐ 15+",
+                       "last_updated": datetime.now().isoformat()
+                   }
+               ]
         self.wfile.write(json.dumps(servers, indent=2).encode())
+
+    def get_tools_list(self):
+        """Récupérer la liste des outils depuis tools/list"""
+        return [
+            # === OUTILS DE BASE ===
+            {"name": "ping", "description": "Simple ping test for Smithery scanning - Always works"},
+            {"name": "test_connection", "description": "Test MCP server connection for Smithery scanning"},
+            {"name": "get_server_info", "description": "Get server information and capabilities"},
+            {"name": "get_capabilities", "description": "Get server capabilities for Smithery scanning"},
+            {"name": "smithery_scan_test", "description": "Special tool for Smithery scanning compatibility"},
+            
+            # === GESTION DE BASE DE DONNÉES ===
+            {"name": "execute_sql", "description": "Execute SQL queries with advanced database management"},
+            {"name": "check_health", "description": "Check database health and connectivity"},
+            {"name": "list_tables", "description": "List database tables and schemas"},
+            {"name": "inspect_schema", "description": "Inspect database schema structure"},
+            {"name": "get_database_stats", "description": "Get database statistics and metrics"},
+            
+            # === MIGRATIONS ===
+            {"name": "create_migration", "description": "Create a new database migration"},
+            {"name": "apply_migration", "description": "Apply database migration"},
+            {"name": "list_migrations", "description": "List all database migrations"},
+            {"name": "push_migrations", "description": "Push migrations to remote database"},
+            {"name": "validate_migration", "description": "Validate migration before applying"},
+            
+            # === AUTHENTIFICATION ===
+            {"name": "create_auth_user", "description": "Create a new authenticated user"},
+            {"name": "get_auth_user", "description": "Get authenticated user information"},
+            {"name": "list_auth_users", "description": "List all authenticated users"},
+            {"name": "update_auth_user", "description": "Update authenticated user information"},
+            {"name": "delete_auth_user", "description": "Delete authenticated user"},
+            
+            # === STOCKAGE ===
+            {"name": "list_storage_buckets", "description": "List all storage buckets"},
+            {"name": "list_storage_objects", "description": "List objects in storage bucket"},
+            {"name": "manage_storage_policies", "description": "Manage storage bucket policies"},
+            
+            # === RLS (ROW LEVEL SECURITY) ===
+            {"name": "manage_rls_policies", "description": "Manage Row Level Security policies"},
+            {"name": "analyze_rls_coverage", "description": "Analyze RLS policy coverage"},
+            
+            # === EXTENSIONS ===
+            {"name": "list_extensions", "description": "List installed PostgreSQL extensions"},
+            {"name": "manage_extensions", "description": "Manage PostgreSQL extensions"},
+            
+            # === FONCTIONS ===
+            {"name": "manage_functions", "description": "Manage database functions"},
+            
+            # === TRIGGERS ===
+            {"name": "manage_triggers", "description": "Manage database triggers"},
+            
+            # === RÔLES ===
+            {"name": "manage_roles", "description": "Manage database roles"},
+            
+            # === WEBHOOKS ===
+            {"name": "manage_webhooks", "description": "Manage webhooks"},
+            
+            # === REALTIME ===
+            {"name": "list_realtime_publications", "description": "List realtime publications"},
+            {"name": "realtime_management", "description": "Manage realtime subscriptions"},
+            
+            # === MONITORING & LOGS ===
+            {"name": "get_logs", "description": "Get application logs"},
+            {"name": "metrics_dashboard", "description": "Get metrics dashboard data"},
+            
+            # === SÉCURITÉ ===
+            {"name": "audit_security", "description": "Audit security configuration"},
+            {"name": "verify_jwt_secret", "description": "Verify JWT secret configuration"},
+            
+            # === PERFORMANCE ===
+            {"name": "analyze_performance", "description": "Analyze database performance"},
+            {"name": "auto_create_indexes", "description": "Automatically create missing indexes"},
+            {"name": "vacuum_analyze", "description": "Run VACUUM ANALYZE on database"},
+            
+            # === BACKUP & RESTORE ===
+            {"name": "backup_database", "description": "Create database backup"},
+            
+            # === CACHE ===
+            {"name": "cache_management", "description": "Manage application cache"},
+            
+            # === ENVIRONNEMENT ===
+            {"name": "environment_management", "description": "Manage environment variables"},
+            
+            # === SECRETS ===
+            {"name": "manage_secrets", "description": "Manage application secrets"},
+            
+            # === DOCKER ===
+            {"name": "manage_docker", "description": "Manage Docker containers"},
+            
+            # === UTILITAIRES ===
+            {"name": "get_project_url", "description": "Get project URL"},
+            {"name": "get_anon_key", "description": "Get anonymous key"},
+            {"name": "get_service_key", "description": "Get service role key"},
+            {"name": "get_database_connections", "description": "Get database connection info"},
+            {"name": "sync_schema", "description": "Sync database schema"},
+            {"name": "import_schema", "description": "Import database schema"},
+            {"name": "rebuild_hooks", "description": "Rebuild database hooks"},
+            {"name": "smart_migration", "description": "Smart migration with conflict resolution"},
+            {"name": "auto_migrate", "description": "Automatically migrate database"},
+            {"name": "generate_crud_api", "description": "Generate CRUD API for table"},
+            {"name": "generate_typescript_types", "description": "Generate TypeScript types from schema"}
+        ]
+
+    def get_tool_category(self, tool_name):
+        """Déterminer la catégorie d'un outil"""
+        categories = {
+            "ping": "utility", "test_connection": "utility", "get_server_info": "info", 
+            "get_capabilities": "info", "smithery_scan_test": "smithery",
+            "execute_sql": "database", "check_health": "monitoring", "list_tables": "database",
+            "inspect_schema": "database", "get_database_stats": "monitoring",
+            "create_migration": "migration", "apply_migration": "migration", 
+            "list_migrations": "migration", "push_migrations": "migration", 
+            "validate_migration": "migration", "smart_migration": "migration", 
+            "auto_migrate": "migration", "sync_schema": "migration", "import_schema": "migration",
+            "create_auth_user": "auth", "get_auth_user": "auth", "list_auth_users": "auth",
+            "update_auth_user": "auth", "delete_auth_user": "auth",
+            "list_storage_buckets": "storage", "list_storage_objects": "storage", 
+            "manage_storage_policies": "storage",
+            "manage_rls_policies": "security", "analyze_rls_coverage": "security",
+            "audit_security": "security", "verify_jwt_secret": "security",
+            "list_extensions": "extensions", "manage_extensions": "extensions",
+            "manage_functions": "functions", "manage_triggers": "triggers", 
+            "manage_roles": "roles", "manage_webhooks": "webhooks",
+            "list_realtime_publications": "realtime", "realtime_management": "realtime",
+            "get_logs": "monitoring", "metrics_dashboard": "monitoring",
+            "analyze_performance": "performance", "auto_create_indexes": "performance", 
+            "vacuum_analyze": "performance", "backup_database": "backup",
+            "cache_management": "cache", "environment_management": "environment",
+            "manage_secrets": "secrets", "manage_docker": "docker",
+            "get_project_url": "utility", "get_anon_key": "utility", 
+            "get_service_key": "utility", "get_database_connections": "utility",
+            "rebuild_hooks": "utility", "generate_crud_api": "generation",
+            "generate_typescript_types": "generation"
+        }
+        return categories.get(tool_name, "utility")
+
+    def is_tool_always_works(self, tool_name):
+        """Déterminer si un outil fonctionne toujours"""
+        always_works = [
+            "ping", "test_connection", "get_server_info", "get_capabilities", 
+            "smithery_scan_test", "get_project_url", "get_anon_key", 
+            "get_service_key", "get_database_connections"
+        ]
+        return tool_name in always_works
 
     def send_tools_api(self):
         """API des outils MCP"""
@@ -1080,26 +1209,174 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
-        tools = [
-            {
-                "name": "ping",
-                "description": "Simple ping test for Smithery scanning - Always works",
+        
+        # Générer automatiquement la liste des outils
+        tools = []
+        for tool in self.get_tools_list():
+            tools.append({
+                "name": tool["name"],
+                "description": tool["description"],
                 "server": "supabase-mcp",
-                "category": "utility",
-                "always_works": True
-            },
-            {
-                "name": "test_connection",
-                "description": "Test MCP server connection for Smithery scanning",
-                "server": "supabase-mcp",
-                "category": "utility",
-                "always_works": True
-            },
-            {
-                "name": "get_server_info",
-                "description": "Get server information and capabilities",
-                "server": "supabase-mcp",
-                "category": "info",
+                "category": self.get_tool_category(tool["name"]),
+                "always_works": self.is_tool_always_works(tool["name"])
+            })
+        
+        self.wfile.write(json.dumps(tools, indent=2).encode())
+
+    def send_hub_page(self):
+        """Page hub principale avec design moderne Tailwind CSS"""
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html; charset=utf-8')
+        self.end_headers()
+        
+        html_content = f"""
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Hub - Serveurs MCP Supabase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {{
+            darkMode: 'class',
+            theme: {{
+                extend: {{
+                    colors: {{
+                        primary: '#3b82f6',
+                        secondary: '#1e40af',
+                        accent: '#06b6d4'
+                    }}
+                }}
+            }}
+        }}
+    </script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-primary mb-4">MCP Hub</h1>
+            <p class="text-xl text-gray-300 mb-6">Centre de contrôle pour tous vos serveurs MCP</p>
+            <div class="flex justify-center space-x-4">
+                <span class="bg-green-600 px-3 py-1 rounded-full text-sm">2 Serveurs</span>
+                <span class="bg-blue-600 px-3 py-1 rounded-full text-sm">54 Outils</span>
+                <span class="bg-purple-600 px-3 py-1 rounded-full text-sm">En ligne</span>
+            </div>
+        </header>
+
+        <!-- Serveurs MCP -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6 text-center">Serveurs MCP Disponibles</h2>
+            <div class="grid md:grid-cols-1 gap-6">
+                <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-primary transition-colors">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-primary">Supabase MCP Server v3.1.0</h3>
+                        <span class="bg-green-600 px-2 py-1 rounded text-sm">En ligne</span>
+                    </div>
+                    <p class="text-gray-300 mb-4">Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management</p>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-primary">54</div>
+                            <div class="text-sm text-gray-400">Outils</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-500">8</div>
+                            <div class="text-sm text-gray-400">Catégories</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-500">100%</div>
+                            <div class="text-sm text-gray-400">Autonome</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-500">⭐ 15+</div>
+                            <div class="text-sm text-gray-400">GitHub</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="bg-gray-700 px-2 py-1 rounded text-xs">tools</span>
+                        <span class="bg-gray-700 px-2 py-1 rounded text-xs">production_mode</span>
+                        <span class="bg-gray-700 px-2 py-1 rounded text-xs">database_management</span>
+                        <span class="bg-gray-700 px-2 py-1 rounded text-xs">migrations</span>
+                        <span class="bg-gray-700 px-2 py-1 rounded text-xs">auth</span>
+                        <span class="bg-gray-700 px-2 py-1 rounded text-xs">storage</span>
+                        <span class="bg-gray-700 px-2 py-1 rounded text-xs">rls</span>
+                        <span class="bg-gray-700 px-2 py-1 rounded text-xs">realtime</span>
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <a href="https://github.com/MisterSandFR/Supabase-MCP-SelfHosted" 
+                           target="_blank" 
+                           class="bg-primary hover:bg-blue-700 px-4 py-2 rounded text-white text-sm transition-colors">
+                            📁 GitHub
+                        </a>
+                        <a href="/api/tools" 
+                           class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-white text-sm transition-colors">
+                            🔧 API Tools
+                        </a>
+                        <a href="/health" 
+                           class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white text-sm transition-colors">
+                            ❤️ Health
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Endpoints -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6 text-center">Endpoints MCP</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4 text-primary">Communication MCP</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <code class="bg-gray-700 px-2 py-1 rounded text-sm">/.well-known/mcp-config</code>
+                            <span class="text-green-500 text-sm">GET</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <code class="bg-gray-700 px-2 py-1 rounded text-sm">/mcp</code>
+                            <span class="text-blue-500 text-sm">POST</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <code class="bg-gray-700 px-2 py-1 rounded text-sm">/?config=e30%3D</code>
+                            <span class="text-purple-500 text-sm">POST</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4 text-primary">API REST</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <code class="bg-gray-700 px-2 py-1 rounded text-sm">/health</code>
+                            <span class="text-green-500 text-sm">GET</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <code class="bg-gray-700 px-2 py-1 rounded text-sm">/api/servers</code>
+                            <span class="text-blue-500 text-sm">GET</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <code class="bg-gray-700 px-2 py-1 rounded text-sm">/api/tools</code>
+                            <span class="text-purple-500 text-sm">GET</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center text-gray-400 text-sm">
+            <p>MCP Hub v3.1.0 - Dernière mise à jour: {datetime.now().strftime('%d/%m/%Y %H:%M')}</p>
+            <p class="mt-2">Commit: <code class="bg-gray-800 px-2 py-1 rounded">4432c7b</code></p>
+        </footer>
+    </div>
+</body>
+</html>
+        """
+        self.wfile.write(html_content.encode('utf-8'))
                 "always_works": True
             },
             {
