@@ -34,14 +34,230 @@ class MCPHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             html = """
-            <html>
-                <body>
+            <!DOCTYPE html>
+            <html lang="fr">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Supabase MCP Server - Self-Hosted</title>
+                <style>
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        min-height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: #333;
+                    }
+                    
+                    .container {
+                        background: white;
+                        border-radius: 20px;
+                        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                        padding: 40px;
+                        max-width: 600px;
+                        width: 90%;
+                        text-align: center;
+                    }
+                    
+                    .logo {
+                        width: 80px;
+                        height: 80px;
+                        background: linear-gradient(135deg, #3ecf8e, #3b82f6);
+                        border-radius: 20px;
+                        margin: 0 auto 20px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 32px;
+                        color: white;
+                        font-weight: bold;
+                    }
+                    
+                    h1 {
+                        color: #1f2937;
+                        font-size: 2.5rem;
+                        margin-bottom: 10px;
+                        font-weight: 700;
+                    }
+                    
+                    .subtitle {
+                        color: #6b7280;
+                        font-size: 1.1rem;
+                        margin-bottom: 30px;
+                    }
+                    
+                    .status {
+                        background: #f0fdf4;
+                        border: 2px solid #22c55e;
+                        border-radius: 12px;
+                        padding: 15px;
+                        margin: 20px 0;
+                        color: #166534;
+                        font-weight: 600;
+                    }
+                    
+                    .info-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 20px;
+                        margin: 30px 0;
+                    }
+                    
+                    .info-card {
+                        background: #f8fafc;
+                        border-radius: 12px;
+                        padding: 20px;
+                        border: 1px solid #e2e8f0;
+                    }
+                    
+                    .info-label {
+                        color: #64748b;
+                        font-size: 0.9rem;
+                        margin-bottom: 5px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+                    
+                    .info-value {
+                        color: #1e293b;
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        word-break: break-all;
+                    }
+                    
+                    .buttons {
+                        display: flex;
+                        gap: 15px;
+                        justify-content: center;
+                        margin-top: 30px;
+                        flex-wrap: wrap;
+                    }
+                    
+                    .btn {
+                        padding: 12px 24px;
+                        border-radius: 10px;
+                        text-decoration: none;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                        border: none;
+                        cursor: pointer;
+                        font-size: 1rem;
+                    }
+                    
+                    .btn-primary {
+                        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+                        color: white;
+                    }
+                    
+                    .btn-primary:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+                    }
+                    
+                    .btn-secondary {
+                        background: linear-gradient(135deg, #10b981, #059669);
+                        color: white;
+                    }
+                    
+                    .btn-secondary:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+                    }
+                    
+                    .btn-outline {
+                        background: transparent;
+                        color: #3b82f6;
+                        border: 2px solid #3b82f6;
+                    }
+                    
+                    .btn-outline:hover {
+                        background: #3b82f6;
+                        color: white;
+                    }
+                    
+                    .tools {
+                        background: #fef3c7;
+                        border: 2px solid #f59e0b;
+                        border-radius: 12px;
+                        padding: 20px;
+                        margin: 20px 0;
+                    }
+                    
+                    .tools-title {
+                        color: #92400e;
+                        font-weight: 600;
+                        margin-bottom: 10px;
+                    }
+                    
+                    .tools-list {
+                        color: #a16207;
+                        font-size: 0.9rem;
+                    }
+                    
+                    @media (max-width: 640px) {
+                        .info-grid {
+                            grid-template-columns: 1fr;
+                        }
+                        
+                        .buttons {
+                            flex-direction: column;
+                        }
+                        
+                        h1 {
+                            font-size: 2rem;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="logo">🚀</div>
                     <h1>Supabase MCP Server</h1>
-                    <p>Status: Running</p>
-                    <p>Supabase URL: """ + self.config.SUPABASE_URL + """</p>
-                    <p>Tools: 5</p>
-                    <p><a href="/health">Health Check</a></p>
-                </body>
+                    <p class="subtitle">Self-Hosted Edition v3.1.0</p>
+                    
+                    <div class="status">
+                        ✅ Server Status: Running & Healthy
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-label">Supabase URL</div>
+                            <div class="info-value">""" + self.config.SUPABASE_URL + """</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Available Tools</div>
+                            <div class="info-value">5 MCP Tools</div>
+                        </div>
+                    </div>
+                    
+                    <div class="tools">
+                        <div class="tools-title">🛠️ Available MCP Tools</div>
+                        <div class="tools-list">
+                            execute_sql • list_tables • check_health • list_auth_users • create_auth_user
+                        </div>
+                    </div>
+                    
+                    <div class="buttons">
+                        <a href="/health" class="btn btn-primary">Health Check</a>
+                        <a href="https://smithery.ai/server/@MisterSandFR/supabase-mcp-selfhosted" class="btn btn-secondary" target="_blank">View on Smithery</a>
+                        <a href="/mcp" class="btn btn-outline">MCP Endpoint</a>
+                    </div>
+                    
+                    <div style="margin-top: 30px; color: #6b7280; font-size: 0.9rem;">
+                        <p>🔗 <strong>MCP Endpoint:</strong> <code>/mcp</code></p>
+                        <p>🏥 <strong>Health Check:</strong> <code>/health</code></p>
+                        <p>📚 <strong>Documentation:</strong> Available on Smithery</p>
+                    </div>
+                </div>
+            </body>
             </html>
             """
             self.wfile.write(html.encode())
