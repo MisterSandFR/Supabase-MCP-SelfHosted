@@ -675,6 +675,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             <div class="glass-effect rounded-xl p-6">
                 <p class="text-white/80 text-lg font-medium mb-2">🚀 MCP Hub - Serveurs MCP Multiples</p>
                 <p class="text-white/60 text-sm">Self-hosted sur mcp.coupaul.fr | Compatible Smithery</p>
+                <p class="text-white/50 text-xs mt-2">Commit: 22872ca | Build: """ + datetime.now().strftime('%Y-%m-%d %H:%M') + """</p>
             </div>
         </div>
     </div>
