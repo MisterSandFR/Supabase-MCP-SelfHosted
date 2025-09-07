@@ -19,6 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copie du code source
 COPY src/ ./src/
+COPY healthcheck_server.py .
 
 # Création d'un utilisateur non-root
 RUN useradd --create-home --shell /bin/bash app && \
@@ -26,7 +27,7 @@ RUN useradd --create-home --shell /bin/bash app && \
 USER app
 
 # Exposition du port
-EXPOSE 3000
+EXPOSE 8000
 
-# Point d'entrée
-CMD ["python", "src/supabase_server.py"]
+# Point d'entrée - Démarrer le serveur HTTP de healthcheck
+CMD ["python", "healthcheck_server.py"]

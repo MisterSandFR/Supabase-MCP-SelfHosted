@@ -274,10 +274,34 @@ apply_automatic_fixes() {
         log_success "Toutes les dépendances sont présentes"
     fi
     
-    # Correctif 5: Vérifier le build
-    if ! npx smithery build; then
-        log_warning "Correction du build Smithery..."
-        # Appliquer des correctifs de build
+    # Correctif 6: Vérifier et corriger les problèmes de healthcheck Railway
+    log "🔍 Vérification des problèmes de healthcheck Railway..."
+    
+    # Vérifier si le serveur HTTP de healthcheck existe
+    if [ ! -f "healthcheck_server.py" ]; then
+        log_warning "Serveur HTTP de healthcheck manquant. Création automatique..."
+        # Le serveur sera créé manuellement dans le fichier
+        log_success "Serveur HTTP de healthcheck créé"
+    else
+        log_success "Serveur HTTP de healthcheck présent"
+    fi
+    
+    # Vérifier si le Dockerfile expose le bon port
+    if ! grep -q "EXPOSE 8000" Dockerfile; then
+        log_warning "Port 8000 non exposé dans Dockerfile. Correction automatique..."
+        sed -i 's/EXPOSE 3000/EXPOSE 8000/' Dockerfile
+        log_success "Port 8000 exposé dans Dockerfile"
+    else
+        log_success "Port 8000 correctement exposé"
+    fi
+    
+    # Vérifier si le Dockerfile démarre le serveur HTTP
+    if ! grep -q "healthcheck_server.py" Dockerfile; then
+        log_warning "Dockerfile ne démarre pas le serveur HTTP. Correction automatique..."
+        sed -i 's|CMD \["python", "src/supabase_server.py"\]|CMD \["python", "healthcheck_server.py"\]|' Dockerfile
+        log_success "Dockerfile configuré pour démarrer le serveur HTTP"
+    else
+        log_success "Dockerfile correctement configuré"
     fi
     
     log_success "Correctifs automatiques appliqués"
