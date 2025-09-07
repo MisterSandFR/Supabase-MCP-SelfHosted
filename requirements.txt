@@ -1,2 +1,1 @@
-mcp>=1.13.0
-pydantic>=2.0.0
+# Serveur MCP minimal - pas de dépendances externes

@@ -1,17 +1,14 @@
 runtime: python
-version: 3.1.0
-description: "Supabase MCP Server"
+version: 1.0.0
+description: "Serveur MCP Supabase minimal pour test"
 
 build:
-  command: "pip install -r requirements.txt"
+  command: "echo 'Build minimal - pas de dépendances'"
 
 server:
   command: "python src/supabase_server.py"
 
 env:
   SUPABASE_URL:
-    description: "Your Supabase URL"
-    required: true
-  SUPABASE_ANON_KEY:
-    description: "Supabase anonymous key"
+    description: "URL Supabase"
     required: true
