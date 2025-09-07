@@ -136,7 +136,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                 "service": "MCP Hub",
                 "version": "3.1.0",
                 "servers": 2,
-                "tools": 20,
+                "tools": 54,
                 "uptime": time.time() - start_time,
                 "healthcheck": "OK"
             }
@@ -300,6 +300,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                     "id": request_id,
                     "result": {
                         "tools": [
+                            # === OUTILS DE BASE ===
                             {
                                 "name": "ping",
                                 "description": "Simple ping test for Smithery scanning - Always works",
@@ -342,6 +343,615 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                                 "inputSchema": {
                                     "type": "object",
                                     "properties": {},
+                                    "required": []
+                                }
+                            },
+                            
+                            # === GESTION DE BASE DE DONNÉES ===
+                            {
+                                "name": "execute_sql",
+                                "description": "Execute SQL queries with advanced database management",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "query": {"type": "string", "description": "SQL query to execute"},
+                                        "params": {"type": "array", "description": "Query parameters"}
+                                    },
+                                    "required": ["query"]
+                                }
+                            },
+                            {
+                                "name": "check_health",
+                                "description": "Check database health and connectivity",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "list_tables",
+                                "description": "List database tables and schemas",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "schema": {"type": "string", "description": "Schema name to filter"}
+                                    },
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "inspect_schema",
+                                "description": "Inspect database schema structure",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "table": {"type": "string", "description": "Table name to inspect"}
+                                    },
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "get_database_stats",
+                                "description": "Get database statistics and metrics",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            
+                            # === MIGRATIONS ===
+                            {
+                                "name": "create_migration",
+                                "description": "Create a new database migration",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {"type": "string", "description": "Migration name"},
+                                        "up": {"type": "string", "description": "Up migration SQL"},
+                                        "down": {"type": "string", "description": "Down migration SQL"}
+                                    },
+                                    "required": ["name", "up"]
+                                }
+                            },
+                            {
+                                "name": "apply_migration",
+                                "description": "Apply database migration",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "migration_id": {"type": "string", "description": "Migration ID to apply"}
+                                    },
+                                    "required": ["migration_id"]
+                                }
+                            },
+                            {
+                                "name": "list_migrations",
+                                "description": "List all database migrations",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "push_migrations",
+                                "description": "Push migrations to remote database",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "validate_migration",
+                                "description": "Validate migration before applying",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "migration_id": {"type": "string", "description": "Migration ID to validate"}
+                                    },
+                                    "required": ["migration_id"]
+                                }
+                            },
+                            
+                            # === AUTHENTIFICATION ===
+                            {
+                                "name": "create_auth_user",
+                                "description": "Create a new authenticated user",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "email": {"type": "string", "description": "User email"},
+                                        "password": {"type": "string", "description": "User password"},
+                                        "metadata": {"type": "object", "description": "User metadata"}
+                                    },
+                                    "required": ["email", "password"]
+                                }
+                            },
+                            {
+                                "name": "get_auth_user",
+                                "description": "Get authenticated user information",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user_id": {"type": "string", "description": "User ID"}
+                                    },
+                                    "required": ["user_id"]
+                                }
+                            },
+                            {
+                                "name": "list_auth_users",
+                                "description": "List all authenticated users",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "limit": {"type": "integer", "description": "Number of users to return"},
+                                        "offset": {"type": "integer", "description": "Offset for pagination"}
+                                    },
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "update_auth_user",
+                                "description": "Update authenticated user information",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user_id": {"type": "string", "description": "User ID"},
+                                        "updates": {"type": "object", "description": "Updates to apply"}
+                                    },
+                                    "required": ["user_id", "updates"]
+                                }
+                            },
+                            {
+                                "name": "delete_auth_user",
+                                "description": "Delete authenticated user",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user_id": {"type": "string", "description": "User ID to delete"}
+                                    },
+                                    "required": ["user_id"]
+                                }
+                            },
+                            
+                            # === STOCKAGE ===
+                            {
+                                "name": "list_storage_buckets",
+                                "description": "List all storage buckets",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "list_storage_objects",
+                                "description": "List objects in storage bucket",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "bucket": {"type": "string", "description": "Bucket name"},
+                                        "prefix": {"type": "string", "description": "Object prefix filter"}
+                                    },
+                                    "required": ["bucket"]
+                                }
+                            },
+                            {
+                                "name": "manage_storage_policies",
+                                "description": "Manage storage bucket policies",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "bucket": {"type": "string", "description": "Bucket name"},
+                                        "action": {"type": "string", "description": "Action: create, update, delete"},
+                                        "policy": {"type": "object", "description": "Policy definition"}
+                                    },
+                                    "required": ["bucket", "action"]
+                                }
+                            },
+                            
+                            # === RLS (ROW LEVEL SECURITY) ===
+                            {
+                                "name": "manage_rls_policies",
+                                "description": "Manage Row Level Security policies",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "table": {"type": "string", "description": "Table name"},
+                                        "action": {"type": "string", "description": "Action: create, update, delete"},
+                                        "policy": {"type": "object", "description": "Policy definition"}
+                                    },
+                                    "required": ["table", "action"]
+                                }
+                            },
+                            {
+                                "name": "analyze_rls_coverage",
+                                "description": "Analyze RLS policy coverage",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "table": {"type": "string", "description": "Table name to analyze"}
+                                    },
+                                    "required": []
+                                }
+                            },
+                            
+                            # === EXTENSIONS ===
+                            {
+                                "name": "list_extensions",
+                                "description": "List installed PostgreSQL extensions",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "manage_extensions",
+                                "description": "Manage PostgreSQL extensions",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "extension": {"type": "string", "description": "Extension name"},
+                                        "action": {"type": "string", "description": "Action: install, uninstall, update"}
+                                    },
+                                    "required": ["extension", "action"]
+                                }
+                            },
+                            
+                            # === FONCTIONS ===
+                            {
+                                "name": "manage_functions",
+                                "description": "Manage database functions",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {"type": "string", "description": "Function name"},
+                                        "action": {"type": "string", "description": "Action: create, update, delete"},
+                                        "definition": {"type": "string", "description": "Function definition"}
+                                    },
+                                    "required": ["name", "action"]
+                                }
+                            },
+                            
+                            # === TRIGGERS ===
+                            {
+                                "name": "manage_triggers",
+                                "description": "Manage database triggers",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "table": {"type": "string", "description": "Table name"},
+                                        "action": {"type": "string", "description": "Action: create, update, delete"},
+                                        "trigger": {"type": "object", "description": "Trigger definition"}
+                                    },
+                                    "required": ["table", "action"]
+                                }
+                            },
+                            
+                            # === RÔLES ===
+                            {
+                                "name": "manage_roles",
+                                "description": "Manage database roles",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "role": {"type": "string", "description": "Role name"},
+                                        "action": {"type": "string", "description": "Action: create, update, delete"},
+                                        "permissions": {"type": "array", "description": "Role permissions"}
+                                    },
+                                    "required": ["role", "action"]
+                                }
+                            },
+                            
+                            # === WEBHOOKS ===
+                            {
+                                "name": "manage_webhooks",
+                                "description": "Manage webhooks",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {"type": "string", "description": "Webhook name"},
+                                        "action": {"type": "string", "description": "Action: create, update, delete"},
+                                        "url": {"type": "string", "description": "Webhook URL"},
+                                        "events": {"type": "array", "description": "Events to listen for"}
+                                    },
+                                    "required": ["name", "action"]
+                                }
+                            },
+                            
+                            # === REALTIME ===
+                            {
+                                "name": "list_realtime_publications",
+                                "description": "List realtime publications",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "realtime_management",
+                                "description": "Manage realtime subscriptions",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "action": {"type": "string", "description": "Action: create, update, delete"},
+                                        "publication": {"type": "string", "description": "Publication name"}
+                                    },
+                                    "required": ["action"]
+                                }
+                            },
+                            
+                            # === MONITORING & LOGS ===
+                            {
+                                "name": "get_logs",
+                                "description": "Get application logs",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "level": {"type": "string", "description": "Log level filter"},
+                                        "limit": {"type": "integer", "description": "Number of logs to return"}
+                                    },
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "metrics_dashboard",
+                                "description": "Get metrics dashboard data",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "timeframe": {"type": "string", "description": "Timeframe for metrics"}
+                                    },
+                                    "required": []
+                                }
+                            },
+                            
+                            # === SÉCURITÉ ===
+                            {
+                                "name": "audit_security",
+                                "description": "Audit security configuration",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "verify_jwt_secret",
+                                "description": "Verify JWT secret configuration",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            
+                            # === PERFORMANCE ===
+                            {
+                                "name": "analyze_performance",
+                                "description": "Analyze database performance",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "query": {"type": "string", "description": "Query to analyze"}
+                                    },
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "auto_create_indexes",
+                                "description": "Automatically create missing indexes",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "table": {"type": "string", "description": "Table name"}
+                                    },
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "vacuum_analyze",
+                                "description": "Run VACUUM ANALYZE on database",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "table": {"type": "string", "description": "Table name (optional)"}
+                                    },
+                                    "required": []
+                                }
+                            },
+                            
+                            # === BACKUP & RESTORE ===
+                            {
+                                "name": "backup_database",
+                                "description": "Create database backup",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "format": {"type": "string", "description": "Backup format: sql, custom, tar"},
+                                        "include_data": {"type": "boolean", "description": "Include data in backup"}
+                                    },
+                                    "required": []
+                                }
+                            },
+                            
+                            # === CACHE ===
+                            {
+                                "name": "cache_management",
+                                "description": "Manage application cache",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "action": {"type": "string", "description": "Action: clear, stats, config"},
+                                        "key": {"type": "string", "description": "Cache key (optional)"}
+                                    },
+                                    "required": ["action"]
+                                }
+                            },
+                            
+                            # === ENVIRONNEMENT ===
+                            {
+                                "name": "environment_management",
+                                "description": "Manage environment variables",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "action": {"type": "string", "description": "Action: get, set, delete"},
+                                        "key": {"type": "string", "description": "Environment variable key"},
+                                        "value": {"type": "string", "description": "Environment variable value"}
+                                    },
+                                    "required": ["action"]
+                                }
+                            },
+                            
+                            # === SECRETS ===
+                            {
+                                "name": "manage_secrets",
+                                "description": "Manage application secrets",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "action": {"type": "string", "description": "Action: create, update, delete, list"},
+                                        "name": {"type": "string", "description": "Secret name"},
+                                        "value": {"type": "string", "description": "Secret value"}
+                                    },
+                                    "required": ["action"]
+                                }
+                            },
+                            
+                            # === DOCKER ===
+                            {
+                                "name": "manage_docker",
+                                "description": "Manage Docker containers",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "action": {"type": "string", "description": "Action: start, stop, restart, status"},
+                                        "container": {"type": "string", "description": "Container name"}
+                                    },
+                                    "required": ["action"]
+                                }
+                            },
+                            
+                            # === UTILITAIRES ===
+                            {
+                                "name": "get_project_url",
+                                "description": "Get project URL",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "get_anon_key",
+                                "description": "Get anonymous key",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "get_service_key",
+                                "description": "Get service role key",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "get_database_connections",
+                                "description": "Get database connection info",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "sync_schema",
+                                "description": "Sync database schema",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "source": {"type": "string", "description": "Source schema"},
+                                        "target": {"type": "string", "description": "Target schema"}
+                                    },
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "import_schema",
+                                "description": "Import database schema",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "file": {"type": "string", "description": "Schema file path"},
+                                        "format": {"type": "string", "description": "File format: sql, json"}
+                                    },
+                                    "required": ["file"]
+                                }
+                            },
+                            {
+                                "name": "rebuild_hooks",
+                                "description": "Rebuild database hooks",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "smart_migration",
+                                "description": "Smart migration with conflict resolution",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "migration": {"type": "string", "description": "Migration name"},
+                                        "strategy": {"type": "string", "description": "Conflict resolution strategy"}
+                                    },
+                                    "required": ["migration"]
+                                }
+                            },
+                            {
+                                "name": "auto_migrate",
+                                "description": "Automatically migrate database",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "dry_run": {"type": "boolean", "description": "Dry run mode"}
+                                    },
+                                    "required": []
+                                }
+                            },
+                            {
+                                "name": "generate_crud_api",
+                                "description": "Generate CRUD API for table",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "table": {"type": "string", "description": "Table name"},
+                                        "operations": {"type": "array", "description": "Operations to generate"}
+                                    },
+                                    "required": ["table"]
+                                }
+                            },
+                            {
+                                "name": "generate_typescript_types",
+                                "description": "Generate TypeScript types from schema",
+                                "inputSchema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "table": {"type": "string", "description": "Table name (optional)"},
+                                        "output": {"type": "string", "description": "Output file path"}
+                                    },
                                     "required": []
                                 }
                             }
@@ -429,7 +1039,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                 "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management",
                 "version": "3.1.0",
                 "status": "online",
-                "tools_count": 8,
+                "tools_count": 54,
                 "endpoints": {
                     "health": "/health",
                     "mcp": "/mcp",
@@ -1008,7 +1618,7 @@ if __name__ == "__main__":
     PORT = int(os.environ.get('PORT', 8000))
     
     print(f"🚀 Starting MCP Hub on port {PORT}")
-    print(f"📊 Serving 2 MCP servers with 20 tools")
+    print(f"📊 Serving 2 MCP servers with 54 tools")
     print(f"🌐 Access at: http://localhost:{PORT}")
     print(f"🔧 Well-known endpoint: /.well-known/mcp-config")
     
