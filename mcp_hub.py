@@ -1377,6 +1377,29 @@ class MCPHubHandler(BaseHTTPRequestHandler):
 </html>
         """
         self.wfile.write(html_content.encode('utf-8'))
+
+    def send_404_response(self):
+        print(f"404 - Path not found: {self.path}")
+        self.send_response(404)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(f"<h1>404 - Page not found</h1><p>Path: {self.path}</p><p><a href='/'>Back to hub</a></p>".encode())
+
+    def log_message(self, format, *args):
+        pass
+
+def create_server():
+    """Fonction pour Smithery - Créer le serveur MCP"""
+    return MCPHubHandler
+
+if __name__ == "__main__":
+    PORT = int(os.environ.get('PORT', 8000))
+    
+    print(f"🚀 Starting MCP Hub on port {PORT}")
+    print(f"📊 Serving 2 MCP servers with 54 tools")
+    print(f"🌐 Access at: http://localhost:{PORT}")
+    print(f"🔧 Well-known endpoint: /.well-known/mcp-config")
+    
     with socketserver.TCPServer(("", PORT), MCPHubHandler) as httpd:
         print(f"✅ MCP Hub running on port {PORT}")
         httpd.serve_forever()
