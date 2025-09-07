@@ -1,60 +1,66 @@
-# Minecraft MCP Forge 1.6.4
+# Supabase MCP Server - Self-Hosted Edition
 
-🎮 **Serveur MCP Minecraft GUI** - Analyse automatique des spritesheets et génération de code Java 7
+🗄️ **Serveur MCP Supabase Self-Hosted** - Gestion complète de votre instance Supabase privée
 
 ## 🌟 Fonctionnalités
 
-- 🎨 **Analyse automatique** des spritesheets GUI Minecraft
-- ☕ **Génération de code Java 7** compatible Forge 1.6.4
-- 🔧 **Outils MCP spécialisés** pour le développement Minecraft
+- 🔐 **Gestion complète** de votre instance Supabase privée
+- 🛠️ **54+ outils MCP** pour l'administration Supabase
 - 📊 **Monitoring** et métriques en temps réel
 - 🚀 **Déploiement automatique** sur Railway
-- 📈 **Performance** optimisée pour le développement mod
+- 🔒 **Sécurité renforcée** avec prévention SQL injection
+- ⚡ **Performance optimisée** pour la production
 
 ## 🏗️ Architecture
 
-Ce repository contient **uniquement** le serveur MCP Minecraft pur, sans interface web ni hub central.
+Ce repository contient **uniquement** le serveur MCP Supabase pur, sans interface web ni hub central.
 
 ```
-Minecraft MCP Server (Port 8002)
-├── 🎨 Analyse des spritesheets
-├── ☕ Génération de code Java
-├── 🔧 Outils de développement
-├── 📊 Monitoring
+Supabase MCP Server (Port 8000)
+├── 🗄️ Gestion de base de données
+├── 🔐 Authentification et autorisation
+├── 📁 Stockage et fichiers
+├── 🔄 Temps réel et subscriptions
+├── 🛠️ Migrations et schémas
+├── 📊 Monitoring et logs
 └── 🚀 Déploiement automatique
 ```
 
 ## 🚀 Démarrage Rapide
 
 ### Prérequis
-- Node.js 18+
-- Java 7 (pour compiler le code généré)
-- Forge 1.6.4 (MCPC+)
+- Python 3.11+
+- Instance Supabase (self-hosted ou cloud)
+- Variables d'environnement Supabase
 
 ### Installation
 
 ```bash
 # Cloner le repository
-git clone https://github.com/coupaul/Minecraft-MCP-Forge-1.6.4.git
-cd Minecraft-MCP-Forge-1.6.4
+git clone https://github.com/MisterSandFR/Supabase-MCP-SelfHosted.git
+cd Supabase-MCP-SelfHosted
 
-# Installer les dépendances
-cd server
-npm install
+# Installer les dépendances Python
+pip install -r requirements.txt
 
-# Build le projet
-npm run build
+# Configurer les variables d'environnement
+export SUPABASE_URL="https://your-project.supabase.co"
+export SUPABASE_ANON_KEY="your-anon-key"
+export SUPABASE_SERVICE_KEY="your-service-key"  # Optionnel
 
 # Démarrer le serveur
-npm start
+python src/supabase_server.py
 ```
 
 ### Avec Docker
 
 ```bash
 # Build et démarrage
-docker build -t minecraft-mcp-server .
-docker run -p 8002:8002 minecraft-mcp-server
+docker build -t supabase-mcp-server .
+docker run -p 8000:8000 \
+  -e SUPABASE_URL="https://your-project.supabase.co" \
+  -e SUPABASE_ANON_KEY="your-anon-key" \
+  supabase-mcp-server
 ```
 
 ## ⚙️ Configuration
@@ -62,33 +68,85 @@ docker run -p 8002:8002 minecraft-mcp-server
 ### Variables d'Environnement
 
 ```bash
-# Server Configuration
-PORT=8002
-LOG_LEVEL=INFO
-NODE_ENV=production
+# Supabase Configuration
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=eyJ... (votre clé anonyme)
+SUPABASE_SERVICE_KEY=eyJ... (optionnel, pour opérations privilégiées)
 
-# Minecraft Configuration
-MINECRAFT_VERSION=1.6.4
-FORGE_VERSION=1.6.4-9.11.1.965
+# Server Configuration
+PORT=8000
+PYTHONUNBUFFERED=1
 ```
 
 ## 🛠️ Outils MCP Disponibles
 
-### Analyse GUI (5 outils)
-- `analyze_spritesheet` - Analyse des spritesheets GUI
-- `extract_gui_elements` - Extraction des éléments GUI
-- `generate_gui_code` - Génération de code GUI Java
-- `validate_gui_structure` - Validation de la structure GUI
-- `optimize_gui_layout` - Optimisation du layout GUI
+### Base de Données (15 outils)
+- `execute_sql` - Exécution de requêtes SQL
+- `list_tables` - Liste des tables
+- `inspect_schema` - Inspection du schéma
+- `apply_migration` - Application de migrations
+- `backup_database` - Sauvegarde de base
+- `restore_database` - Restauration de base
+- `vacuum_analyze` - Optimisation de base
+- `get_database_stats` - Statistiques de base
+- `create_index` - Création d'index
+- `drop_index` - Suppression d'index
+- `list_extensions` - Liste des extensions
+- `manage_extensions` - Gestion des extensions
+- `execute_psql` - Commandes psql
+- `check_health` - Vérification de santé
+- `get_database_connections` - Connexions de base
 
-### Génération de Code (3 outils)
-- `generate_java_class` - Génération de classe Java
-- `generate_forge_mod` - Génération de mod Forge
-- `compile_java_code` - Compilation du code Java
+### Authentification (8 outils)
+- `list_auth_users` - Liste des utilisateurs
+- `create_auth_user` - Création d'utilisateur
+- `update_auth_user` - Mise à jour d'utilisateur
+- `delete_auth_user` - Suppression d'utilisateur
+- `get_auth_user` - Récupération d'utilisateur
+- `verify_jwt_secret` - Vérification JWT
+- `manage_roles` - Gestion des rôles
+- `manage_rls_policies` - Gestion des politiques RLS
 
-### Développement (2 outils)
-- `create_mod_structure` - Création de structure de mod
-- `validate_mod_code` - Validation du code de mod
+### Stockage (6 outils)
+- `list_storage_buckets` - Liste des buckets
+- `list_storage_objects` - Liste des objets
+- `manage_storage_policies` - Gestion des politiques
+- `upload_file` - Upload de fichier
+- `download_file` - Téléchargement de fichier
+- `delete_file` - Suppression de fichier
+
+### Temps Réel (4 outils)
+- `list_realtime_publications` - Liste des publications
+- `manage_realtime` - Gestion du temps réel
+- `create_subscription` - Création de subscription
+- `delete_subscription` - Suppression de subscription
+
+### Migrations (8 outils)
+- `create_migration` - Création de migration
+- `list_migrations` - Liste des migrations
+- `push_migrations` - Push des migrations
+- `validate_migration` - Validation de migration
+- `smart_migration` - Migration intelligente
+- `auto_migrate` - Migration automatique
+- `sync_schema` - Synchronisation de schéma
+- `import_schema` - Import de schéma
+
+### Monitoring (5 outils)
+- `get_logs` - Récupération des logs
+- `metrics_dashboard` - Tableau de bord métriques
+- `analyze_performance` - Analyse de performance
+- `analyze_rls_coverage` - Analyse couverture RLS
+- `audit_security` - Audit de sécurité
+
+### Utilitaires (8 outils)
+- `generate_typescript_types` - Génération de types TS
+- `generate_crud_api` - Génération d'API CRUD
+- `cache_management` - Gestion du cache
+- `environment_management` - Gestion d'environnement
+- `manage_secrets` - Gestion des secrets
+- `manage_functions` - Gestion des fonctions
+- `manage_triggers` - Gestion des triggers
+- `manage_webhooks` - Gestion des webhooks
 
 ## 🔧 API Endpoints
 
@@ -114,8 +172,8 @@ railway up
 ### Docker
 ```bash
 # Build et déploiement
-docker build -t minecraft-mcp-server .
-docker run -p 8002:8002 minecraft-mcp-server
+docker build -t supabase-mcp-server .
+docker run -p 8000:8000 supabase-mcp-server
 ```
 
 ### Intégration avec Hub Central
@@ -125,12 +183,12 @@ Ce serveur est conçu pour être intégré avec le [MCP Hub Central](https://git
 ```json
 {
   "servers": {
-    "minecraft": {
-      "name": "Minecraft MCP Server",
-      "host": "minecraft.mcp.coupaul.fr",
-      "port": 8002,
-      "path": "/minecraft",
-      "categories": ["gui", "code_generation", "development", "forge"]
+    "supabase": {
+      "name": "Supabase MCP Server",
+      "host": "supabase.mcp.coupaul.fr",
+      "port": 8000,
+      "path": "/supabase",
+      "categories": ["database", "auth", "storage", "realtime", "security", "migration", "monitoring", "performance"]
     }
   }
 }
@@ -138,10 +196,12 @@ Ce serveur est conçu pour être intégré avec le [MCP Hub Central](https://git
 
 ## 🔒 Sécurité
 
-- **Validation des entrées** pour prévenir les injections
+- **Validation des entrées** pour prévenir les injections SQL
 - **Rate limiting** par IP et utilisateur
 - **Audit logs** de toutes les opérations
 - **Chiffrement HTTPS** obligatoire en production
+- **Gestion des secrets** sécurisée
+- **Politiques RLS** pour la sécurité des données
 
 ## 📊 Monitoring
 
@@ -151,6 +211,8 @@ Le serveur fournit un monitoring complet :
 - **Logs structurés** avec niveaux configurables
 - **Health checks** automatiques
 - **Alertes** en cas de problème
+- **Tableau de bord** métriques
+- **Analyse de performance** détaillée
 
 ## 🤝 Contribution
 
@@ -166,15 +228,15 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 ## 🙏 Remerciements
 
-- [Minecraft Forge](https://files.minecraftforge.net/) pour la plateforme
+- [Supabase](https://supabase.com/) pour la plateforme
 - [Smithery](https://smithery.ai) pour l'écosystème MCP
-- La communauté Minecraft modding pour les contributions
+- La communauté Supabase pour les contributions
 
 ## 📞 Support
 
-- 📧 Email : support@mcp.coupaul.fr
+- 📧 Email : contact@coupaul.fr
 - 💬 Discord : [Serveur MCP Community](https://discord.gg/mcp)
-- 🐛 Issues : [GitHub Issues](https://github.com/coupaul/Minecraft-MCP-Forge-1.6.4/issues)
+- 🐛 Issues : [GitHub Issues](https://github.com/MisterSandFR/Supabase-MCP-SelfHosted/issues)
 
 ---
 
