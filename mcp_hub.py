@@ -354,6 +354,22 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                     "id": request_id,
                     "result": {}
                 }
+            elif method == 'resources/list':
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "result": {
+                        "resources": []
+                    }
+                }
+            elif method == 'prompts/list':
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "result": {
+                        "prompts": []
+                    }
+                }
             elif method == 'notifications/initialized':
                 # Les notifications n'ont pas de réponse
                 response = None
