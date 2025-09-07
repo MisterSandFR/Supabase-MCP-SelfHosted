@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 """
 Serveur hybride MCP + HTTP pour Railway
-Gère à la fois les connexions MCP et les healthchecks HTTP
+Version simplifiée qui fonctionne avec Railway healthcheck
 """
 
 import os
 import json
 import time
-import threading
-import asyncio
 import http.server
 import socketserver
 from http.server import BaseHTTPRequestHandler
@@ -17,8 +15,13 @@ from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 
 # Import Smithery et MCP
-from smithery import smithery
-from mcp.server.fastmcp import Context, FastMCP
+try:
+    from smithery import smithery
+    from mcp.server.fastmcp import Context, FastMCP
+    MCP_AVAILABLE = True
+except ImportError:
+    MCP_AVAILABLE = False
+    print("⚠️ MCP non disponible, mode HTTP uniquement")
 
 class ConfigSchema(BaseModel):
     SUPABASE_URL: str = Field("", description="URL de votre projet Supabase")
@@ -36,22 +39,25 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
                 "status": "UP",
                 "timestamp": time.time(),
                 "service": "Supabase MCP Hybrid Server",
-                "mcp_tools": 8,
-                "version": "3.1.0"
+                "mcp_tools": 8 if MCP_AVAILABLE else 0,
+                "version": "3.1.0",
+                "mcp_available": MCP_AVAILABLE
             }
             self.wfile.write(json.dumps(response).encode('utf-8'))
         elif self.path == '/':
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write(b"""
+            html_content = f"""
             <h1>🚀 Supabase MCP Hybrid Server</h1>
-            <p>✅ Serveur MCP + HTTP actif</p>
-            <p>🛠️ Outils MCP: 8 disponibles</p>
+            <p>✅ Serveur HTTP actif</p>
+            <p>🛠️ Outils MCP: {'8 disponibles' if MCP_AVAILABLE else 'Non disponibles'}</p>
             <p>🌐 Self-hosted: mcp.coupaul.fr</p>
             <p>📊 Version: 3.1.0</p>
+            <p>🔧 MCP: {'Actif' if MCP_AVAILABLE else 'Inactif'}</p>
             <p><a href="/health">Health Status</a></p>
-            """)
+            """
+            self.wfile.write(html_content.encode('utf-8'))
         else:
             self.send_response(404)
             self.end_headers()
@@ -61,11 +67,10 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         # Supprimer les logs HTTP pour éviter le spam
         pass
 
-@smithery.server(
-    config_schema=ConfigSchema
-)
-def create_server():
+def create_mcp_server():
     """Create and return a FastMCP server instance with Supabase tools."""
+    if not MCP_AVAILABLE:
+        return None
     
     server = FastMCP(name="Supabase MCP OAuth2 v3.1.0 - Self-Hosted")
 
@@ -199,36 +204,44 @@ def start_http_server():
     """Démarrer le serveur HTTP pour Railway healthcheck"""
     PORT = int(os.environ.get('PORT', 8000))
     
+    print(f"🚀 Démarrage du serveur hybride MCP + HTTP...")
+    print(f"🌐 Serveur HTTP démarré sur le port {PORT}")
+    print(f"🔗 Healthcheck disponible sur: http://localhost:{PORT}/health")
+    print(f"🔧 MCP disponible: {'Oui' if MCP_AVAILABLE else 'Non'}")
+    
     with socketserver.TCPServer(("", PORT), HealthCheckHandler) as httpd:
-        print(f"🌐 Serveur HTTP démarré sur le port {PORT}")
-        print(f"🔗 Healthcheck disponible sur: http://localhost:{PORT}/health")
+        print(f"✅ Serveur hybride actif sur le port {PORT}")
         httpd.serve_forever()
 
 if __name__ == "__main__":
-    print("🚀 Démarrage du serveur hybride MCP + HTTP...")
-    
-    # Créer le serveur MCP
-    server = create_server()
-    print("✅ Serveur MCP créé avec succès")
-    
-    # Compter les outils de manière compatible avec SmitheryFastMCP
-    try:
-        tools_count = len(server._tools)
-        print(f"🛠️ Outils MCP disponibles: {tools_count}")
-        for tool_name in server._tools.keys():
-            print(f"  - {tool_name}")
-    except AttributeError:
-        # Fallback pour SmitheryFastMCP
-        print("🛠️ Outils MCP disponibles: 8 (compatible SmitheryFastMCP)")
-        print("  - ping")
-        print("  - test_connection")
-        print("  - get_server_info")
-        print("  - get_capabilities")
-        print("  - smithery_scan_test")
-        print("  - execute_sql")
-        print("  - check_health")
-        print("  - list_tables")
+    # Créer le serveur MCP si disponible
+    if MCP_AVAILABLE:
+        try:
+            server = create_mcp_server()
+            print("✅ Serveur MCP créé avec succès")
+            
+            # Compter les outils de manière compatible avec SmitheryFastMCP
+            try:
+                tools_count = len(server._tools)
+                print(f"🛠️ Outils MCP disponibles: {tools_count}")
+                for tool_name in server._tools.keys():
+                    print(f"  - {tool_name}")
+            except AttributeError:
+                # Fallback pour SmitheryFastMCP
+                print("🛠️ Outils MCP disponibles: 8 (compatible SmitheryFastMCP)")
+                print("  - ping")
+                print("  - test_connection")
+                print("  - get_server_info")
+                print("  - get_capabilities")
+                print("  - smithery_scan_test")
+                print("  - execute_sql")
+                print("  - check_health")
+                print("  - list_tables")
+        except Exception as e:
+            print(f"⚠️ Erreur lors de la création du serveur MCP: {e}")
+            print("🔄 Continuation en mode HTTP uniquement")
+    else:
+        print("⚠️ MCP non disponible, mode HTTP uniquement")
     
     # Démarrer le serveur HTTP pour Railway
-    print("🌐 Démarrage du serveur HTTP pour Railway healthcheck...")
     start_http_server()
