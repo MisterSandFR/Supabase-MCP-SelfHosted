@@ -1,14 +1,78 @@
+# Supabase MCP Server - Self-Hosted Configuration
+# Pour utiliser avec Smithery en mode self-hosted
+
 runtime: python
-version: 1.0.0
-description: "Serveur MCP Supabase minimal pour test"
+version: 3.1.0
+description: "Supabase MCP Server Self-Hosted - Complete Supabase management tools"
 
-build:
-  command: "echo 'Build minimal - pas de dépendances'"
+# Configuration pour self-hosting
+deployment:
+  type: "self-hosted"
+  url: "https://your-domain.com/supabase-mcp"
+  health_check: "/health"
 
-server:
-  command: "python src/supabase_server.py"
-
+# Variables d'environnement requises
 env:
   SUPABASE_URL:
-    description: "URL Supabase"
+    description: "Your Supabase project URL"
     required: true
+    example: "https://your-project.supabase.co"
+  SUPABASE_ANON_KEY:
+    description: "Supabase anonymous key"
+    required: true
+    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  SUPABASE_SERVICE_ROLE_KEY:
+    description: "Service role key for admin operations"
+    required: false
+  DATABASE_URL:
+    description: "Direct PostgreSQL connection"
+    required: false
+
+# Outils MCP disponibles
+tools:
+  - execute_sql
+  - list_tables
+  - check_health
+  - list_auth_users
+  - create_auth_user
+  - manage_extensions
+  - generate_typescript_types
+  - backup_database
+  - import_schema
+  - execute_psql
+  - inspect_schema
+  - apply_migration
+
+# Documentation pour self-hosting
+documentation:
+  setup: |
+    ## Self-Hosting Setup
+    
+    1. **Deploy your server**:
+       ```bash
+       # Option 1: Docker
+       docker run -d -p 3000:3000 \
+         -e SUPABASE_URL="your-url" \
+         -e SUPABASE_ANON_KEY="your-key" \
+         your-image
+       
+       # Option 2: Direct Python
+       python src/supabase_server.py
+       ```
+    
+    2. **Configure Smithery**:
+       - Use "Self-Hosted" option
+       - Enter your server URL
+       - Add environment variables
+    
+    3. **Test connection**:
+       ```bash
+       curl https://your-domain.com/supabase-mcp/health
+       ```
+  
+  features:
+    - "Complete Supabase management"
+    - "OAuth2 support"
+    - "Advanced migrations"
+    - "Security auditing"
+    - "Performance monitoring"
