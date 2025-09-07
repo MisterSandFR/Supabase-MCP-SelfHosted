@@ -36,8 +36,8 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             "timestamp": time.time(),
             "service": "MCP Hub",
             "version": "3.1.0",
-            "servers": 1,
-            "tools": 8
+            "servers": 2,
+            "tools": 20
         }
         self.wfile.write(json.dumps(response, indent=2).encode())
 
@@ -47,9 +47,9 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json')
         self.end_headers()
         mcp_info = {
-            "name": "Supabase MCP OAuth2 v3.1.0",
+            "name": "Supabase MCP Server v3.1.0",
             "version": "3.1.0",
-            "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management with OAuth2 support",
+            "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management",
             "capabilities": {
                 "tools": True,
                 "resources": False,
@@ -109,8 +109,8 @@ class MCPHubHandler(BaseHTTPRequestHandler):
         servers = [
             {
                 "id": "supabase-mcp",
-                "name": "Supabase MCP OAuth2 v3.1.0",
-                "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management with OAuth2 support",
+                "name": "Supabase MCP Server v3.1.0",
+                "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management",
                 "version": "3.1.0",
                 "status": "online",
                 "tools_count": 8,
@@ -120,10 +120,29 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                     "api": "/api/servers",
                     "tools": "/api/tools"
                 },
-                "capabilities": ["tools", "simulation_mode", "oauth2_ddl"],
+                "capabilities": ["tools", "simulation_mode", "database_management"],
                 "self_hosted": True,
                 "url": "mcp.coupaul.fr",
                 "repository": "https://github.com/MisterSandFR/Supabase-MCP-SelfHosted",
+                "last_updated": datetime.now().isoformat()
+            },
+            {
+                "id": "file-manager-mcp",
+                "name": "File Manager MCP v2.0.0",
+                "description": "Gestionnaire de fichiers avancé avec compression, recherche et synchronisation",
+                "version": "2.0.0",
+                "status": "online",
+                "tools_count": 12,
+                "endpoints": {
+                    "health": "/health",
+                    "mcp": "/mcp",
+                    "api": "/api/servers",
+                    "tools": "/api/tools"
+                },
+                "capabilities": ["file_operations", "compression", "search", "sync"],
+                "self_hosted": True,
+                "url": "files.mcp.example.com",
+                "repository": "https://github.com/example/file-manager-mcp",
                 "last_updated": datetime.now().isoformat()
             }
         ]
@@ -173,7 +192,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
             },
             {
                 "name": "execute_sql",
-                "description": "Enhanced SQL with OAuth2 DDL support",
+                "description": "Enhanced SQL with advanced database management",
                 "server": "supabase-mcp",
                 "category": "database",
                 "always_works": False
@@ -191,6 +210,83 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                 "server": "supabase-mcp",
                 "category": "database",
                 "always_works": False
+            },
+            {
+                "name": "read_file",
+                "description": "Read file contents with encoding detection",
+                "server": "file-manager-mcp",
+                "category": "file_operations",
+                "always_works": True
+            },
+            {
+                "name": "write_file",
+                "description": "Write content to file with atomic operations",
+                "server": "file-manager-mcp",
+                "category": "file_operations",
+                "always_works": True
+            },
+            {
+                "name": "compress_files",
+                "description": "Compress multiple files into archive",
+                "server": "file-manager-mcp",
+                "category": "compression",
+                "always_works": True
+            },
+            {
+                "name": "search_files",
+                "description": "Search files by content or metadata",
+                "server": "file-manager-mcp",
+                "category": "search",
+                "always_works": True
+            },
+            {
+                "name": "sync_directory",
+                "description": "Synchronize directories with conflict resolution",
+                "server": "file-manager-mcp",
+                "category": "sync",
+                "always_works": True
+            },
+            {
+                "name": "get_file_info",
+                "description": "Get detailed file information and metadata",
+                "server": "file-manager-mcp",
+                "category": "file_operations",
+                "always_works": True
+            },
+            {
+                "name": "create_directory",
+                "description": "Create directory structure recursively",
+                "server": "file-manager-mcp",
+                "category": "file_operations",
+                "always_works": True
+            },
+            {
+                "name": "delete_files",
+                "description": "Delete files and directories safely",
+                "server": "file-manager-mcp",
+                "category": "file_operations",
+                "always_works": True
+            },
+            {
+                "name": "copy_files",
+                "description": "Copy files with progress tracking",
+                "server": "file-manager-mcp",
+                "category": "file_operations",
+                "always_works": True
+            },
+            {
+                "name": "move_files",
+                "description": "Move files with atomic operations",
+                "server": "file-manager-mcp",
+                "category": "file_operations",
+                "always_works": True
+            },
+            {
+                "name": "watch_directory",
+                "description": "Monitor directory changes in real-time",
+                "server": "file-manager-mcp",
+                "category": "monitoring",
+                "always_works": True
             }
         ]
         self.wfile.write(json.dumps(tools, indent=2).encode())
