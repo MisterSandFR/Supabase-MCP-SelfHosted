@@ -93,6 +93,75 @@ const workingTools = {
                 service: { type: "string", enum: ["postgres", "auth", "storage", "realtime"] }
             }
         }
+    },
+    // NEW v3.1.0 Enhanced Tools
+    import_schema: {
+        name: "import_schema",
+        description: "Import complete SQL schemas with transaction safety and extension management. Perfect for OAuth2 deployments.",
+        mcpInputSchema: {
+            type: "object",
+            properties: {
+                source: { type: "string", description: "Path to SQL file or direct SQL content" },
+                source_type: { type: "string", enum: ["file", "content"], default: "file" },
+                enable_extensions: { type: "array", items: { type: "string" }, description: "Extensions to enable (e.g., pgcrypto, uuid-ossp)" },
+                transaction: { type: "boolean", default: true, description: "Execute within transaction" }
+            },
+            required: ["source"]
+        }
+    },
+    execute_psql: {
+        name: "execute_psql",
+        description: "Execute PostgreSQL commands directly via native psql with advanced formatting options.",
+        mcpInputSchema: {
+            type: "object",
+            properties: {
+                sql: { type: "string", description: "SQL command to execute" },
+                command: { type: "string", enum: ["execute", "describe", "list_tables", "list_functions"], default: "execute" },
+                output_format: { type: "string", enum: ["table", "csv", "json", "html"], default: "table" }
+            }
+        }
+    },
+    inspect_schema: {
+        name: "inspect_schema",
+        description: "Complete schema inspection with TypeScript generation and detailed analysis.",
+        mcpInputSchema: {
+            type: "object",
+            properties: {
+                schema_name: { type: "string", default: "public" },
+                include: { type: "array", items: { type: "string" }, default: ["tables", "functions", "views"] },
+                format: { type: "string", enum: ["detailed", "summary", "typescript"], default: "detailed" },
+                include_statistics: { type: "boolean", default: false }
+            }
+        }
+    },
+    apply_migration_enhanced: {
+        name: "apply_migration_enhanced",
+        description: "Advanced migration system with validation, dry-run mode, and rollback support.",
+        mcpInputSchema: {
+            type: "object",
+            properties: {
+                version: { type: "string", description: "Migration version (e.g., 20250106120000)" },
+                sql: { type: "string", description: "Migration SQL content" },
+                file: { type: "string", description: "Path to migration file" },
+                enable_extensions: { type: "array", items: { type: "string" } },
+                dry_run: { type: "boolean", default: false },
+                validate_before: { type: "boolean", default: true }
+            },
+            required: ["version"]
+        }
+    },
+    execute_sql_enhanced: {
+        name: "execute_sql_enhanced", 
+        description: "Enhanced SQL execution with multi-statement DDL support for complex operations like OAuth2 setup.",
+        mcpInputSchema: {
+            type: "object",
+            properties: {
+                sql: { type: "string", description: "SQL query to execute" },
+                allow_multiple_statements: { type: "boolean", default: false, description: "Allow DDL multi-statements" },
+                read_only: { type: "boolean", default: false }
+            },
+            required: ["sql"]
+        }
     }
 };
 
