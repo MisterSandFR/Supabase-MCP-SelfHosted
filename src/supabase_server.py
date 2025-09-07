@@ -49,7 +49,13 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            html = """
+            
+            # Charger le fichier HTML du hub
+            try:
+                with open('src/hub.html', 'r', encoding='utf-8') as f:
+                    html = f.read()
+            except FileNotFoundError:
+                html = """
             <!DOCTYPE html>
             <html lang="fr">
             <head>
@@ -241,6 +247,7 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
             </body>
             </html>
             """
+            
             self.wfile.write(html.encode())
         else:
             self.send_response(404)
