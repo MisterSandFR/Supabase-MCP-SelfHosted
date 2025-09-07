@@ -50,9 +50,9 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             
-            # Charger le fichier HTML du hub
+            # Charger le fichier HTML simple du hub
             try:
-                with open('src/hub.html', 'r', encoding='utf-8') as f:
+                with open('src/simple_hub.html', 'r', encoding='utf-8') as f:
                     html = f.read()
             except FileNotFoundError:
                 html = """
@@ -61,7 +61,7 @@ class SupabaseMCPHandler(BaseHTTPRequestHandler):
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Supabase MCP Server - Self-Hosted</title>
+                <title>MCP Hub - @MisterSandFR</title>
                 <style>
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     body {
