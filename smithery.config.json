@@ -1,13 +1,13 @@
 {
-  "runtime": "python",
-  "version": "3.1.0",
-  "description": "Supabase MCP Server - Enhanced Edition v3.1",
+  "runtime": "node",
+  "version": "1.0.0",
+  "description": "Minecraft MCP Server for Forge 1.6.4 - GUI analysis and Java code generation",
   "build": {
-    "command": "pip install -r requirements.txt",
-    "output": "dist"
+    "command": "cd server && npm install && npm run build",
+    "output": "server/dist"
   },
   "server": {
-    "command": "python src/supabase_server.py",
-    "port": 8001
+    "command": "cd server && npm start",
+    "port": 8002
   }
 }

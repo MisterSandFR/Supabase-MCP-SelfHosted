@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
 
 # Copier les fichiers de configuration
 COPY requirements.txt .
-COPY mcp_servers_config.json .
 
 # Installer les dépendances Python
 RUN pip install --no-cache-dir -r requirements.txt

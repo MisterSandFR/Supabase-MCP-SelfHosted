@@ -1,59 +1,60 @@
-# Supabase MCP Server
+# Minecraft MCP Forge 1.6.4
 
-🗄️ **Serveur MCP Supabase Pur** - 47 outils MCP pour la gestion autonome de Supabase
+🎮 **Serveur MCP Minecraft GUI** - Analyse automatique des spritesheets et génération de code Java 7
 
 ## 🌟 Fonctionnalités
 
-- 🗄️ **47 outils MCP** spécialisés pour Supabase
-- 🔐 **Gestion complète** de l'authentification
+- 🎨 **Analyse automatique** des spritesheets GUI Minecraft
+- ☕ **Génération de code Java 7** compatible Forge 1.6.4
+- 🔧 **Outils MCP spécialisés** pour le développement Minecraft
 - 📊 **Monitoring** et métriques en temps réel
-- 🔒 **Sécurité avancée** avec RLS et audit
-- 🚀 **Migrations** automatiques et intelligentes
-- 📈 **Performance** optimisée avec indexation automatique
+- 🚀 **Déploiement automatique** sur Railway
+- 📈 **Performance** optimisée pour le développement mod
 
 ## 🏗️ Architecture
 
-Ce repository contient **uniquement** le serveur MCP Supabase pur, sans interface web ni hub central.
+Ce repository contient **uniquement** le serveur MCP Minecraft pur, sans interface web ni hub central.
 
 ```
-Supabase MCP Server (Port 8001)
-├── 🗄️ 47 outils Supabase
-├── 🔐 Gestion Auth
+Minecraft MCP Server (Port 8002)
+├── 🎨 Analyse des spritesheets
+├── ☕ Génération de code Java
+├── 🔧 Outils de développement
 ├── 📊 Monitoring
-├── 🔒 Sécurité RLS
-└── 🚀 Migrations
+└── 🚀 Déploiement automatique
 ```
 
 ## 🚀 Démarrage Rapide
 
 ### Prérequis
-- Python 3.8+
-- Accès à une instance Supabase
+- Node.js 18+
+- Java 7 (pour compiler le code généré)
+- Forge 1.6.4 (MCPC+)
 
 ### Installation
 
 ```bash
 # Cloner le repository
-git clone https://github.com/MisterSandFR/Supabase-MCP-SelfHosted.git
-cd Supabase-MCP-SelfHosted
+git clone https://github.com/coupaul/Minecraft-MCP-Forge-1.6.4.git
+cd Minecraft-MCP-Forge-1.6.4
 
 # Installer les dépendances
-pip install -r requirements.txt
+cd server
+npm install
 
-# Configurer les variables d'environnement
-cp .env.example .env
-# Éditer .env avec vos credentials Supabase
+# Build le projet
+npm run build
 
 # Démarrer le serveur
-python src/supabase_server.py
+npm start
 ```
 
 ### Avec Docker
 
 ```bash
 # Build et démarrage
-docker build -t supabase-mcp-server .
-docker run -p 8001:8001 supabase-mcp-server
+docker build -t minecraft-mcp-server .
+docker run -p 8002:8002 minecraft-mcp-server
 ```
 
 ## ⚙️ Configuration
@@ -61,59 +62,33 @@ docker run -p 8001:8001 supabase-mcp-server
 ### Variables d'Environnement
 
 ```bash
-# Supabase Configuration
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-
 # Server Configuration
-PORT=8001
+PORT=8002
 LOG_LEVEL=INFO
+NODE_ENV=production
+
+# Minecraft Configuration
+MINECRAFT_VERSION=1.6.4
+FORGE_VERSION=1.6.4-9.11.1.965
 ```
 
 ## 🛠️ Outils MCP Disponibles
 
-### Base de Données (8 outils)
-- `execute_sql` - Exécution SQL avancée
-- `check_health` - Santé de la base de données
-- `list_tables` - Liste des tables
-- `inspect_schema` - Inspection du schéma
-- `get_database_stats` - Statistiques de la DB
+### Analyse GUI (5 outils)
+- `analyze_spritesheet` - Analyse des spritesheets GUI
+- `extract_gui_elements` - Extraction des éléments GUI
+- `generate_gui_code` - Génération de code GUI Java
+- `validate_gui_structure` - Validation de la structure GUI
+- `optimize_gui_layout` - Optimisation du layout GUI
 
-### Authentification (5 outils)
-- `create_auth_user` - Création d'utilisateur
-- `get_auth_user` - Récupération d'utilisateur
-- `list_auth_users` - Liste des utilisateurs
-- `update_auth_user` - Mise à jour d'utilisateur
-- `delete_auth_user` - Suppression d'utilisateur
+### Génération de Code (3 outils)
+- `generate_java_class` - Génération de classe Java
+- `generate_forge_mod` - Génération de mod Forge
+- `compile_java_code` - Compilation du code Java
 
-### Stockage (3 outils)
-- `list_storage_buckets` - Liste des buckets
-- `list_storage_objects` - Liste des objets
-- `manage_storage_policies` - Gestion des politiques
-
-### Sécurité (2 outils)
-- `manage_rls_policies` - Gestion RLS
-- `analyze_rls_coverage` - Analyse de couverture RLS
-
-### Migrations (6 outils)
-- `create_migration` - Création de migration
-- `apply_migration` - Application de migration
-- `list_migrations` - Liste des migrations
-- `push_migrations` - Push des migrations
-- `validate_migration` - Validation de migration
-- `smart_migration` - Migration intelligente
-
-### Performance (3 outils)
-- `analyze_performance` - Analyse de performance
-- `auto_create_indexes` - Création automatique d'index
-- `vacuum_analyze` - VACUUM ANALYZE
-
-### Monitoring (2 outils)
-- `get_logs` - Récupération des logs
-- `metrics_dashboard` - Tableau de bord des métriques
-
-### Et plus...
+### Développement (2 outils)
+- `create_mod_structure` - Création de structure de mod
+- `validate_mod_code` - Validation du code de mod
 
 ## 🔧 API Endpoints
 
@@ -139,8 +114,8 @@ railway up
 ### Docker
 ```bash
 # Build et déploiement
-docker build -t supabase-mcp-server .
-docker run -p 8001:8001 supabase-mcp-server
+docker build -t minecraft-mcp-server .
+docker run -p 8002:8002 minecraft-mcp-server
 ```
 
 ### Intégration avec Hub Central
@@ -150,12 +125,12 @@ Ce serveur est conçu pour être intégré avec le [MCP Hub Central](https://git
 ```json
 {
   "servers": {
-    "supabase": {
-      "name": "Supabase MCP Server",
-      "host": "supabase-mcp-server",
-      "port": 8001,
-      "path": "/supabase",
-      "categories": ["database", "auth", "storage", "realtime", "security"]
+    "minecraft": {
+      "name": "Minecraft MCP Server",
+      "host": "minecraft.mcp.coupaul.fr",
+      "port": 8002,
+      "path": "/minecraft",
+      "categories": ["gui", "code_generation", "development", "forge"]
     }
   }
 }
@@ -163,8 +138,7 @@ Ce serveur est conçu pour être intégré avec le [MCP Hub Central](https://git
 
 ## 🔒 Sécurité
 
-- **Authentification JWT** pour l'accès aux outils
-- **Validation des entrées** SQL pour prévenir les injections
+- **Validation des entrées** pour prévenir les injections
 - **Rate limiting** par IP et utilisateur
 - **Audit logs** de toutes les opérations
 - **Chiffrement HTTPS** obligatoire en production
@@ -192,16 +166,16 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 ## 🙏 Remerciements
 
-- [Supabase](https://supabase.com) pour la plateforme
+- [Minecraft Forge](https://files.minecraftforge.net/) pour la plateforme
 - [Smithery](https://smithery.ai) pour l'écosystème MCP
-- La communauté Supabase pour les contributions
+- La communauté Minecraft modding pour les contributions
 
 ## 📞 Support
 
 - 📧 Email : support@mcp.coupaul.fr
 - 💬 Discord : [Serveur MCP Community](https://discord.gg/mcp)
-- 🐛 Issues : [GitHub Issues](https://github.com/MisterSandFR/Supabase-MCP-SelfHosted/issues)
+- 🐛 Issues : [GitHub Issues](https://github.com/coupaul/Minecraft-MCP-Forge-1.6.4/issues)
 
 ---
 
-**Fait avec ❤️ par [MisterSandFR](https://github.com/MisterSandFR)**
+**Fait avec ❤️ par [coupaul](https://github.com/coupaul)**

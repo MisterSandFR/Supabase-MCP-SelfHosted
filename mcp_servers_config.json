@@ -1,0 +1,82 @@
+{
+  "hub": {
+    "name": "MCP Hub Central",
+    "version": "1.0.0",
+    "description": "Multi-server MCP hub for centralized management",
+    "domain": "mcp.coupaul.fr"
+  },
+  "servers": {
+    "supabase": {
+      "name": "Supabase MCP Server",
+      "version": "3.1.0",
+      "description": "Enhanced Edition v3.1 - 47 MCP tools for Supabase management",
+      "host": "supabase.mcp.coupaul.fr",
+      "port": 443,
+      "protocol": "https",
+      "path": "/supabase",
+      "status": "active",
+      "categories": ["database", "auth", "storage", "realtime", "security", "migration", "monitoring", "performance"],
+      "github_url": "https://github.com/MisterSandFR/Supabase-MCP-SelfHosted",
+      "always_works": true
+    },
+    "files": {
+      "name": "File Manager MCP Server",
+      "version": "1.0.0",
+      "description": "Advanced file management with compression, search, and sync capabilities",
+      "host": "files.mcp.coupaul.fr",
+      "port": 443,
+      "protocol": "https",
+      "path": "/files",
+      "status": "inactive",
+      "categories": ["file_operations", "compression", "search", "sync", "monitoring"],
+      "github_url": "https://github.com/coupaul/file-manager-mcp",
+      "always_works": true
+    },
+    "git": {
+      "name": "Git MCP Server",
+      "version": "1.0.0",
+      "description": "Git repository management with advanced branching and collaboration features",
+      "host": "git.mcp.coupaul.fr",
+      "port": 443,
+      "protocol": "https",
+      "path": "/git",
+      "status": "inactive",
+      "categories": ["repository", "branching", "collaboration", "history", "merge"],
+      "github_url": "https://github.com/coupaul/git-mcp",
+      "always_works": true
+    },
+    "web": {
+      "name": "Web Scraping MCP Server",
+      "version": "1.0.0",
+      "description": "Advanced web scraping with browser automation and data extraction",
+      "host": "web.mcp.coupaul.fr",
+      "port": 443,
+      "protocol": "https",
+      "path": "/web",
+      "status": "inactive",
+      "categories": ["scraping", "automation", "extraction", "browser"],
+      "github_url": "https://github.com/coupaul/web-scraping-mcp",
+      "always_works": true
+    }
+  },
+  "discovery": {
+    "enabled": true,
+    "interval": 30,
+    "timeout": 5,
+    "retry_attempts": 3
+  },
+  "routing": {
+    "strategy": "intelligent",
+    "fallback_server": "supabase",
+    "load_balancing": true
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics_retention": 24,
+    "alert_thresholds": {
+      "response_time": 5000,
+      "error_rate": 0.1,
+      "server_down": 1
+    }
+  }
+}

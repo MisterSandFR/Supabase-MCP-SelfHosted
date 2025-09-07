@@ -1,13 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "supabase-mcp-server"
-version = "3.1.0"
-description = "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management"
-requires-python = ">=3.12"
+name = "minecraft-mcp-forge-1.6.4"
+version = "1.0.0"
+description = "Minecraft MCP Server for Forge 1.6.4 - GUI analysis and Java code generation"
+authors = [
+    {name = "coupaul", email = "support@mcp.coupaul.fr"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
 dependencies = [
-    "mcp>=1.13.0",
     "smithery>=0.1.23",
     "pydantic>=2.0.0"
 ]
 
 [tool.smithery]
-server = "src.supabase_server:create_server"
+server = "server.src.index:create_server"
