@@ -1,11 +1,5 @@
-# ============================================
-# SUPABASE MCP OAUTH2 v3.1.0 - DOCKERFILE
-# ============================================
-# Configuration Python pure - SANS UV
-# Date: $(date)
-# Version: 3.1.0
-# ============================================
-
+# SUPABASE MCP OAUTH2 v3.1.0 - DOCKERFILE FINAL
+# Configuration Python pure - SANS UV - SANS CONFLIT
 FROM python:3.12-slim-bookworm
 
 # Variables d'environnement

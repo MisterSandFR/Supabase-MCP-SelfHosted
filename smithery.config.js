@@ -1,0 +1,13 @@
+module.exports = {
+  runtime: "python",
+  version: "3.1.0",
+  description: "Supabase MCP OAuth2 Server - Python Pure",
+  build: {
+    command: "pip install -r requirements.txt",
+    output: "dist"
+  },
+  server: {
+    command: "python src/supabase_server.py",
+    port: 3000
+  }
+};
