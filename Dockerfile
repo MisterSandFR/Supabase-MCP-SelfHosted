@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copie du code source
 COPY src/ ./src/
-COPY simple_http_server.py .
+COPY minimal_server.py .
 
 # Création d'un utilisateur non-root
 RUN useradd --create-home --shell /bin/bash app && \
@@ -29,5 +29,5 @@ USER app
 # Exposition du port
 EXPOSE 8000
 
-# Point d'entrée - Démarrer le serveur HTTP simple
-CMD ["python", "simple_http_server.py"]
+# Point d'entrée - Démarrer le serveur HTTP minimal
+CMD ["python", "minimal_server.py"]
