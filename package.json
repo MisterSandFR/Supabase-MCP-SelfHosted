@@ -1,1 +1,66 @@
-{"name":"@mistersandfr/selfhosted-supabase-mcp","version":"3.1.0","description":"Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management with OAuth2 support, advanced DDL operations, and comprehensive database automation","main":"dist/index.js","module":"./src/index-smithery.ts","exports":{".":"./src/index-smithery.ts"},"types":"./src/index-smithery.ts","type":"module","repository":{"type":"git","url":"https://github.com/MisterSandFR/selfhosted-supabase-mcp.git"},"homepage":"https://github.com/MisterSandFR/selfhosted-supabase-mcp","bugs":{"url":"https://github.com/MisterSandFR/selfhosted-supabase-mcp/issues"},"scripts":{"build":"tsc","start":"node dist/index.js","dev":"tsup src/index.ts --format esm --watch","test":"echo \"Error: no test specified\" && exit 1"},"keywords":["supabase","mcp","postgresql","database","security","self-hosted","docker","authentication","rate-limiting","sql-injection-prevention","oauth2","ddl","schema-import","psql","typescript-generation","migrations"],"author":"MisterSandFR","license":"MIT","engines":{"node":">=18.0.0","npm":">=8.0.0"},"dependencies":{"@modelcontextprotocol/sdk":"^1.11.0","@supabase/supabase-js":"^2.49.4","@types/glob":"^8.1.0","commander":"^13.1.0","glob":"^11.0.3","pg":"^8.15.6","zod":"^3.24.3"},"devDependencies":{"@types/node":"^22.15.3","@types/pg":"^8.11.14","tsup":"^8.4.0","tsx":"^4.20.5","typescript":"^5.8.3"}}
+{
+  "name": "@mistersandfr/selfhosted-supabase-mcp",
+  "version": "3.1.0",
+  "description": "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management with OAuth2 support, advanced DDL operations, and comprehensive database automation",
+  "main": "dist/index.js",
+  "module": "./src/index-smithery-final.ts",
+  "exports": {
+    ".": "./src/index-smithery-final.ts"
+  },
+  "types": "./src/index-smithery-final.ts",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MisterSandFR/selfhosted-supabase-mcp.git"
+  },
+  "homepage": "https://github.com/MisterSandFR/selfhosted-supabase-mcp",
+  "bugs": {
+    "url": "https://github.com/MisterSandFR/selfhosted-supabase-mcp/issues"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsup src/index.ts --format esm --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "supabase",
+    "mcp",
+    "postgresql",
+    "database",
+    "security",
+    "self-hosted",
+    "docker",
+    "authentication",
+    "rate-limiting",
+    "sql-injection-prevention",
+    "oauth2",
+    "ddl",
+    "schema-import",
+    "psql",
+    "typescript-generation",
+    "migrations"
+  ],
+  "author": "MisterSandFR",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.0",
+    "@supabase/supabase-js": "^2.49.4",
+    "@types/glob": "^8.1.0",
+    "commander": "^13.1.0",
+    "glob": "^11.0.3",
+    "pg": "^8.15.6",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "@types/pg": "^8.11.14",
+    "tsup": "^8.4.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.8.3"
+  }
+}

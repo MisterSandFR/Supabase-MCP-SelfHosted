@@ -9,7 +9,6 @@ RUN npm ci --omit=dev || npm install --omit=dev
 # Include sources so Smithery can scan repo alongside a successful image build
 COPY tsconfig.json ./
 COPY src ./src
-COPY index-smithery.ts ./
 COPY smithery.yaml ./
 
 # No build step here; Smithery uses TypeScript runtime for scanning.
