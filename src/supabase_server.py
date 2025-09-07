@@ -125,4 +125,4 @@ if __name__ == "__main__":
     print("🚀 Serveur MCP Supabase démarré avec FastMCP et Smithery")
     print("🛠️ Outils disponibles:", len(server._tools))
     for tool_name in server._tools.keys():
-        print(f"  - {tool_name}")
+        print(f"  - {tool_name}")# Test automatisation - Sun, Sep  7, 2025 12:54:32 PM
