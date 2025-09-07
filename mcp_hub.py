@@ -352,11 +352,7 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                 response = {
                     "jsonrpc": "2.0",
                     "id": request_id,
-                    "result": {
-                        "pong": True,
-                        "timestamp": time.time(),
-                        "status": "OK"
-                    }
+                    "result": {}
                 }
             elif method == 'notifications/initialized':
                 # Les notifications n'ont pas de réponse
@@ -378,9 +374,12 @@ class MCPHubHandler(BaseHTTPRequestHandler):
                 self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
                 self.send_header('Access-Control-Allow-Headers', 'Content-Type')
                 self.end_headers()
-                self.wfile.write(json.dumps(response, indent=2).encode())
+                response_json = json.dumps(response, indent=2)
+                print(f"JSON-RPC response: {response_json}")
+                self.wfile.write(response_json.encode())
             else:
                 # Pour les notifications, pas de réponse
+                print(f"JSON-RPC notification: {method} - no response")
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
