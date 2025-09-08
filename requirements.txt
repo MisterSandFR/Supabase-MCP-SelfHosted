@@ -1,8 +1,7 @@
-# Requirements pour Supabase MCP Server
-flask==3.0.0
-flask-cors==4.0.0
-urllib3==2.0.7
-requests==2.31.0
+# Requirements pour Supabase MCP Server - Version FastMCP qui fonctionne avec Smithery
+mcp==1.0.0
+fastmcp==0.1.0
+smithery==1.0.0
 pydantic==2.5.0
 python-dotenv==1.0.0
 pyyaml==6.0.1

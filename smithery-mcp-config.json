@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "supabase-mcp": {
+      "command": "curl",
+      "args": [
+        "-X", "POST",
+        "-H", "Content-Type: application/json",
+        "-d", "@-",
+        "https://supabase.mcp.coupaul.fr/"
+      ],
+      "env": {
+        "MCP_SERVER_NAME": "Supabase MCP Server",
+        "MCP_SERVER_VERSION": "3.7.0",
+        "SUPABASE_URL": "https://api.recube.gg",
+        "SUPABASE_ANON_KEY": "[CONFIGURED]"
+      }
+    },
+    "minecraft-mcp": {
+      "command": "curl",
+      "args": [
+        "-X", "POST",
+        "-H", "Content-Type: application/json",
+        "-d", "@-",
+        "https://minecraft.mcp.coupaul.fr/"
+      ],
+      "env": {
+        "MCP_SERVER_NAME": "Minecraft MCP Server",
+        "MCP_SERVER_VERSION": "3.7.0"
+      }
+    }
+  }
+}
