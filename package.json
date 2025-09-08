@@ -1,7 +1,7 @@
 {
-  "name": "@coupaul/minecraft-mcp-forge-1.6.4",
-  "version": "1.0.0",
-  "description": "Minecraft MCP Server for Forge 1.6.4 - GUI analysis and Java code generation",
+  "name": "@coupaul/supabase-mcp-server",
+  "version": "3.7.0",
+  "description": "Supabase MCP Server - Enhanced Edition v3.7 with 54+ MCP tools for 100% autonomous Supabase management",
   "main": "server/src/index.ts",
   "module": "server/src/index.ts",
   "type": "module",

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "minecraft-mcp-forge-1.6.4"
-version = "1.0.0"
+version = "3.7.0"
 description = "Minecraft MCP Server for Forge 1.6.4 - GUI analysis and Java code generation"
 authors = [
     {name = "coupaul", email = "support@mcp.coupaul.fr"}

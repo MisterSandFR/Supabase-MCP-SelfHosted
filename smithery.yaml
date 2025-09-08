@@ -1,15 +1,64 @@
-# Supabase MCP Server - Self-Hosted Configuration
-# Pour utiliser avec Smithery en mode self-hosted
+# Supabase MCP Server - Configuration Smithery.ai
+# Version standardisée pour cohérence avec les autres projets
 
-runtime: python
-version: 3.1.0
-description: "Supabase MCP Server Self-Hosted - Complete Supabase management tools"
+name: "supabase-mcp-server"
+displayName: "Supabase MCP Server"
+version: "3.7.0"
+description: "Enhanced Edition v3.7 - 54+ MCP tools for 100% autonomous Supabase management"
+author:
+  name: "coupaul"
+  email: "contact@coupaul.fr"
+  url: "https://github.com/coupaul/ng-supabase-mcp"
+license: "MIT"
+homepage: "https://supabase.mcp.coupaul.fr"
+repository:
+  type: "git"
+  url: "https://github.com/coupaul/ng-supabase-mcp"
+bugs:
+  url: "https://github.com/coupaul/ng-supabase-mcp/issues"
+
+# Mots-clés pour la découverte
+keywords:
+  - "supabase"
+  - "mcp"
+  - "database"
+  - "postgresql"
+  - "auth"
+  - "storage"
+  - "realtime"
+  - "backend"
+  - "api"
+  - "self-hosted"
+
+# Catégories pour Smithery.ai
+categories:
+  - "database"
+  - "backend"
+  - "api"
+  - "self-hosted"
+
+# Tags pour la recherche
+tags:
+  - "supabase"
+  - "postgresql"
+  - "database"
+  - "auth"
+  - "storage"
+  - "mcp"
+
+# Capacités MCP
+capabilities:
+  tools: true
+  resources: false
+  prompts: false
 
 # Configuration pour self-hosting
 deployment:
   type: "self-hosted"
-  url: "https://your-domain.com/supabase-mcp"
-  health_check: "/health"
+  platform: "railway"
+  url: "https://supabase.mcp.coupaul.fr"
+  healthCheck: "https://supabase.mcp.coupaul.fr/health"
+  mcpEndpoint: "https://supabase.mcp.coupaul.fr/mcp"
 
 # Variables d'environnement requises
 env:
@@ -28,13 +77,16 @@ env:
     description: "Direct PostgreSQL connection"
     required: false
 
-# Outils MCP disponibles
+# Outils MCP disponibles (liste complète)
 tools:
   - execute_sql
   - list_tables
   - check_health
   - list_auth_users
   - create_auth_user
+  - delete_auth_user
+  - update_auth_user
+  - get_auth_user
   - manage_extensions
   - generate_typescript_types
   - backup_database
@@ -42,37 +94,101 @@ tools:
   - execute_psql
   - inspect_schema
   - apply_migration
+  - create_migration
+  - list_migrations
+  - push_migrations
+  - validate_migration
+  - smart_migration
+  - auto_migrate
+  - sync_schema
+  - manage_functions
+  - manage_triggers
+  - manage_webhooks
+  - rebuild_hooks
+  - manage_rls_policies
+  - manage_storage_policies
+  - manage_roles
+  - manage_secrets
+  - list_storage_buckets
+  - list_storage_objects
+  - realtime_management
+  - list_realtime_publications
+  - cache_management
+  - environment_management
+  - get_project_url
+  - get_anon_key
+  - get_service_key
+  - get_database_stats
+  - get_database_connections
+  - get_logs
+  - analyze_performance
+  - analyze_rls_coverage
+  - audit_security
+  - auto_create_indexes
+  - vacuum_analyze
+  - metrics_dashboard
+  - verify_jwt_secret
+  - manage_docker
 
-# Documentation pour self-hosting
-documentation:
-  setup: |
-    ## Self-Hosting Setup
-    
-    1. **Deploy your server**:
-       ```bash
-       # Option 1: Docker
-       docker run -d -p 3000:3000 \
-         -e SUPABASE_URL="your-url" \
-         -e SUPABASE_ANON_KEY="your-key" \
-         your-image
-       
-       # Option 2: Direct Python
-       python src/supabase_server.py
-       ```
-    
-    2. **Configure Smithery**:
-       - Use "Self-Hosted" option
-       - Enter your server URL
-       - Add environment variables
-    
-    3. **Test connection**:
-       ```bash
-       curl https://your-domain.com/supabase-mcp/health
-       ```
-  
-  features:
-    - "Complete Supabase management"
-    - "OAuth2 support"
-    - "Advanced migrations"
-    - "Security auditing"
-    - "Performance monitoring"
+# Exemples d'utilisation
+examples:
+  - name: "Exécution de requête SQL"
+    description: "Exécuter une requête SQL sur votre base de données Supabase"
+    input:
+      tool: "execute_sql"
+      arguments:
+        query: "SELECT * FROM users LIMIT 10"
+        database: "postgres"
+
+  - name: "Création d'utilisateur auth"
+    description: "Créer un nouvel utilisateur dans l'authentification Supabase"
+    input:
+      tool: "create_auth_user"
+      arguments:
+        email: "user@example.com"
+        password: "secure_password"
+        email_confirm: true
+
+  - name: "Génération de types TypeScript"
+    description: "Générer les types TypeScript à partir du schéma de base de données"
+    input:
+      tool: "generate_typescript_types"
+      arguments:
+        output_file: "types/database.ts"
+        include_auth: true
+
+# Configuration des exigences
+requirements:
+  python: ">=3.11"
+  memory: "512MB"
+  storage: "1GB"
+  node: ">=18.0.0"
+
+# Modèle de tarification
+pricing:
+  model: "free"
+  description: "Gratuit pour tous les utilisateurs"
+
+# Support et documentation
+support:
+  documentation: "https://github.com/coupaul/ng-supabase-mcp/blob/main/README.md"
+  issues: "https://github.com/coupaul/ng-supabase-mcp/issues"
+  discussions: "https://github.com/coupaul/ng-supabase-mcp/discussions"
+
+# Changelog
+changelog:
+  - version: "3.7.0"
+    date: "2025-01-08"
+    changes:
+      - "Version standardisée pour cohérence avec les autres projets"
+      - "54+ outils MCP pour gestion complète Supabase"
+      - "Support complet de l'authentification et du stockage"
+      - "Outils de migration et de sécurité avancés"
+      - "Intégration Railway et Smithery optimisée"
+
+# Statistiques
+stats:
+  downloads: 0
+  stars: 0
+  forks: 0
+  lastUpdated: "2025-01-08T00:00:00Z"

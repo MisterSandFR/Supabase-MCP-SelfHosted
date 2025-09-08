@@ -1,0 +1,160 @@
+# Configuration partagée pour les 3 projets MCP interconnectés
+# mcp-hub-central, ng-supabase-mcp, Minecraft-MCP-Forge-1.6.4
+
+# Version commune pour tous les projets
+version: "3.7.0"
+release_date: "2025-01-08"
+
+# Configuration des projets
+projects:
+  hub_central:
+    name: "MCP Hub Central"
+    path: "./mcp-hub-central"
+    type: "hub"
+    port: 8080
+    domain: "mcp.coupaul.fr"
+    description: "Multi-server MCP hub for centralized management"
+    
+  supabase_mcp:
+    name: "Supabase MCP Server"
+    path: "./ng-supabase-mcp"
+    type: "mcp-server"
+    port: 8000
+    domain: "supabase.mcp.coupaul.fr"
+    description: "Enhanced Edition v3.1 - 54+ MCP tools for 100% autonomous Supabase management"
+    tools_count: 54
+    
+  minecraft_mcp:
+    name: "Minecraft MCPC+ 1.6.4 Server"
+    path: "./Minecraft-MCP-Forge-1.6.4"
+    type: "mcp-server"
+    port: 3000
+    domain: "minecraft.mcp.coupaul.fr"
+    description: "MCPC+ 1.6.4 server management and automation with MCP tools"
+    tools_count: 4
+    mcpc_version: "1.6.4"
+
+# Configuration commune des APIs
+api:
+  version: "1.0"
+  base_path: "/api"
+  endpoints:
+    health: "/health"
+    mcp: "/mcp"
+    tools: "/api/tools"
+    config: "/.well-known/mcp-config"
+    servers: "/api/servers"
+
+# Configuration commune des variables d'environnement
+environment:
+  common:
+    PYTHON_VERSION: "3.11"
+    LOG_LEVEL: "INFO"
+    HEALTH_CHECK_INTERVAL: 120
+    CACHE_DURATION: 300
+    TIMEOUT: 15
+    
+  hub_central:
+    PORT: 8080
+    MCP_HUB_VERSION: "3.7.0"
+    MCP_HUB_NAME: "MCP Hub Central"
+    SUPABASE_MCP_URL: "https://supabase.mcp.coupaul.fr"
+    MINECRAFT_MCP_URL: "https://minecraft.mcp.coupaul.fr"
+    
+  supabase_mcp:
+    PORT: 8000
+    SUPABASE_URL: "https://api.recube.gg/"
+    SUPABASE_ANON_KEY: "${SUPABASE_ANON_KEY}"
+    SUPABASE_SERVICE_ROLE_KEY: "${SUPABASE_SERVICE_ROLE_KEY}"
+    SUPABASE_AUTH_JWT_SECRET: "${SUPABASE_AUTH_JWT_SECRET}"
+    PRODUCTION_MODE: true
+    
+  minecraft_mcp:
+    PORT: 3000
+    MINECRAFT_MCPC_VERSION: "1.6.4"
+    DOCKER_ENABLED: true
+
+# Configuration commune du déploiement
+deployment:
+  platform: "railway"
+  docker:
+    base_image: "python:3.11-slim"
+    health_check: true
+    restart_policy: "on-failure"
+    max_restarts: 3
+  
+  domains:
+    hub: "mcp.coupaul.fr"
+    supabase: "supabase.mcp.coupaul.fr"
+    minecraft: "minecraft.mcp.coupaul.fr"
+
+# Configuration commune du monitoring
+monitoring:
+  enabled: true
+  health_check_path: "/health"
+  alert_on_failure: true
+  log_rotation: true
+  metrics_collection: true
+
+# Configuration commune de la sécurité
+security:
+  ssl_enabled: true
+  ssl_verify: true
+  rate_limiting: true
+  max_requests_per_minute: 100
+  api_key_required: false
+
+# Configuration commune des outils
+tools:
+  auto_discovery: false
+  health_check_interval: 120
+  cache_duration: 300
+  timeout: 15
+  retry_attempts: 3
+
+# Configuration commune des notifications
+notifications:
+  enabled: true
+  webhook: "https://hooks.slack.com/services/..."
+  email: "admin@mcp.coupaul.fr"
+  alert_on_failure: true
+  alert_on_recovery: true
+
+# Configuration commune des logs
+logging:
+  level: "INFO"
+  format: "json"
+  output: "stdout"
+  file_rotation: true
+  max_file_size: "10MB"
+  max_files: 5
+
+# Configuration commune du cache
+cache:
+  enabled: true
+  ttl: 300
+  max_size: "100MB"
+  backend: "memory"
+
+# Configuration commune des métriques
+metrics:
+  enabled: true
+  collection_interval: 60
+  export_format: "prometheus"
+  endpoint: "/metrics"
+
+# Configuration commune des tests
+testing:
+  enabled: true
+  framework: "pytest"
+  coverage_threshold: 80
+  integration_tests: true
+  e2e_tests: true
+
+# Configuration commune de la documentation
+documentation:
+  enabled: true
+  format: "markdown"
+  api_docs: true
+  readme_template: true
+  changelog: true
