@@ -111,11 +111,23 @@ def get_tools():
     """Endpoint pour lister tous les outils MCP disponibles"""
     return jsonify(MCP_TOOLS)
 
-# Endpoint MCP principal
-@app.route('/mcp', methods=['POST'])
+# Endpoint MCP principal - Support GET et POST
+@app.route('/mcp', methods=['GET', 'POST'])
 def mcp_endpoint():
     """Endpoint MCP principal pour les requêtes JSON-RPC 2.0"""
     try:
+        # Gestion des requêtes GET
+        if request.method == 'GET':
+            return jsonify({
+                "service": MCP_SERVER_NAME,
+                "version": MCP_SERVER_VERSION,
+                "protocol": "JSON-RPC 2.0",
+                "methods": ["initialize", "tools/list", "tools/call"],
+                "endpoint": "/mcp",
+                "status": "ready"
+            })
+        
+        # Gestion des requêtes POST
         data = request.get_json()
         if not data:
             return jsonify({"error": "No JSON data provided"}), 400
@@ -224,9 +236,27 @@ def mcp_config():
         }
     })
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
     """Page d'accueil avec informations du serveur"""
+    # Gestion des requêtes POST sur la racine (pour Smithery)
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            if data and data.get("method"):
+                # Rediriger vers l'endpoint MCP
+                return mcp_endpoint()
+            else:
+                return jsonify({
+                    "service": MCP_SERVER_NAME,
+                    "version": MCP_SERVER_VERSION,
+                    "status": "running",
+                    "message": "POST requests should use /mcp endpoint for JSON-RPC"
+                })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+    
+    # Gestion des requêtes GET
     return jsonify({
         "service": MCP_SERVER_NAME,
         "version": MCP_SERVER_VERSION,
