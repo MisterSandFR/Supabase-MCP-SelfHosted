@@ -1,5 +1,5 @@
 # Requirements pour Supabase MCP Server - Version FastMCP qui fonctionne avec Smithery
-mcp==1.0.0
+mcp>=1.13.1
 fastmcp==0.1.0
 smithery==0.1.24
 pydantic>=2.8.0
