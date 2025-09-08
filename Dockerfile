@@ -31,4 +31,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Commande de démarrage - Serveur Supabase MCP uniquement
-CMD ["python", "src/supabase_server.py"]
+CMD ["python", "src/supabase_server.py"]# Build timestamp: 1757307067

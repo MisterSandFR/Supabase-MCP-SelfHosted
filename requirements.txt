@@ -1,13 +1,11 @@
-# Requirements communs pour les projets MCP
+# Requirements pour Supabase MCP Server
+flask==3.0.0
+flask-cors==4.0.0
 urllib3==2.0.7
 requests==2.31.0
 pydantic==2.5.0
-fastapi==0.104.1
-uvicorn==0.24.0
-python-multipart==0.0.6
 python-dotenv==1.0.0
 pyyaml==6.0.1
-aiofiles==23.2.1
 httpx==0.25.2
 pytest==7.4.3
 pytest-asyncio==0.21.1
