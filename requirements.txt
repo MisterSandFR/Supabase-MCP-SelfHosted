@@ -14,3 +14,4 @@ flake8==6.1.0
 mypy==1.7.1
 # Timestamp pour forcer le rebuild: 1757311985
 # Build timestamp: 1757331135
+# Railway rebuild timestamp: Mon, Sep  8, 2025  1:37:57 PM
