@@ -197,8 +197,12 @@ def mcp_endpoint():
             tool_name = data.get("params", {}).get("name", "")
             tool_args = data.get("params", {}).get("arguments", {})
             
+            logger.info(f"Tools/call: {tool_name} with args: {tool_args}")
+            
             # Simulation d'exécution d'outil
             result = execute_tool(tool_name, tool_args)
+            
+            logger.info(f"Tools/call result: {result}")
             
             response = {
                 "jsonrpc": "2.0",
@@ -331,24 +335,38 @@ def index():
 
 def execute_tool(tool_name: str, args: dict) -> str:
     """Simulation d'exécution d'outil MCP"""
+    logger.info(f"Executing tool: {tool_name}")
+    
     tool_found = any(tool["name"] == tool_name for tool in MCP_TOOLS)
     
     if not tool_found:
-        return f"Tool '{tool_name}' not found"
+        logger.warning(f"Tool '{tool_name}' not found in available tools")
+        return f"Tool '{tool_name}' not found. Available tools: {[tool['name'] for tool in MCP_TOOLS[:5]]}..."
     
     # Simulation basique selon le type d'outil
-    if "sql" in tool_name.lower():
-        return f"SQL query executed successfully: {args.get('query', 'No query provided')}"
-    elif "health" in tool_name.lower():
-        return "Database health check: OK"
-    elif "list" in tool_name.lower():
-        return f"List operation completed for {tool_name}"
-    elif "create" in tool_name.lower():
-        return f"Created successfully: {tool_name}"
-    elif "migration" in tool_name.lower():
-        return f"Migration operation completed: {tool_name}"
-    else:
-        return f"Tool '{tool_name}' executed successfully with args: {args}"
+    try:
+        if "sql" in tool_name.lower():
+            query = args.get('query', 'No query provided')
+            return f"SQL query executed successfully: {query}"
+        elif "health" in tool_name.lower():
+            return "Database health check: OK - All systems operational"
+        elif "list" in tool_name.lower():
+            return f"List operation completed for {tool_name} - Found 10 items"
+        elif "create" in tool_name.lower():
+            return f"Created successfully: {tool_name} - ID: 12345"
+        elif "migration" in tool_name.lower():
+            return f"Migration operation completed: {tool_name} - Status: Success"
+        elif "ping" in tool_name.lower():
+            return "Pong! Server is running and ready"
+        elif "auth" in tool_name.lower():
+            return f"Authentication operation completed: {tool_name} - Status: Success"
+        elif "storage" in tool_name.lower():
+            return f"Storage operation completed: {tool_name} - Files processed: 5"
+        else:
+            return f"Tool '{tool_name}' executed successfully with args: {args}"
+    except Exception as e:
+        logger.error(f"Error executing tool {tool_name}: {str(e)}")
+        return f"Error executing tool '{tool_name}': {str(e)}"
 
 if __name__ == "__main__":
     logger.info(f"🚀 Starting {MCP_SERVER_NAME} v{MCP_SERVER_VERSION}")
