@@ -207,7 +207,7 @@ def mcp_endpoint():
             }
         elif method == "notifications/initialized":
             # Notification d'initialisation - pas de réponse requise
-            response = None
+            return "", 204  # No Content
         else:
             response = {
                 "jsonrpc": "2.0",
@@ -271,6 +271,24 @@ def index():
             return jsonify({"error": str(e)}), 400
     
     # Gestion des requêtes GET
+    config_param = request.args.get('config')
+    if config_param:
+        # Smithery.ai envoie un paramètre config - retourner la configuration MCP
+        return jsonify({
+            "mcpServers": {
+                "supabase-mcp": {
+                    "command": "python",
+                    "args": ["src/supabase_server.py"],
+                    "env": {
+                        "MCP_SERVER_NAME": MCP_SERVER_NAME,
+                        "MCP_SERVER_VERSION": MCP_SERVER_VERSION,
+                        "SUPABASE_URL": SUPABASE_URL,
+                        "SUPABASE_ANON_KEY": "[CONFIGURED]"
+                    }
+                }
+            }
+        })
+    
     return jsonify({
         "service": MCP_SERVER_NAME,
         "version": MCP_SERVER_VERSION,
