@@ -153,10 +153,17 @@ def mcp_endpoint():
                 "jsonrpc": "2.0",
                 "id": request_id,
                 "result": {
-                    "protocolVersion": "2025-06-18",
+                    "protocolVersion": "2024-11-05",  # Version plus récente pour Smithery
                     "capabilities": {
                         "tools": {
                             "listChanged": True
+                        },
+                        "resources": {
+                            "subscribe": False,
+                            "listChanged": False
+                        },
+                        "prompts": {
+                            "listChanged": False
                         }
                     },
                     "serverInfo": {
@@ -268,9 +275,10 @@ def index():
                     "message": "POST requests should use /mcp endpoint for JSON-RPC"
                 })
         except Exception as e:
+            logger.error(f"Error in index POST: {str(e)}")
             return jsonify({"error": str(e)}), 400
     
-    # Gestion des requêtes GET
+    # Gestion des requêtes GET sur la racine
     config_param = request.args.get('config')
     if config_param:
         # Smithery.ai envoie un paramètre config - retourner la configuration MCP
@@ -287,6 +295,24 @@ def index():
                     }
                 }
             }
+        })
+    
+    # Vérifier si c'est une requête Smithery.ai
+    user_agent = request.headers.get('User-Agent', '')
+    if 'smithery' in user_agent.lower() or 'smithery' in str(request.args):
+        # Retourner une réponse spéciale pour Smithery
+        return jsonify({
+            "service": MCP_SERVER_NAME,
+            "version": MCP_SERVER_VERSION,
+            "status": "ready",
+            "protocol": "JSON-RPC 2.0",
+            "smithery_compatible": True,
+            "endpoints": {
+                "mcp": "/mcp",
+                "health": "/health",
+                "config": "/.well-known/mcp-config"
+            },
+            "methods": ["ping", "initialize", "notifications/initialized", "tools/list", "tools/call"]
         })
     
     return jsonify({
