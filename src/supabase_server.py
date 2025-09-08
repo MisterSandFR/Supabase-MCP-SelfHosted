@@ -115,9 +115,13 @@ def create_server():
 
 if __name__ == "__main__":
     server = create_server()
-    print("��� Serveur MCP Supabase démarré avec FastMCP et Smithery")
-    print("��� Outils disponibles:", len(server._tools))
-    for tool_name in server._tools.keys():
-        print(f"  - {tool_name}")
+    print("🚀 Serveur MCP Supabase démarré avec FastMCP et Smithery")
+    print("🛠️ Outils disponibles: 6")
+    print("  - ping")
+    print("  - get_server_info")
+    print("  - get_capabilities")
+    print("  - execute_sql")
+    print("  - check_health")
+    print("  - list_tables")
 
 # Force redeploy timestamp: 1757321360
