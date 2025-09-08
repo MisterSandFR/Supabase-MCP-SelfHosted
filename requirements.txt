@@ -2,7 +2,7 @@
 mcp==1.0.0
 fastmcp==0.1.0
 smithery==0.1.24
-pydantic==2.5.0
+pydantic>=2.8.0
 python-dotenv==1.0.0
 pyyaml==6.0.1
 httpx>=0.27
