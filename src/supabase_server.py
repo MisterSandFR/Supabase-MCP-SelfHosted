@@ -69,7 +69,7 @@ def create_server():
 6. list_tables - Liste des tables et schémas"""
 
     @server.tool()
-    def execute_sql(sql: str, allow_multiple_statements: bool = False, ctx: Context) -> str:
+    def execute_sql(ctx: Context, sql: str, allow_multiple_statements: bool = False) -> str:
         """🔧 v3.1.0 Enhanced SQL with OAuth2 DDL support"""
         try:
             session_config = ctx.session_config
