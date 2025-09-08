@@ -119,3 +119,5 @@ if __name__ == "__main__":
     print("��� Outils disponibles:", len(server._tools))
     for tool_name in server._tools.keys():
         print(f"  - {tool_name}")
+
+# Force redeploy timestamp: 1757321360
