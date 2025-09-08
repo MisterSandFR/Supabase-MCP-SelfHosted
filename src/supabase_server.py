@@ -122,7 +122,7 @@ def mcp_endpoint():
                 "service": MCP_SERVER_NAME,
                 "version": MCP_SERVER_VERSION,
                 "protocol": "JSON-RPC 2.0",
-                "methods": ["initialize", "tools/list", "tools/call"],
+                "methods": ["ping", "initialize", "notifications/initialized", "tools/list", "tools/call"],
                 "endpoint": "/mcp",
                 "status": "ready"
             })
@@ -137,7 +137,18 @@ def mcp_endpoint():
         
         logger.info(f"MCP Request: {method} (ID: {request_id})")
         
-        if method == "initialize":
+        if method == "ping":
+            response = {
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "result": {
+                    "pong": True,
+                    "server": MCP_SERVER_NAME,
+                    "version": MCP_SERVER_VERSION,
+                    "status": "ready"
+                }
+            }
+        elif method == "initialize":
             response = {
                 "jsonrpc": "2.0",
                 "id": request_id,
@@ -194,6 +205,9 @@ def mcp_endpoint():
                     ]
                 }
             }
+        elif method == "notifications/initialized":
+            # Notification d'initialisation - pas de réponse requise
+            response = None
         else:
             response = {
                 "jsonrpc": "2.0",
