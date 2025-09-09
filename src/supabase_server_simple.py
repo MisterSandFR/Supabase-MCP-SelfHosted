@@ -274,14 +274,13 @@ class MCPHandler(BaseHTTPRequestHandler):
             if method == 'ping':
                 result = {"pong": True, "server": "Supabase MCP Server"}
             elif method == 'initialize':
-                # Exposer à la fois listChanged et la map d'outils
-                tools_map = {t.get('name'): t for t in self._get_tools_definition()}
+                # Réponse minimale conforme MCP: capabilities = objets vides
                 result = {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {
-                        "tools": {"listChanged": True, "definitions": tools_map},
-                        "resources": {"listChanged": False, "definitions": {}},
-                        "prompts": {"listChanged": False, "definitions": {}}
+                        "tools": {},
+                        "resources": {},
+                        "prompts": {}
                     },
                     "serverInfo": {
                         "name": MCP_SERVER_NAME,
@@ -361,7 +360,6 @@ class MCPHandler(BaseHTTPRequestHandler):
     def send_mcp_config(self):
         """Envoie la configuration MCP"""
         public_url = os.getenv('PUBLIC_URL', 'https://supabase.mcp.coupaul.fr')
-        tools_map = {t.get('name'): t for t in self._get_tools_definition()}
         config = {
             "mcpServers": {
                 "supabase": {
@@ -370,9 +368,9 @@ class MCPHandler(BaseHTTPRequestHandler):
                         "name": MCP_SERVER_NAME,
                         "version": MCP_SERVER_VERSION,
                         "capabilities": {
-                            "tools": {"listChanged": True, "definitions": tools_map},
-                            "resources": {"listChanged": False, "definitions": {}},
-                            "prompts": {"listChanged": False, "definitions": {}}
+                            "tools": {},
+                            "resources": {},
+                            "prompts": {}
                         },
                         "discovery": {"tools": f"{public_url}/mcp/tools.json"},
                         "categories": ["database", "auth", "storage"]
@@ -392,7 +390,7 @@ class MCPHandler(BaseHTTPRequestHandler):
         pass
 
     def _get_tools_definition(self):
-        # Liste élargie compatible serveur officiel
+        # Ensemble d'outils réduit et applicable au self-hosted
         tools = []
         def add(name: str, description: str, props: dict | None = None, required: list | None = None):
             schema = {"type": "object", "properties": props or {}}
@@ -400,50 +398,27 @@ class MCPHandler(BaseHTTPRequestHandler):
                 schema["required"] = required
             tools.append({"name": name, "description": description, "inputSchema": schema})
 
-        # Organization & Project
-        add("list_organizations", "Lists all organizations you're a member of")
-        add("get_organization", "Gets organization details including subscription plan", {"id": {"type": "string"}})
-        add("list_projects", "Lists all your Supabase projects")
-        add("get_project", "Gets details for a specific project", {"id": {"type": "string"}}, ["id"])
-        add("create_project", "Creates a new Supabase project (requires cost confirmation)", {"name": {"type": "string"}, "org_id": {"type": "string"}}, ["name", "org_id"])
-        add("pause_project", "Pauses a project", {"id": {"type": "string"}}, ["id"])
-        add("restore_project", "Restores a paused project", {"id": {"type": "string"}}, ["id"])
-
-        # Cost (not applicable in self-hosted) — removed
-
-        # Branches
-        add("create_branch", "Creates a development branch (requires cost confirmation)", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
-        add("list_branches", "Lists all development branches of a project", {"project_id": {"type": "string"}}, ["project_id"])
-        add("delete_branch", "Deletes a development branch", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
-        add("merge_branch", "Merges branch migrations to production", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
-        add("reset_branch", "Resets branch migrations", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
-        add("rebase_branch", "Rebases branch on production", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
-
         # Database
         add("execute_sql", "Executes raw SQL queries", {"sql": {"type": "string"}}, ["sql"])
-        add("apply_migration", "Applies a migration (for DDL operations)", {"project_id": {"type": "string"}, "version": {"type": "string"}}, ["project_id", "version"])
         add("list_tables", "Lists all tables in specified schemas", {"schemas": {"type": "array", "items": {"type": "string"}}})
         add("list_extensions", "Lists all database extensions")
-        add("list_migrations", "Lists all database migrations", {"project_id": {"type": "string"}}, ["project_id"])
 
-        # Project Info
-        add("get_project_url", "Gets the API URL for a project", {"project_id": {"type": "string"}}, ["project_id"])
-        add("get_anon_key", "Gets the anonymous API key", {"project_id": {"type": "string"}}, ["project_id"])
-        add("generate_typescript_types", "Generates TypeScript types from schema", {"project_id": {"type": "string"}}, ["project_id"])
+        # Migrations (facultatif pour self-hosted)
+        add("apply_migration", "Applies a migration (for DDL operations)", {"version": {"type": "string"}}, ["version"])
+        add("list_migrations", "Lists all database migrations")
 
-        # Monitoring
-        add("get_logs", "Gets logs by service type (api, postgres, auth, etc.)", {"project_id": {"type": "string"}, "service": {"type": "string"}}, ["project_id", "service"])
-        add("get_advisors", "Gets security/performance advisory notices", {"project_id": {"type": "string"}}, ["project_id"])
+        # Project Info (génériques)
+        add("generate_typescript_types", "Generates TypeScript types from schema")
 
-        # Edge Functions
-        add("list_edge_functions", "Lists all Edge Functions in a project", {"project_id": {"type": "string"}}, ["project_id"])
-        add("deploy_edge_function", "Deploys an Edge Function", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
+        # Monitoring générique
+        add("get_logs", "Gets logs by service type (api, postgres, auth, etc.)", {"service": {"type": "string"}})
 
         # Docs
         add("search_docs", "Search Supabase documentation using GraphQL", {"query": {"type": "string"}}, ["query"])
 
         # Santé simple
         add("check_health", "Verify your database connection is working")
+
         # Compat: dupliquer inputSchema en input_schema si nécessaire
         for t in tools:
             if 'inputSchema' in t and 'input_schema' not in t:
@@ -470,7 +445,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                 except Exception as e:
                     return (None, {"code": -32000, "message": f"SQL error: {str(e)}"})
             return ({"content": [{"type": "text", "text": f"SQL execute ok: {sql[:100]}..."}]}, None)
-        if tool_name in ('list_organizations', 'get_organization', 'list_projects', 'get_project', 'create_project', 'pause_project', 'restore_project', 'create_branch', 'list_branches', 'delete_branch', 'merge_branch', 'reset_branch', 'rebase_branch', 'apply_migration', 'list_extensions', 'list_migrations', 'get_project_url', 'get_anon_key', 'generate_typescript_types', 'get_logs', 'get_advisors', 'list_edge_functions', 'deploy_edge_function', 'search_docs'):
+        if tool_name in ('apply_migration', 'list_extensions', 'list_migrations', 'generate_typescript_types', 'get_logs', 'search_docs'):
             # Réponses factices pour l'ISO de surface
             return ({
                 "content": [
