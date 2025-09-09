@@ -135,9 +135,9 @@ class MCPHandler(BaseHTTPRequestHandler):
                 result = {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {
-                        "tools": {},
-                        "resources": {},
-                        "prompts": {}
+                        "tools": {"listChanged": True},
+                        "resources": {"subscribe": False, "listChanged": False},
+                        "prompts": {"listChanged": False}
                     },
                     "serverInfo": {
                         "name": MCP_SERVER_NAME,
@@ -214,7 +214,11 @@ class MCPHandler(BaseHTTPRequestHandler):
                     "metadata": {
                         "name": MCP_SERVER_NAME,
                         "version": MCP_SERVER_VERSION,
-                        "capabilities": {"tools": {}, "resources": {}, "prompts": {}},
+                        "capabilities": {
+                            "tools": {"listChanged": True},
+                            "resources": {"subscribe": False, "listChanged": False},
+                            "prompts": {"listChanged": False}
+                        },
                         "categories": ["database", "auth", "storage"]
                     }
                 }
