@@ -113,6 +113,32 @@ class MCPHandler(BaseHTTPRequestHandler):
         code = self._response_code if self._response_code is not None else '-'
         logger.info(f"RES {request_id} status={code} dur_ms={dur_ms} {note}")
 
+    def _send_json(self, payload: dict, status: int = 200):
+        body_bytes = json.dumps(payload).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(body_bytes)))
+        self._set_cors_headers()
+        self.end_headers()
+        self.wfile.write(body_bytes)
+        try:
+            self.wfile.flush()
+        except Exception:
+            pass
+
+    def _send_text(self, content: str, status: int = 200):
+        body_bytes = content.encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-type', 'text/plain; charset=utf-8')
+        self.send_header('Content-Length', str(len(body_bytes)))
+        self._set_cors_headers()
+        self.end_headers()
+        self.wfile.write(body_bytes)
+        try:
+            self.wfile.flush()
+        except Exception:
+            pass
+
     def _execute_sql_text(self, sql: str, params: tuple | None = None):
         db_url = os.getenv('DATABASE_URL')
         if not db_url:
@@ -151,11 +177,7 @@ class MCPHandler(BaseHTTPRequestHandler):
         elif parsed_path.path == '/mcp':
             # Page d'accueil MCP (texte) ou handshake JSON selon Accept
             if 'application/json' in accept_header:
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json; charset=utf-8')
-                self._set_cors_headers()
-                self.end_headers()
-                self.wfile.write(json.dumps({
+                self._send_json({
                     "status": "ok",
                     "transport": "http",
                     "jsonrpc": "2.0",
@@ -170,23 +192,15 @@ class MCPHandler(BaseHTTPRequestHandler):
                         "prompts/list",
                         "get_capabilities"
                     ]
-                }).encode('utf-8'))
+                })
             else:
                 content = self._make_mcp_intro_text()
-                self.send_response(200)
-                self.send_header('Content-type', 'text/plain; charset=utf-8')
-                self._set_cors_headers()
-                self.end_headers()
-                self.wfile.write(content.encode('utf-8'))
+                self._send_text(content)
         elif parsed_path.path in ('/.well-known/mcp-config', '/.well-known/mcp.json'):
             self.send_mcp_config()
         elif parsed_path.path in ('/mcp/tools.json', '/mcp-tools.json'):
             tools = self._get_tools_definition()
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json; charset=utf-8')
-            self._set_cors_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps({"tools": tools}).encode('utf-8'))
+            self._send_json({"tools": tools})
         elif parsed_path.path in ('/mcp/tools/list', '/mcp/tools', '/tools'):
             # Page texte sur /mcp/tools, sinon JSON
             if parsed_path.path == '/mcp/tools' and 'application/json' not in accept_header:
@@ -198,43 +212,23 @@ class MCPHandler(BaseHTTPRequestHandler):
                 self.wfile.write(content.encode('utf-8'))
             else:
                 tools = self._get_tools_definition()
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json; charset=utf-8')
-                self._set_cors_headers()
-                self.end_headers()
-                self.wfile.write(json.dumps({"tools": tools}).encode('utf-8'))
+                self._send_json({"tools": tools})
         elif parsed_path.path in ('/mcp/resources/list', '/mcp/resources', '/resources'):
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json; charset=utf-8')
-            self._set_cors_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps({"resources": []}).encode('utf-8'))
+            self._send_json({"resources": []})
         elif parsed_path.path in ('/mcp/prompts/list', '/mcp/prompts', '/prompts'):
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json; charset=utf-8')
-            self._set_cors_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps({"prompts": []}).encode('utf-8'))
+            self._send_json({"prompts": []})
         elif parsed_path.path == '/api/tools':
             # Liste des outils (format REST simple)
             tools = self._get_tools_definition()
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json; charset=utf-8')
-            self._set_cors_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps({"tools": tools}).encode('utf-8'))
+            self._send_json({"tools": tools})
         elif parsed_path.path == '/':
             # Landing minimaliste
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json; charset=utf-8')
-            self._set_cors_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps({
+            self._send_json({
                 "status": "ok",
                 "server": MCP_SERVER_NAME,
                 "version": MCP_SERVER_VERSION,
                 "endpoints": ["/health", "/.well-known/mcp-config", "/"]
-            }).encode('utf-8'))
+            })
         else:
             self.send_error(404, "Not Found")
         self._log_done(request_id)
@@ -440,11 +434,7 @@ class MCPHandler(BaseHTTPRequestHandler):
             }
         }
         
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json; charset=utf-8')
-        self._set_cors_headers()
-        self.end_headers()
-        self.wfile.write(json.dumps(config).encode('utf-8'))
+        self._send_json(config)
     
     def log_message(self, format, *args):
         """Override pour éviter les logs verbeux"""
