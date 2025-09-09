@@ -47,14 +47,24 @@ class MCPHandler(BaseHTTPRequestHandler):
             data = json.loads(post_data.decode('utf-8'))
             method = data.get('method', '')
             params = data.get('params', {})
-            request_id = data.get('id', 0)
-            
+            request_id = data.get('id', None)
+
             logger.info(f"MCP Request: {method} (ID: {request_id})")
-            
+
+            # Notifications: pas de réponse (ex: notifications/initialized)
+            if method == 'notifications/initialized':
+                self.send_response(204)
+                self.end_headers()
+                return
+
+            # Construire le résultat selon la méthode
+            result = None
+            error = None
+
             if method == 'ping':
-                response = {"pong": True, "server": "Supabase MCP Server"}
+                result = {"pong": True, "server": "Supabase MCP Server"}
             elif method == 'initialize':
-                response = {
+                result = {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {
                         "tools": {},
@@ -66,12 +76,8 @@ class MCPHandler(BaseHTTPRequestHandler):
                         "version": MCP_SERVER_VERSION
                     }
                 }
-            elif method == 'notifications/initialized':
-                self.send_response(204)
-                self.end_headers()
-                return
             elif method == 'tools/list':
-                response = {
+                result = {
                     "tools": [
                         {
                             "name": "execute_sql",
@@ -105,58 +111,53 @@ class MCPHandler(BaseHTTPRequestHandler):
             elif method == 'tools/call':
                 tool_name = params.get('name', '')
                 tool_args = params.get('arguments', {})
-                
+
                 logger.info(f"Tools/call: {tool_name} with args: {tool_args}")
-                
+
                 if tool_name == 'execute_sql':
                     sql = tool_args.get('sql', 'SELECT 1')
-                    response = {
+                    result = {
                         "content": [
-                            {
-                                "type": "text",
-                                "text": f"✅ SQL exécuté avec succès: {sql[:100]}..."
-                            }
+                            {"type": "text", "text": f"SQL execute ok: {sql[:100]}..."}
                         ]
                     }
                 elif tool_name == 'check_health':
-                    response = {
+                    result = {
                         "content": [
-                            {
-                                "type": "text",
-                                "text": "✅ Base de données Supabase opérationnelle"
-                            }
+                            {"type": "text", "text": "Database healthy"}
                         ]
                     }
                 elif tool_name == 'list_tables':
-                    response = {
+                    result = {
                         "content": [
-                            {
-                                "type": "text",
-                                "text": "Tables disponibles: users, profiles, posts, comments, etc."
-                            }
+                            {"type": "text", "text": "Tables disponibles: users, profiles, posts, comments, etc."}
                         ]
                     }
                 else:
-                    response = {
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": f"❌ Outil '{tool_name}' non trouvé"
-                            }
-                        ],
-                        "isError": True
-                    }
+                    error = {"code": -32601, "message": f"Tool '{tool_name}' not found"}
             else:
-                response = {"error": {"code": -32601, "message": "Method not found"}}
-            
+                error = {"code": -32601, "message": "Method not found"}
+
+            # Envelope JSON-RPC 2.0
+            rpc_response = {"jsonrpc": "2.0", "id": request_id}
+            if error is not None:
+                rpc_response["error"] = error
+            else:
+                rpc_response["result"] = result if result is not None else {}
+
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(response).encode('utf-8'))
-            
+            self.wfile.write(json.dumps(rpc_response).encode('utf-8'))
+
         except Exception as e:
             logger.error(f"Erreur MCP: {e}")
-            self.send_error(500, "Internal Server Error")
+            # Internal error JSON-RPC
+            rpc_response = {"jsonrpc": "2.0", "id": None, "error": {"code": -32603, "message": "Internal error"}}
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(rpc_response).encode('utf-8'))
     
     def send_health_response(self):
         """Envoie la réponse de santé"""
