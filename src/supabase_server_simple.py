@@ -316,14 +316,13 @@ class MCPHandler(BaseHTTPRequestHandler):
             if method == 'ping':
                 result = {"pong": True, "server": "Supabase MCP Server"}
             elif method == 'initialize':
-                # Inclure la map des outils pour aider certains scanners
-                tools_map = {t.get('name'): t for t in self._get_tools_definition()}
+                # Réponse minimale conforme (sans 'definitions')
                 result = {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {
-                        "tools": {"listChanged": True, "definitions": tools_map},
-                        "resources": {"listChanged": False, "definitions": {}},
-                        "prompts": {"listChanged": False, "definitions": {}}
+                        "tools": {"listChanged": True},
+                        "resources": {"listChanged": False},
+                        "prompts": {"listChanged": False}
                     },
                     "serverInfo": {
                         "name": MCP_SERVER_NAME,
@@ -422,7 +421,6 @@ class MCPHandler(BaseHTTPRequestHandler):
     def send_mcp_config(self):
         """Envoie la configuration MCP"""
         public_url = os.getenv('PUBLIC_URL', 'https://supabase.mcp.coupaul.fr')
-        tools_map = {t.get('name'): t for t in self._get_tools_definition()}
         config = {
             "mcpServers": {
                 "supabase": {
@@ -431,9 +429,9 @@ class MCPHandler(BaseHTTPRequestHandler):
                         "name": MCP_SERVER_NAME,
                         "version": MCP_SERVER_VERSION,
                         "capabilities": {
-                            "tools": {"listChanged": True, "definitions": tools_map},
-                            "resources": {"listChanged": False, "definitions": {}},
-                            "prompts": {"listChanged": False, "definitions": {}}
+                            "tools": {"listChanged": True},
+                            "resources": {"listChanged": False},
+                            "prompts": {"listChanged": False}
                         },
                         "discovery": {"tools": f"{public_url}/mcp/tools.json"},
                         "categories": ["database", "auth", "storage"]
