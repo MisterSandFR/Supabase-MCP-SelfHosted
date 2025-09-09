@@ -310,29 +310,38 @@ class MCPHandler(BaseHTTPRequestHandler):
             else:
                 error = {"code": -32601, "message": "Method not found"}
 
-            # Envelope JSON-RPC 2.0
+            # Envelope JSON-RPC 2.0 (sérialiser avant d'envoyer les en-têtes)
             rpc_response = {"jsonrpc": "2.0", "id": request_id}
             if error is not None:
                 rpc_response["error"] = error
             else:
                 rpc_response["result"] = result if result is not None else {}
 
+            body_bytes = json.dumps(rpc_response).encode('utf-8')
             self.send_response(200)
             self.send_header('Content-type', 'application/json; charset=utf-8')
             self._set_cors_headers()
             self.end_headers()
-            self.wfile.write(json.dumps(rpc_response).encode('utf-8'))
+            self.wfile.write(body_bytes)
             self._log_done(str(request_id) if request_id is not None else '-')
 
         except Exception as e:
             logger.exception(f"Erreur MCP: {e}")
             # Internal error JSON-RPC
             rpc_response = {"jsonrpc": "2.0", "id": None, "error": {"code": -32603, "message": "Internal error"}}
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json; charset=utf-8')
-            self._set_cors_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps(rpc_response).encode('utf-8'))
+            body_bytes = json.dumps(rpc_response).encode('utf-8')
+            # Tenter de renvoyer une réponse propre (si en-têtes pas déjà envoyés)
+            try:
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json; charset=utf-8')
+                self._set_cors_headers()
+                self.end_headers()
+            except Exception:
+                pass
+            try:
+                self.wfile.write(body_bytes)
+            except Exception:
+                pass
             self._log_done(str(request_id) if request_id is not None else '-')
 
     def do_OPTIONS(self):
