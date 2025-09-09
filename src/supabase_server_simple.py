@@ -25,16 +25,31 @@ MCP_SERVER_NAME = os.getenv("MCP_SERVER_NAME", "Supabase MCP Server")
 MCP_SERVER_VERSION = os.getenv("MCP_SERVER_VERSION", "3.1.0")
 
 class MCPHandler(BaseHTTPRequestHandler):
+    def _set_cors_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+
     def do_GET(self):
         """Gestion des requêtes GET"""
         parsed_path = urlparse(self.path)
         
         if parsed_path.path == '/health':
             self.send_health_response()
-        elif parsed_path.path == '/.well-known/mcp-config':
+        elif parsed_path.path in ('/.well-known/mcp-config', '/.well-known/mcp.json'):
             self.send_mcp_config()
-        elif parsed_path.path == '/' and 'config' in parse_qs(parsed_path.query):
-            self.send_mcp_config()
+        elif parsed_path.path == '/':
+            # Landing minimaliste
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "status": "ok",
+                "server": MCP_SERVER_NAME,
+                "version": MCP_SERVER_VERSION,
+                "endpoints": ["/health", "/.well-known/mcp-config", "/"]
+            }).encode('utf-8'))
         else:
             self.send_error(404, "Not Found")
     
@@ -147,6 +162,7 @@ class MCPHandler(BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
+            self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(rpc_response).encode('utf-8'))
 
@@ -156,8 +172,15 @@ class MCPHandler(BaseHTTPRequestHandler):
             rpc_response = {"jsonrpc": "2.0", "id": None, "error": {"code": -32603, "message": "Internal error"}}
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
+            self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(rpc_response).encode('utf-8'))
+
+    def do_OPTIONS(self):
+        # Pré-vol CORS
+        self.send_response(204)
+        self._set_cors_headers()
+        self.end_headers()
     
     def send_health_response(self):
         """Envoie la réponse de santé"""
@@ -171,6 +194,7 @@ class MCPHandler(BaseHTTPRequestHandler):
         
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
+        self._set_cors_headers()
         self.end_headers()
         self.wfile.write(json.dumps(response).encode('utf-8'))
     
@@ -191,6 +215,7 @@ class MCPHandler(BaseHTTPRequestHandler):
         
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
+        self._set_cors_headers()
         self.end_headers()
         self.wfile.write(json.dumps(config).encode('utf-8'))
     
