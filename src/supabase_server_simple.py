@@ -267,14 +267,14 @@ class MCPHandler(BaseHTTPRequestHandler):
             if method == 'ping':
                 result = {"pong": True, "server": "Supabase MCP Server"}
             elif method == 'initialize':
-                # Exposer directement la map d'outils dans capabilities.tools
+                # Exposer à la fois listChanged et la map d'outils
                 tools_map = {t.get('name'): t for t in self._get_tools_definition()}
                 result = {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {
-                        "tools": tools_map,
-                        "resources": {},
-                        "prompts": {}
+                        "tools": {"listChanged": True, "definitions": tools_map},
+                        "resources": {"listChanged": False, "definitions": {}},
+                        "prompts": {"listChanged": False, "definitions": {}}
                     },
                     "serverInfo": {
                         "name": MCP_SERVER_NAME,
@@ -362,7 +362,11 @@ class MCPHandler(BaseHTTPRequestHandler):
                     "metadata": {
                         "name": MCP_SERVER_NAME,
                         "version": MCP_SERVER_VERSION,
-                        "capabilities": {"tools": tools_map, "resources": {}, "prompts": {}},
+                        "capabilities": {
+                            "tools": {"listChanged": True, "definitions": tools_map},
+                            "resources": {"listChanged": False, "definitions": {}},
+                            "prompts": {"listChanged": False, "definitions": {}}
+                        },
                         "categories": ["database", "auth", "storage"]
                     }
                 }
