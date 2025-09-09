@@ -33,11 +33,42 @@ class MCPHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         """Gestion des requêtes GET"""
         parsed_path = urlparse(self.path)
+        logger.info(f"HTTP GET {parsed_path.path}")
         
         if parsed_path.path == '/health':
             self.send_health_response()
+        elif parsed_path.path == '/mcp':
+            # Handshake HTTP
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "status": "ok",
+                "transport": "http",
+                "jsonrpc": "2.0"
+            }).encode('utf-8'))
         elif parsed_path.path in ('/.well-known/mcp-config', '/.well-known/mcp.json'):
             self.send_mcp_config()
+        elif parsed_path.path == '/mcp/tools/list':
+            tools = self._get_tools_definition()
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({"tools": tools}).encode('utf-8'))
+        elif parsed_path.path == '/mcp/resources/list':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({"resources": []}).encode('utf-8'))
+        elif parsed_path.path == '/mcp/prompts/list':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({"prompts": []}).encode('utf-8'))
         elif parsed_path.path == '/api/tools':
             # Liste des outils (format REST simple)
             tools = self._get_tools_definition()
@@ -63,6 +94,7 @@ class MCPHandler(BaseHTTPRequestHandler):
     
     def do_POST(self):
         """Gestion des requêtes POST MCP"""
+        logger.info(f"HTTP POST {self.path}")
         content_length = int(self.headers.get('Content-Length', 0))
         post_data = self.rfile.read(content_length)
         
@@ -75,7 +107,7 @@ class MCPHandler(BaseHTTPRequestHandler):
             logger.info(f"MCP Request: {method} (ID: {request_id})")
 
             # Endpoint REST alternatif: /api/execute
-            if self.path == '/api/execute':
+            if self.path in ('/api/execute', '/mcp/tools/call'):
                 # Adapter le payload REST en appel tools/call
                 tool_name = data.get('name') or data.get('tool') or ''
                 tool_args = data.get('arguments') or {}
