@@ -9,7 +9,7 @@ import { spawn } from 'child_process';
 import { join } from 'path';
 
 // Configuration du serveur Python
-const PYTHON_SERVER_PATH = join(__dirname, 'src', 'supabase_server.py');
+const PYTHON_SERVER_PATH = join(__dirname, 'src', 'supabase_server_simple.py');
 
 console.log('🚀 Démarrage du serveur Supabase MCP OAuth2 v3.1.0...');
 console.log(`📁 Chemin du serveur Python: ${PYTHON_SERVER_PATH}`);

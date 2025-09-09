@@ -2,7 +2,7 @@
 builder = "dockerfile"
 
 [deploy]
-startCommand = "python src/supabase_server.py"
+startCommand = "python src/supabase_server_simple.py"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "always"
