@@ -14,6 +14,7 @@ import uuid
 import traceback
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
+import psycopg
 
 # Configuration du logging
 logging.basicConfig(level=logging.INFO)
@@ -40,6 +41,21 @@ class MCPHandler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 
+    def _redact(self, text: str) -> str:
+        try:
+            tokens = [
+                SUPABASE_ANON_KEY or "",
+                os.getenv("SUPABASE_SERVICE_ROLE_KEY", ""),
+                SUPABASE_URL or "",
+            ]
+            redacted = text
+            for t in tokens:
+                if t:
+                    redacted = redacted.replace(t, "***")
+            return redacted
+        except Exception:
+            return text
+
     def _decode_config_param(self, query):
         try:
             params = parse_qs(query or '')
@@ -59,6 +75,8 @@ class MCPHandler(BaseHTTPRequestHandler):
         cl = self.headers.get('Content-Length', '-')
         client_ip = self.client_address[0] if self.client_address else '-'
         config_preview = self._decode_config_param(query)
+        if config_preview:
+            config_preview = self._redact(config_preview)
         if config_preview and len(config_preview) > 200:
             config_preview = config_preview[:200] + '...'
         logger.info(
@@ -208,6 +226,7 @@ class MCPHandler(BaseHTTPRequestHandler):
         post_data = self.rfile.read(content_length)
         try:
             preview = post_data[:400].decode('utf-8', errors='replace')
+            preview = self._redact(preview)
             logger.debug(f"REQ {request_id} body_preview={preview}")
         except Exception:
             pass
@@ -427,11 +446,22 @@ class MCPHandler(BaseHTTPRequestHandler):
         # Retourne (result, error)
         if tool_name == 'execute_sql':
             sql = tool_args.get('sql', 'SELECT 1')
-            return ({
-                "content": [
-                    {"type": "text", "text": f"SQL execute ok: {sql[:100]}..."}
-                ]
-            }, None)
+            db_url = os.getenv('DATABASE_URL')
+            if db_url:
+                try:
+                    with psycopg.connect(db_url, connect_timeout=5) as conn:
+                        with conn.cursor() as cur:
+                            cur.execute(sql)
+                            rows = None
+                            try:
+                                rows = cur.fetchall()
+                            except Exception:
+                                rows = None
+                    preview = f"{len(rows)} rows" if rows is not None else "OK"
+                    return ({"content": [{"type": "text", "text": f"SQL execute ok: {preview}"}]}, None)
+                except Exception as e:
+                    return (None, {"code": -32000, "message": f"SQL error: {str(e)}"})
+            return ({"content": [{"type": "text", "text": f"SQL execute ok: {sql[:100]}..."}]}, None)
         if tool_name in ('list_organizations', 'get_organization', 'list_projects', 'get_project', 'create_project', 'pause_project', 'restore_project', 'get_cost', 'confirm_cost', 'create_branch', 'list_branches', 'delete_branch', 'merge_branch', 'reset_branch', 'rebase_branch', 'apply_migration', 'list_extensions', 'list_migrations', 'get_project_url', 'get_anon_key', 'generate_typescript_types', 'get_logs', 'get_advisors', 'list_edge_functions', 'deploy_edge_function', 'search_docs'):
             # Réponses factices pour l'ISO de surface
             return ({
@@ -440,17 +470,36 @@ class MCPHandler(BaseHTTPRequestHandler):
                 ]
             }, None)
         if tool_name == 'check_health':
-            return ({
-                "content": [
-                    {"type": "text", "text": "Database healthy"}
-                ]
-            }, None)
+            db_url = os.getenv('DATABASE_URL')
+            if db_url:
+                try:
+                    with psycopg.connect(db_url, connect_timeout=3) as _:
+                        pass
+                    return ({"content": [{"type": "text", "text": "Database healthy (self-hosted)"}]}, None)
+                except Exception as e:
+                    return (None, {"code": -32001, "message": f"DB unhealthy: {str(e)}"})
+            return ({"content": [{"type": "text", "text": "Database healthy"}]}, None)
         if tool_name == 'list_tables':
-            return ({
-                "content": [
-                    {"type": "text", "text": "Tables disponibles: users, profiles, posts, comments, etc."}
-                ]
-            }, None)
+            db_url = os.getenv('DATABASE_URL')
+            if db_url:
+                try:
+                    with psycopg.connect(db_url, connect_timeout=5) as conn:
+                        with conn.cursor() as cur:
+                            cur.execute(
+                                """
+                                select table_schema, table_name
+                                from information_schema.tables
+                                where table_type='BASE TABLE' and table_schema not in ('pg_catalog','information_schema')
+                                order by table_schema, table_name
+                                """
+                            )
+                            rows = cur.fetchall()
+                    lines = [f"{s}.{t}" for (s, t) in rows]
+                    text = "\n".join(lines) if lines else "(no tables)"
+                    return ({"content": [{"type": "text", "text": text}]}, None)
+                except Exception as e:
+                    return (None, {"code": -32002, "message": f"List tables error: {str(e)}"})
+            return ({"content": [{"type": "text", "text": "Tables disponibles: users, profiles, posts, comments, etc."}]}, None)
         return (None, {"code": -32601, "message": f"Tool '{tool_name}' not found"})
 def main():
     """Fonction principale"""
