@@ -150,6 +150,14 @@ class MCPHandler(BaseHTTPRequestHandler):
                 result = {"resources": []}
             elif method == 'prompts/list':
                 result = {"prompts": []}
+            elif method == 'get_capabilities':
+                result = {
+                    "capabilities": {
+                        "tools": {"listChanged": True},
+                        "resources": {"subscribe": False, "listChanged": False},
+                        "prompts": {"listChanged": False}
+                    }
+                }
             elif method == 'tools/call':
                 tool_name = params.get('name', '')
                 tool_args = params.get('arguments', {})
