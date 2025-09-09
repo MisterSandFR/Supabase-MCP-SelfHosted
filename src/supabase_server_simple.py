@@ -114,6 +114,10 @@ class MCPHandler(BaseHTTPRequestHandler):
                 }
             elif method == 'tools/list':
                 result = {"tools": self._get_tools_definition()}
+            elif method == 'resources/list':
+                result = {"resources": []}
+            elif method == 'prompts/list':
+                result = {"prompts": []}
             elif method == 'tools/call':
                 tool_name = params.get('name', '')
                 tool_args = params.get('arguments', {})
@@ -170,11 +174,14 @@ class MCPHandler(BaseHTTPRequestHandler):
     
     def send_mcp_config(self):
         """Envoie la configuration MCP"""
+        public_url = os.getenv('PUBLIC_URL', 'https://supabase.mcp.coupaul.fr')
         config = {
             "mcpServers": {
                 "supabase": {
-                    "transport": {"type": "http", "url": "/mcp"},
+                    "transport": {"type": "http", "url": f"{public_url}/mcp"},
                     "metadata": {
+                        "name": MCP_SERVER_NAME,
+                        "version": MCP_SERVER_VERSION,
                         "capabilities": {"tools": True, "resources": False, "prompts": False},
                         "categories": ["database", "auth", "storage"]
                     }
