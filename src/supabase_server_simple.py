@@ -180,7 +180,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                 self.wfile.write(content.encode('utf-8'))
         elif parsed_path.path in ('/.well-known/mcp-config', '/.well-known/mcp.json'):
             self.send_mcp_config()
-        elif parsed_path.path == '/mcp/tools.json':
+        elif parsed_path.path in ('/mcp/tools.json', '/mcp-tools.json'):
             tools = self._get_tools_definition()
             self.send_response(200)
             self.send_header('Content-type', 'application/json; charset=utf-8')
@@ -251,7 +251,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'application/json; charset=utf-8')
                 self._set_cors_headers()
                 self.end_headers()
-            elif parsed_path.path in ('/mcp/tools/list', '/mcp/resources/list', '/mcp/prompts/list', '/mcp/tools.json'):
+            elif parsed_path.path in ('/mcp/tools/list', '/mcp/resources/list', '/mcp/prompts/list', '/mcp/tools.json', '/mcp-tools.json'):
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json; charset=utf-8')
                 self._set_cors_headers()
@@ -316,13 +316,14 @@ class MCPHandler(BaseHTTPRequestHandler):
             if method == 'ping':
                 result = {"pong": True, "server": "Supabase MCP Server"}
             elif method == 'initialize':
-                # Annonce explicite pour déclencher tools/list côté client
+                # Inclure la map des outils pour aider certains scanners
+                tools_map = {t.get('name'): t for t in self._get_tools_definition()}
                 result = {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {
-                        "tools": {"listChanged": True},
-                        "resources": {"listChanged": False},
-                        "prompts": {"listChanged": False}
+                        "tools": {"listChanged": True, "definitions": tools_map},
+                        "resources": {"listChanged": False, "definitions": {}},
+                        "prompts": {"listChanged": False, "definitions": {}}
                     },
                     "serverInfo": {
                         "name": MCP_SERVER_NAME,
@@ -421,6 +422,7 @@ class MCPHandler(BaseHTTPRequestHandler):
     def send_mcp_config(self):
         """Envoie la configuration MCP"""
         public_url = os.getenv('PUBLIC_URL', 'https://supabase.mcp.coupaul.fr')
+        tools_map = {t.get('name'): t for t in self._get_tools_definition()}
         config = {
             "mcpServers": {
                 "supabase": {
@@ -429,9 +431,9 @@ class MCPHandler(BaseHTTPRequestHandler):
                         "name": MCP_SERVER_NAME,
                         "version": MCP_SERVER_VERSION,
                         "capabilities": {
-                            "tools": {"listChanged": True},
-                            "resources": {"listChanged": False},
-                            "prompts": {"listChanged": False}
+                            "tools": {"listChanged": True, "definitions": tools_map},
+                            "resources": {"listChanged": False, "definitions": {}},
+                            "prompts": {"listChanged": False, "definitions": {}}
                         },
                         "discovery": {"tools": f"{public_url}/mcp/tools.json"},
                         "categories": ["database", "auth", "storage"]
