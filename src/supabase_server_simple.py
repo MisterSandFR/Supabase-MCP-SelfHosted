@@ -9,6 +9,9 @@ import os
 import json
 import time
 import logging
+import base64
+import uuid
+import traceback
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -25,18 +28,65 @@ MCP_SERVER_NAME = os.getenv("MCP_SERVER_NAME", "Supabase MCP Server")
 MCP_SERVER_VERSION = os.getenv("MCP_SERVER_VERSION", "3.1.0")
 
 class MCPHandler(BaseHTTPRequestHandler):
+    _response_code = None
+    _request_start_time = None
+
+    def send_response(self, code, message=None):
+        self._response_code = code
+        return super().send_response(code, message)
+
     def _set_cors_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 
+    def _decode_config_param(self, query):
+        try:
+            params = parse_qs(query or '')
+            raw = params.get('config', [None])[0]
+            if not raw:
+                return None
+            # raw peut déjà être base64-safe (e.g. e30=)
+            decoded = base64.b64decode(raw).decode('utf-8', errors='replace')
+            return decoded
+        except Exception as e:
+            logger.debug(f"Config decode error: {e}")
+            return None
+
+    def _log_start(self, request_id: str, method: str, path: str, query: str):
+        ua = self.headers.get('User-Agent', '-')
+        ct = self.headers.get('Content-Type', '-')
+        cl = self.headers.get('Content-Length', '-')
+        client_ip = self.client_address[0] if self.client_address else '-'
+        config_preview = self._decode_config_param(query)
+        if config_preview and len(config_preview) > 200:
+            config_preview = config_preview[:200] + '...'
+        logger.info(
+            f"REQ {request_id} {method} {path} ua='{ua}' ct='{ct}' cl='{cl}' ip={client_ip}"
+            + (f" config={config_preview}" if config_preview else '')
+        )
+
+    def _log_done(self, request_id: str, note: str = ''):
+        try:
+            dur_ms = int((time.time() - (self._request_start_time or time.time())) * 1000)
+        except Exception:
+            dur_ms = -1
+        code = self._response_code if self._response_code is not None else '-'
+        logger.info(f"RES {request_id} status={code} dur_ms={dur_ms} {note}")
+
     def do_GET(self):
         """Gestion des requêtes GET"""
         parsed_path = urlparse(self.path)
-        logger.info(f"HTTP GET {parsed_path.path}")
+        self._request_start_time = time.time()
+        request_id = self.headers.get('X-Request-Id') or uuid.uuid4().hex[:8]
+        self._log_start(request_id, 'GET', parsed_path.path, parsed_path.query)
         
         if parsed_path.path == '/health':
             self.send_health_response()
+        elif parsed_path.path == '/favicon.ico':
+            self.send_response(204)
+            self._set_cors_headers()
+            self.end_headers()
         elif parsed_path.path == '/mcp':
             # Handshake HTTP
             self.send_response(200)
@@ -102,12 +152,21 @@ class MCPHandler(BaseHTTPRequestHandler):
             }).encode('utf-8'))
         else:
             self.send_error(404, "Not Found")
+        self._log_done(request_id)
     
     def do_POST(self):
         """Gestion des requêtes POST MCP"""
-        logger.info(f"HTTP POST {self.path}")
+        self._request_start_time = time.time()
+        request_id = self.headers.get('X-Request-Id') or uuid.uuid4().hex[:8]
+        parsed_path = urlparse(self.path)
+        self._log_start(request_id, 'POST', parsed_path.path, parsed_path.query)
         content_length = int(self.headers.get('Content-Length', 0))
         post_data = self.rfile.read(content_length)
+        try:
+            preview = post_data[:400].decode('utf-8', errors='replace')
+            logger.debug(f"REQ {request_id} body_preview={preview}")
+        except Exception:
+            pass
         
         try:
             data = json.loads(post_data.decode('utf-8'))
@@ -128,12 +187,14 @@ class MCPHandler(BaseHTTPRequestHandler):
                 self._set_cors_headers()
                 self.end_headers()
                 self.wfile.write(json.dumps({"ok": error is None, "result": result, "error": error}).encode('utf-8'))
+                self._log_done(str(request_id) if request_id is not None else '-')
                 return
 
             # Notifications: pas de réponse (ex: notifications/initialized)
             if method == 'notifications/initialized':
                 self.send_response(204)
                 self.end_headers()
+                self._log_done(str(request_id) if request_id is not None else '-')
                 return
 
             # Construire le résultat selon la méthode
@@ -191,9 +252,10 @@ class MCPHandler(BaseHTTPRequestHandler):
             self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(rpc_response).encode('utf-8'))
+            self._log_done(str(request_id) if request_id is not None else '-')
 
         except Exception as e:
-            logger.error(f"Erreur MCP: {e}")
+            logger.exception(f"Erreur MCP: {e}")
             # Internal error JSON-RPC
             rpc_response = {"jsonrpc": "2.0", "id": None, "error": {"code": -32603, "message": "Internal error"}}
             self.send_response(200)
@@ -201,6 +263,7 @@ class MCPHandler(BaseHTTPRequestHandler):
             self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(rpc_response).encode('utf-8'))
+            self._log_done(str(request_id) if request_id is not None else '-')
 
     def do_OPTIONS(self):
         # Pré-vol CORS
