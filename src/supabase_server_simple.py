@@ -143,14 +143,13 @@ class MCPHandler(BaseHTTPRequestHandler):
             if method == 'ping':
                 result = {"pong": True, "server": "Supabase MCP Server"}
             elif method == 'initialize':
-                # Exposer la map des outils dans capabilities.tools (compat Smithery)
-                tools_map = {t.get('name'): t for t in self._get_tools_definition()}
+                # Forme standard attendue par le scanner Smithery
                 result = {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {
-                        "tools": tools_map,
-                        "resources": {},
-                        "prompts": {}
+                        "tools": {"listChanged": True},
+                        "resources": {"subscribe": False, "listChanged": False},
+                        "prompts": {"listChanged": False}
                     },
                     "serverInfo": {
                         "name": MCP_SERVER_NAME,
@@ -228,7 +227,6 @@ class MCPHandler(BaseHTTPRequestHandler):
     def send_mcp_config(self):
         """Envoie la configuration MCP"""
         public_url = os.getenv('PUBLIC_URL', 'https://supabase.mcp.coupaul.fr')
-        tools_map = {t.get('name'): t for t in self._get_tools_definition()}
         config = {
             "mcpServers": {
                 "supabase": {
@@ -236,7 +234,11 @@ class MCPHandler(BaseHTTPRequestHandler):
                     "metadata": {
                         "name": MCP_SERVER_NAME,
                         "version": MCP_SERVER_VERSION,
-                        "capabilities": {"tools": tools_map, "resources": {}, "prompts": {}},
+                        "capabilities": {
+                            "tools": {"listChanged": True},
+                            "resources": {"subscribe": False, "listChanged": False},
+                            "prompts": {"listChanged": False}
+                        },
                         "categories": ["database", "auth", "storage"]
                     }
                 }
