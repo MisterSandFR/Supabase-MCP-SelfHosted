@@ -143,11 +143,12 @@ class MCPHandler(BaseHTTPRequestHandler):
             if method == 'ping':
                 result = {"pong": True, "server": "Supabase MCP Server"}
             elif method == 'initialize':
-                # Capabilities minimales: objets vides
+                # Exposer la map des outils dans capabilities.tools (compat Smithery)
+                tools_map = {t.get('name'): t for t in self._get_tools_definition()}
                 result = {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {
-                        "tools": {},
+                        "tools": tools_map,
                         "resources": {},
                         "prompts": {}
                     },
@@ -227,6 +228,7 @@ class MCPHandler(BaseHTTPRequestHandler):
     def send_mcp_config(self):
         """Envoie la configuration MCP"""
         public_url = os.getenv('PUBLIC_URL', 'https://supabase.mcp.coupaul.fr')
+        tools_map = {t.get('name'): t for t in self._get_tools_definition()}
         config = {
             "mcpServers": {
                 "supabase": {
@@ -234,7 +236,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                     "metadata": {
                         "name": MCP_SERVER_NAME,
                         "version": MCP_SERVER_VERSION,
-                        "capabilities": {"tools": {}, "resources": {}, "prompts": {}},
+                        "capabilities": {"tools": tools_map, "resources": {}, "prompts": {}},
                         "categories": ["database", "auth", "storage"]
                     }
                 }
