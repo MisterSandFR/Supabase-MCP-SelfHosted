@@ -46,7 +46,18 @@ class MCPHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({
                 "status": "ok",
                 "transport": "http",
-                "jsonrpc": "2.0"
+                "jsonrpc": "2.0",
+                "endpoint": "/mcp",
+                "methods": [
+                    "ping",
+                    "initialize",
+                    "notifications/initialized",
+                    "tools/list",
+                    "tools/call",
+                    "resources/list",
+                    "prompts/list",
+                    "get_capabilities"
+                ]
             }).encode('utf-8'))
         elif parsed_path.path in ('/.well-known/mcp-config', '/.well-known/mcp.json'):
             self.send_mcp_config()
