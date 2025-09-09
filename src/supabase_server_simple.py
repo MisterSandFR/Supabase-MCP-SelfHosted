@@ -320,9 +320,14 @@ class MCPHandler(BaseHTTPRequestHandler):
             body_bytes = json.dumps(rpc_response).encode('utf-8')
             self.send_response(200)
             self.send_header('Content-type', 'application/json; charset=utf-8')
+            self.send_header('Content-Length', str(len(body_bytes)))
             self._set_cors_headers()
             self.end_headers()
             self.wfile.write(body_bytes)
+            try:
+                self.wfile.flush()
+            except Exception:
+                pass
             self._log_done(str(request_id) if request_id is not None else '-')
 
         except Exception as e:
@@ -334,12 +339,17 @@ class MCPHandler(BaseHTTPRequestHandler):
             try:
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json; charset=utf-8')
+                self.send_header('Content-Length', str(len(body_bytes)))
                 self._set_cors_headers()
                 self.end_headers()
             except Exception:
                 pass
             try:
                 self.wfile.write(body_bytes)
+                try:
+                    self.wfile.flush()
+                except Exception:
+                    pass
             except Exception:
                 pass
             self._log_done(str(request_id) if request_id is not None else '-')
