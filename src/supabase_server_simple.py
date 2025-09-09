@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Serveur MCP Supabase Ultra-Simple - Sans Flask
 Solution de contournement pour Railway
@@ -131,7 +132,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                         "content": [
                             {
                                 "type": "text",
-                                "text": "Ì≥ã Tables disponibles: users, profiles, posts, comments, etc."
+                                "text": "Tables disponibles: users, profiles, posts, comments, etc."
                             }
                         ]
                     }
@@ -200,11 +201,11 @@ def main():
     """Fonction principale"""
     port = int(os.getenv('PORT', 8000))
     
-    logger.info(f"Ì∫Ä Starting Supabase MCP Server v{MCP_SERVER_VERSION}")
-    logger.info(f"Ìºê Port: {port}")
-    logger.info(f"Ì¥ß Supabase URL: {SUPABASE_URL}")
-    logger.info(f"Ìª†Ô∏è Tools available: 3")
-    logger.info(f"Ìø≠ Production mode: {os.getenv('PRODUCTION_MODE', 'false')}")
+    logger.info(f"Starting Supabase MCP Server v{MCP_SERVER_VERSION}")
+    logger.info(f"Port: {port}")
+    logger.info(f"Supabase URL: {SUPABASE_URL}")
+    logger.info("Tools available: 3")
+    logger.info(f"Production mode: {os.getenv('PRODUCTION_MODE', 'false')}")
     
     server = HTTPServer(('0.0.0.0', port), MCPHandler)
     
