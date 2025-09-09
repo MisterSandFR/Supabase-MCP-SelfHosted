@@ -154,6 +154,32 @@ class MCPHandler(BaseHTTPRequestHandler):
             self.send_error(404, "Not Found")
         self._log_done(request_id)
     
+    def do_HEAD(self):
+        """Gestion des requêtes HEAD (mêmes codes que GET, sans body)"""
+        parsed_path = urlparse(self.path)
+        self._request_start_time = time.time()
+        request_id = self.headers.get('X-Request-Id') or uuid.uuid4().hex[:8]
+        self._log_start(request_id, 'HEAD', parsed_path.path, parsed_path.query)
+        try:
+            if parsed_path.path in ('/health', '/', '/.well-known/mcp-config', '/.well-known/mcp.json', '/mcp'):
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json; charset=utf-8')
+                self._set_cors_headers()
+                self.end_headers()
+            elif parsed_path.path in ('/mcp/tools/list', '/mcp/resources/list', '/mcp/prompts/list'):
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json; charset=utf-8')
+                self._set_cors_headers()
+                self.end_headers()
+            elif parsed_path.path == '/favicon.ico':
+                self.send_response(204)
+                self._set_cors_headers()
+                self.end_headers()
+            else:
+                self.send_error(404, "Not Found")
+        finally:
+            self._log_done(request_id)
+
     def do_POST(self):
         """Gestion des requêtes POST MCP"""
         self._request_start_time = time.time()
