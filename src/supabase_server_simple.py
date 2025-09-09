@@ -138,6 +138,13 @@ class MCPHandler(BaseHTTPRequestHandler):
                 self.wfile.write(content.encode('utf-8'))
         elif parsed_path.path in ('/.well-known/mcp-config', '/.well-known/mcp.json'):
             self.send_mcp_config()
+        elif parsed_path.path == '/mcp/tools.json':
+            tools = self._get_tools_definition()
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json; charset=utf-8')
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({"tools": tools}).encode('utf-8'))
         elif parsed_path.path in ('/mcp/tools/list', '/mcp/tools', '/tools'):
             # Page texte sur /mcp/tools, sinon JSON
             if parsed_path.path == '/mcp/tools' and 'application/json' not in accept_header:
@@ -202,7 +209,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'application/json; charset=utf-8')
                 self._set_cors_headers()
                 self.end_headers()
-            elif parsed_path.path in ('/mcp/tools/list', '/mcp/resources/list', '/mcp/prompts/list'):
+            elif parsed_path.path in ('/mcp/tools/list', '/mcp/resources/list', '/mcp/prompts/list', '/mcp/tools.json'):
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json; charset=utf-8')
                 self._set_cors_headers()
@@ -367,6 +374,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                             "resources": {"listChanged": False, "definitions": {}},
                             "prompts": {"listChanged": False, "definitions": {}}
                         },
+                        "discovery": {"tools": f"{public_url}/mcp/tools.json"},
                         "categories": ["database", "auth", "storage"]
                     }
                 }
