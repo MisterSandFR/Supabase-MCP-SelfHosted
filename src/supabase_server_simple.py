@@ -399,9 +399,7 @@ class MCPHandler(BaseHTTPRequestHandler):
         add("pause_project", "Pauses a project", {"id": {"type": "string"}}, ["id"])
         add("restore_project", "Restores a paused project", {"id": {"type": "string"}}, ["id"])
 
-        # Cost
-        add("get_cost", "Gets the cost of creating a new project or branch", {"type": {"type": "string"}}, ["type"])
-        add("confirm_cost", "Confirms understanding of costs before creation", {"type": {"type": "string"}}, ["type"])
+        # Cost (not applicable in self-hosted) — removed
 
         # Branches
         add("create_branch", "Creates a development branch (requires cost confirmation)", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
@@ -462,7 +460,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                 except Exception as e:
                     return (None, {"code": -32000, "message": f"SQL error: {str(e)}"})
             return ({"content": [{"type": "text", "text": f"SQL execute ok: {sql[:100]}..."}]}, None)
-        if tool_name in ('list_organizations', 'get_organization', 'list_projects', 'get_project', 'create_project', 'pause_project', 'restore_project', 'get_cost', 'confirm_cost', 'create_branch', 'list_branches', 'delete_branch', 'merge_branch', 'reset_branch', 'rebase_branch', 'apply_migration', 'list_extensions', 'list_migrations', 'get_project_url', 'get_anon_key', 'generate_typescript_types', 'get_logs', 'get_advisors', 'list_edge_functions', 'deploy_edge_function', 'search_docs'):
+        if tool_name in ('list_organizations', 'get_organization', 'list_projects', 'get_project', 'create_project', 'pause_project', 'restore_project', 'create_branch', 'list_branches', 'delete_branch', 'merge_branch', 'reset_branch', 'rebase_branch', 'apply_migration', 'list_extensions', 'list_migrations', 'get_project_url', 'get_anon_key', 'generate_typescript_types', 'get_logs', 'get_advisors', 'list_edge_functions', 'deploy_edge_function', 'search_docs'):
             # Réponses factices pour l'ISO de surface
             return ({
                 "content": [
