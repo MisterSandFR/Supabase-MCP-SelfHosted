@@ -40,7 +40,7 @@ class MCPHandler(BaseHTTPRequestHandler):
         elif parsed_path.path == '/mcp':
             # Handshake HTTP
             self.send_response(200)
-            self.send_header('Content-type', 'application/json')
+            self.send_header('Content-type', 'application/json; charset=utf-8')
             self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps({
@@ -50,22 +50,22 @@ class MCPHandler(BaseHTTPRequestHandler):
             }).encode('utf-8'))
         elif parsed_path.path in ('/.well-known/mcp-config', '/.well-known/mcp.json'):
             self.send_mcp_config()
-        elif parsed_path.path == '/mcp/tools/list':
+        elif parsed_path.path in ('/mcp/tools/list', '/mcp/tools', '/tools'):
             tools = self._get_tools_definition()
             self.send_response(200)
-            self.send_header('Content-type', 'application/json')
+            self.send_header('Content-type', 'application/json; charset=utf-8')
             self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps({"tools": tools}).encode('utf-8'))
-        elif parsed_path.path == '/mcp/resources/list':
+        elif parsed_path.path in ('/mcp/resources/list', '/mcp/resources', '/resources'):
             self.send_response(200)
-            self.send_header('Content-type', 'application/json')
+            self.send_header('Content-type', 'application/json; charset=utf-8')
             self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps({"resources": []}).encode('utf-8'))
-        elif parsed_path.path == '/mcp/prompts/list':
+        elif parsed_path.path in ('/mcp/prompts/list', '/mcp/prompts', '/prompts'):
             self.send_response(200)
-            self.send_header('Content-type', 'application/json')
+            self.send_header('Content-type', 'application/json; charset=utf-8')
             self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps({"prompts": []}).encode('utf-8'))
@@ -73,14 +73,14 @@ class MCPHandler(BaseHTTPRequestHandler):
             # Liste des outils (format REST simple)
             tools = self._get_tools_definition()
             self.send_response(200)
-            self.send_header('Content-type', 'application/json')
+            self.send_header('Content-type', 'application/json; charset=utf-8')
             self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps({"tools": tools}).encode('utf-8'))
         elif parsed_path.path == '/':
             # Landing minimaliste
             self.send_response(200)
-            self.send_header('Content-type', 'application/json')
+            self.send_header('Content-type', 'application/json; charset=utf-8')
             self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps({
@@ -113,7 +113,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                 tool_args = data.get('arguments') or {}
                 result, error = self._dispatch_tool(tool_name, tool_args)
                 self.send_response(200)
-                self.send_header('Content-type', 'application/json')
+                self.send_header('Content-type', 'application/json; charset=utf-8')
                 self._set_cors_headers()
                 self.end_headers()
                 self.wfile.write(json.dumps({"ok": error is None, "result": result, "error": error}).encode('utf-8'))
@@ -167,7 +167,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                 rpc_response["result"] = result if result is not None else {}
 
             self.send_response(200)
-            self.send_header('Content-type', 'application/json')
+            self.send_header('Content-type', 'application/json; charset=utf-8')
             self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(rpc_response).encode('utf-8'))
@@ -177,7 +177,7 @@ class MCPHandler(BaseHTTPRequestHandler):
             # Internal error JSON-RPC
             rpc_response = {"jsonrpc": "2.0", "id": None, "error": {"code": -32603, "message": "Internal error"}}
             self.send_response(200)
-            self.send_header('Content-type', 'application/json')
+            self.send_header('Content-type', 'application/json; charset=utf-8')
             self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(rpc_response).encode('utf-8'))
@@ -199,7 +199,7 @@ class MCPHandler(BaseHTTPRequestHandler):
         }
         
         self.send_response(200)
-        self.send_header('Content-type', 'application/json')
+        self.send_header('Content-type', 'application/json; charset=utf-8')
         self._set_cors_headers()
         self.end_headers()
         self.wfile.write(json.dumps(response).encode('utf-8'))
@@ -222,7 +222,7 @@ class MCPHandler(BaseHTTPRequestHandler):
         }
         
         self.send_response(200)
-        self.send_header('Content-type', 'application/json')
+        self.send_header('Content-type', 'application/json; charset=utf-8')
         self._set_cors_headers()
         self.end_headers()
         self.wfile.write(json.dumps(config).encode('utf-8'))
@@ -233,7 +233,7 @@ class MCPHandler(BaseHTTPRequestHandler):
 
     def _get_tools_definition(self):
         # Définition minimale d'outils attendus par Smithery (aligné avec README/smithery.yaml)
-        return [
+        tools = [
             {
                 "name": "execute_sql",
                 "description": "Exécuter des requêtes SQL sur Supabase",
@@ -256,6 +256,11 @@ class MCPHandler(BaseHTTPRequestHandler):
                 "inputSchema": {"type": "object", "properties": {}}
             }
         ]
+        # Compat: dupliquer inputSchema en input_schema si nécessaire
+        for t in tools:
+            if 'inputSchema' in t and 'input_schema' not in t:
+                t['input_schema'] = t['inputSchema']
+        return tools
 
     def _dispatch_tool(self, tool_name: str, tool_args: dict):
         # Retourne (result, error)
