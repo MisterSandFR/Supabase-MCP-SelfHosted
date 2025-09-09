@@ -233,7 +233,7 @@ class MCPHandler(BaseHTTPRequestHandler):
         config = {
             "mcpServers": {
                 "supabase": {
-                    "transport": {"type": "http", "url": f"{public_url}/mcp"},
+                    "transport": {"type": "http", "url": f"{public_url}"},
                     "metadata": {
                         "name": MCP_SERVER_NAME,
                         "version": MCP_SERVER_VERSION,
