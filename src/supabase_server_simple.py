@@ -316,7 +316,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                     "protocolVersion": "2024-11-05",
                     "capabilities": {
                         "tools": {"listChanged": True, "definitions": tools_map},
-                        "resources": {"listChanged": False, "definitions": {}},
+                        "resources": {"subscribe": False, "listChanged": False, "definitions": {}},
                         "prompts": {"listChanged": False, "definitions": {}}
                     },
                     "serverInfo": {
@@ -417,6 +417,7 @@ class MCPHandler(BaseHTTPRequestHandler):
         """Envoie la configuration MCP"""
         public_url = os.getenv('PUBLIC_URL', 'https://supabase.mcp.coupaul.fr')
         tools_map = {t.get('name'): t for t in self._get_tools_definition()}
+        tools_map = {t.get('name'): t for t in self._get_tools_definition()}
         config = {
             "mcpServers": {
                 "supabase": {
@@ -426,7 +427,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                         "version": MCP_SERVER_VERSION,
                         "capabilities": {
                             "tools": {"listChanged": True, "definitions": tools_map},
-                            "resources": {"listChanged": False, "definitions": {}},
+                            "resources": {"subscribe": False, "listChanged": False, "definitions": {}},
                             "prompts": {"listChanged": False, "definitions": {}}
                         },
                         "discovery": {"tools": f"{public_url}/mcp/tools.json"},
