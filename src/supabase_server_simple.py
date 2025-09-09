@@ -135,9 +135,9 @@ class MCPHandler(BaseHTTPRequestHandler):
                 result = {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {
-                        "tools": {},
-                        "resources": {},
-                        "prompts": {}
+                        "tools": True,
+                        "resources": False,
+                        "prompts": False
                     },
                     "serverInfo": {
                         "name": MCP_SERVER_NAME,
