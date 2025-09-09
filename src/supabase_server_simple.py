@@ -80,6 +80,7 @@ class MCPHandler(BaseHTTPRequestHandler):
         self._request_start_time = time.time()
         request_id = self.headers.get('X-Request-Id') or uuid.uuid4().hex[:8]
         self._log_start(request_id, 'GET', parsed_path.path, parsed_path.query)
+        accept_header = (self.headers.get('Accept') or '*/*').lower()
         
         if parsed_path.path == '/health':
             self.send_health_response()
@@ -88,36 +89,53 @@ class MCPHandler(BaseHTTPRequestHandler):
             self._set_cors_headers()
             self.end_headers()
         elif parsed_path.path == '/mcp':
-            # Handshake HTTP
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json; charset=utf-8')
-            self._set_cors_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                "status": "ok",
-                "transport": "http",
-                "jsonrpc": "2.0",
-                "endpoint": "/mcp",
-                "methods": [
-                    "ping",
-                    "initialize",
-                    "notifications/initialized",
-                    "tools/list",
-                    "tools/call",
-                    "resources/list",
-                    "prompts/list",
-                    "get_capabilities"
-                ]
-            }).encode('utf-8'))
+            # Page d'accueil MCP (texte) ou handshake JSON selon Accept
+            if 'application/json' in accept_header:
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json; charset=utf-8')
+                self._set_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "ok",
+                    "transport": "http",
+                    "jsonrpc": "2.0",
+                    "endpoint": "/mcp",
+                    "methods": [
+                        "ping",
+                        "initialize",
+                        "notifications/initialized",
+                        "tools/list",
+                        "tools/call",
+                        "resources/list",
+                        "prompts/list",
+                        "get_capabilities"
+                    ]
+                }).encode('utf-8'))
+            else:
+                content = self._make_mcp_intro_text()
+                self.send_response(200)
+                self.send_header('Content-type', 'text/plain; charset=utf-8')
+                self._set_cors_headers()
+                self.end_headers()
+                self.wfile.write(content.encode('utf-8'))
         elif parsed_path.path in ('/.well-known/mcp-config', '/.well-known/mcp.json'):
             self.send_mcp_config()
         elif parsed_path.path in ('/mcp/tools/list', '/mcp/tools', '/tools'):
-            tools = self._get_tools_definition()
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json; charset=utf-8')
-            self._set_cors_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps({"tools": tools}).encode('utf-8'))
+            # Page texte sur /mcp/tools, sinon JSON
+            if parsed_path.path == '/mcp/tools' and 'application/json' not in accept_header:
+                content = self._make_tools_text()
+                self.send_response(200)
+                self.send_header('Content-type', 'text/plain; charset=utf-8')
+                self._set_cors_headers()
+                self.end_headers()
+                self.wfile.write(content.encode('utf-8'))
+            else:
+                tools = self._get_tools_definition()
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json; charset=utf-8')
+                self._set_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"tools": tools}).encode('utf-8'))
         elif parsed_path.path in ('/mcp/resources/list', '/mcp/resources', '/resources'):
             self.send_response(200)
             self.send_header('Content-type', 'application/json; charset=utf-8')
@@ -345,30 +363,60 @@ class MCPHandler(BaseHTTPRequestHandler):
         pass
 
     def _get_tools_definition(self):
-        # Définition minimale d'outils attendus par Smithery (aligné avec README/smithery.yaml)
-        tools = [
-            {
-                "name": "execute_sql",
-                "description": "Exécuter des requêtes SQL sur Supabase",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "sql": {"type": "string", "description": "Requête SQL à exécuter"}
-                    },
-                    "required": ["sql"]
-                }
-            },
-            {
-                "name": "check_health",
-                "description": "Vérifier la santé de la base de données",
-                "inputSchema": {"type": "object", "properties": {}}
-            },
-            {
-                "name": "list_tables",
-                "description": "Lister les tables de la base de données",
-                "inputSchema": {"type": "object", "properties": {}}
-            }
-        ]
+        # Liste élargie compatible serveur officiel
+        tools = []
+        def add(name: str, description: str, props: dict | None = None, required: list | None = None):
+            schema = {"type": "object", "properties": props or {}}
+            if required:
+                schema["required"] = required
+            tools.append({"name": name, "description": description, "inputSchema": schema})
+
+        # Organization & Project
+        add("list_organizations", "Lists all organizations you're a member of")
+        add("get_organization", "Gets organization details including subscription plan", {"id": {"type": "string"}})
+        add("list_projects", "Lists all your Supabase projects")
+        add("get_project", "Gets details for a specific project", {"id": {"type": "string"}}, ["id"])
+        add("create_project", "Creates a new Supabase project (requires cost confirmation)", {"name": {"type": "string"}, "org_id": {"type": "string"}}, ["name", "org_id"])
+        add("pause_project", "Pauses a project", {"id": {"type": "string"}}, ["id"])
+        add("restore_project", "Restores a paused project", {"id": {"type": "string"}}, ["id"])
+
+        # Cost
+        add("get_cost", "Gets the cost of creating a new project or branch", {"type": {"type": "string"}}, ["type"])
+        add("confirm_cost", "Confirms understanding of costs before creation", {"type": {"type": "string"}}, ["type"])
+
+        # Branches
+        add("create_branch", "Creates a development branch (requires cost confirmation)", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
+        add("list_branches", "Lists all development branches of a project", {"project_id": {"type": "string"}}, ["project_id"])
+        add("delete_branch", "Deletes a development branch", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
+        add("merge_branch", "Merges branch migrations to production", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
+        add("reset_branch", "Resets branch migrations", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
+        add("rebase_branch", "Rebases branch on production", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
+
+        # Database
+        add("execute_sql", "Executes raw SQL queries", {"sql": {"type": "string"}}, ["sql"])
+        add("apply_migration", "Applies a migration (for DDL operations)", {"project_id": {"type": "string"}, "version": {"type": "string"}}, ["project_id", "version"])
+        add("list_tables", "Lists all tables in specified schemas", {"schemas": {"type": "array", "items": {"type": "string"}}})
+        add("list_extensions", "Lists all database extensions")
+        add("list_migrations", "Lists all database migrations", {"project_id": {"type": "string"}}, ["project_id"])
+
+        # Project Info
+        add("get_project_url", "Gets the API URL for a project", {"project_id": {"type": "string"}}, ["project_id"])
+        add("get_anon_key", "Gets the anonymous API key", {"project_id": {"type": "string"}}, ["project_id"])
+        add("generate_typescript_types", "Generates TypeScript types from schema", {"project_id": {"type": "string"}}, ["project_id"])
+
+        # Monitoring
+        add("get_logs", "Gets logs by service type (api, postgres, auth, etc.)", {"project_id": {"type": "string"}, "service": {"type": "string"}}, ["project_id", "service"])
+        add("get_advisors", "Gets security/performance advisory notices", {"project_id": {"type": "string"}}, ["project_id"])
+
+        # Edge Functions
+        add("list_edge_functions", "Lists all Edge Functions in a project", {"project_id": {"type": "string"}}, ["project_id"])
+        add("deploy_edge_function", "Deploys an Edge Function", {"project_id": {"type": "string"}, "name": {"type": "string"}}, ["project_id", "name"])
+
+        # Docs
+        add("search_docs", "Search Supabase documentation using GraphQL", {"query": {"type": "string"}}, ["query"])
+
+        # Santé simple
+        add("check_health", "Verify your database connection is working")
         # Compat: dupliquer inputSchema en input_schema si nécessaire
         for t in tools:
             if 'inputSchema' in t and 'input_schema' not in t:
@@ -382,6 +430,13 @@ class MCPHandler(BaseHTTPRequestHandler):
             return ({
                 "content": [
                     {"type": "text", "text": f"SQL execute ok: {sql[:100]}..."}
+                ]
+            }, None)
+        if tool_name in ('list_organizations', 'get_organization', 'list_projects', 'get_project', 'create_project', 'pause_project', 'restore_project', 'get_cost', 'confirm_cost', 'create_branch', 'list_branches', 'delete_branch', 'merge_branch', 'reset_branch', 'rebase_branch', 'apply_migration', 'list_extensions', 'list_migrations', 'get_project_url', 'get_anon_key', 'generate_typescript_types', 'get_logs', 'get_advisors', 'list_edge_functions', 'deploy_edge_function', 'search_docs'):
+            # Réponses factices pour l'ISO de surface
+            return ({
+                "content": [
+                    {"type": "text", "text": f"{tool_name} executed (stub)."}
                 ]
             }, None)
         if tool_name == 'check_health':
