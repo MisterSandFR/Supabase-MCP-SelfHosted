@@ -274,13 +274,13 @@ class MCPHandler(BaseHTTPRequestHandler):
             if method == 'ping':
                 result = {"pong": True, "server": "Supabase MCP Server"}
             elif method == 'initialize':
-                # Réponse minimale conforme MCP: capabilities = objets vides
+                # Annonce explicite pour déclencher tools/list côté client
                 result = {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {
-                        "tools": {},
-                        "resources": {},
-                        "prompts": {}
+                        "tools": {"listChanged": True},
+                        "resources": {"listChanged": False},
+                        "prompts": {"listChanged": False}
                     },
                     "serverInfo": {
                         "name": MCP_SERVER_NAME,
@@ -368,9 +368,9 @@ class MCPHandler(BaseHTTPRequestHandler):
                         "name": MCP_SERVER_NAME,
                         "version": MCP_SERVER_VERSION,
                         "capabilities": {
-                            "tools": {},
-                            "resources": {},
-                            "prompts": {}
+                            "tools": {"listChanged": true},
+                            "resources": {"listChanged": false},
+                            "prompts": {"listChanged": false}
                         },
                         "discovery": {"tools": f"{public_url}/mcp/tools.json"},
                         "categories": ["database", "auth", "storage"]
