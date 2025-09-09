@@ -23,6 +23,25 @@ logger = logging.getLogger(__name__)
 # Configuration Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://api.recube.gg")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
+SUPABASE_AUTH_JWT_SECRET = os.getenv("SUPABASE_AUTH_JWT_SECRET", "")
+TOOLS_CONFIG_PATH = os.getenv("TOOLS_CONFIG_PATH") or os.getenv("MCP_TOOLS_CONFIG") or "mcp-tools.json"
+
+def _load_enabled_tools():
+    try:
+        path = TOOLS_CONFIG_PATH
+        if not path:
+            return None
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+            enabled = cfg.get("enabledTools") or cfg.get("enabled_tools")
+            if isinstance(enabled, list):
+                return set(str(x) for x in enabled)
+    except Exception as e:
+        logger.debug(f"Tools config not loaded: {e}")
+    return None
+
+ENABLED_TOOLS = _load_enabled_tools()
 
 # Configuration MCP
 MCP_SERVER_NAME = os.getenv("MCP_SERVER_NAME", "Supabase MCP Server")
@@ -47,6 +66,8 @@ class MCPHandler(BaseHTTPRequestHandler):
                 SUPABASE_ANON_KEY or "",
                 os.getenv("SUPABASE_SERVICE_ROLE_KEY", ""),
                 SUPABASE_URL or "",
+                os.getenv("DATABASE_URL", ""),
+                SUPABASE_AUTH_JWT_SECRET or "",
             ]
             redacted = text
             for t in tokens:
@@ -91,6 +112,27 @@ class MCPHandler(BaseHTTPRequestHandler):
             dur_ms = -1
         code = self._response_code if self._response_code is not None else '-'
         logger.info(f"RES {request_id} status={code} dur_ms={dur_ms} {note}")
+
+    def _execute_sql_text(self, sql: str, params: tuple | None = None):
+        db_url = os.getenv('DATABASE_URL')
+        if not db_url:
+            return None, "Missing DATABASE_URL"
+        try:
+            with psycopg.connect(db_url, connect_timeout=5) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(sql, params or None)
+                    try:
+                        rows = cur.fetchall()
+                    except Exception:
+                        rows = None
+            if rows is None:
+                return "OK", None
+            lines = []
+            for row in rows:
+                lines.append(" | ".join("" if v is None else str(v) for v in row))
+            return "\n".join(lines) if lines else "(no rows)", None
+        except Exception as e:
+            return None, str(e)
 
     def do_GET(self):
         """Gestion des requêtes GET"""
@@ -421,6 +463,8 @@ class MCPHandler(BaseHTTPRequestHandler):
         add("execute_sql", "Executes raw SQL queries", {"sql": {"type": "string"}}, ["sql"])
         add("list_tables", "Lists all tables in specified schemas", {"schemas": {"type": "array", "items": {"type": "string"}}})
         add("list_extensions", "Lists all database extensions")
+        add("get_database_stats", "Shows database and top table sizes")
+        add("get_database_connections", "Shows active connection counts by database")
 
         # Migrations (facultatif pour self-hosted)
         add("apply_migration", "Applies a migration (for DDL operations)", {"version": {"type": "string"}}, ["version"])
@@ -438,10 +482,27 @@ class MCPHandler(BaseHTTPRequestHandler):
         # Santé simple
         add("check_health", "Verify your database connection is working")
 
+        # Auth (lecture)
+        add("list_auth_users", "List auth users (id, email, created_at)")
+        add("get_auth_user", "Get auth user by id or email", {"id": {"type": "string"}, "email": {"type": "string"}})
+        add("create_auth_user", "Create auth user (stub)", {"email": {"type": "string"}, "password": {"type": "string"}})
+        add("delete_auth_user", "Delete auth user (stub)", {"id": {"type": "string"}})
+        add("update_auth_user", "Update auth user (stub)", {"id": {"type": "string"}})
+
+        # Storage (lecture)
+        add("list_storage_buckets", "List storage buckets")
+        add("list_storage_objects", "List storage objects in a bucket", {"bucket_id": {"type": "string"}}, ["bucket_id"])
+
+        # JWT/config
+        add("verify_jwt_secret", "Verify presence of SUPABASE_AUTH_JWT_SECRET env var")
+
         # Compat: dupliquer inputSchema en input_schema si nécessaire
         for t in tools:
             if 'inputSchema' in t and 'input_schema' not in t:
                 t['input_schema'] = t['inputSchema']
+        # Whitelist
+        if ENABLED_TOOLS:
+            tools = [t for t in tools if t.get('name') in ENABLED_TOOLS]
         return tools
 
     def _dispatch_tool(self, tool_name: str, tool_args: dict):
@@ -464,7 +525,12 @@ class MCPHandler(BaseHTTPRequestHandler):
                 except Exception as e:
                     return (None, {"code": -32000, "message": f"SQL error: {str(e)}"})
             return ({"content": [{"type": "text", "text": f"SQL execute ok: {sql[:100]}..."}]}, None)
-        if tool_name in ('apply_migration', 'list_extensions', 'list_migrations', 'generate_typescript_types', 'get_logs', 'search_docs'):
+        if tool_name == 'list_extensions':
+            txt, err = self._execute_sql_text("SELECT extname, extversion FROM pg_extension ORDER BY extname")
+            if err:
+                return (None, {"code": -32010, "message": f"Extensions error: {err}"})
+            return ({"content": [{"type": "text", "text": txt}]}, None)
+        if tool_name in ('apply_migration', 'list_migrations', 'generate_typescript_types', 'get_logs', 'search_docs'):
             # Réponses factices pour l'ISO de surface
             return ({
                 "content": [
@@ -502,6 +568,63 @@ class MCPHandler(BaseHTTPRequestHandler):
                 except Exception as e:
                     return (None, {"code": -32002, "message": f"List tables error: {str(e)}"})
             return ({"content": [{"type": "text", "text": "Tables disponibles: users, profiles, posts, comments, etc."}]}, None)
+        if tool_name == 'list_auth_users':
+            txt, err = self._execute_sql_text("SELECT id::text, email, created_at FROM auth.users ORDER BY created_at DESC LIMIT 50")
+            if err:
+                return (None, {"code": -32020, "message": f"Auth users error: {err}"})
+            return ({"content": [{"type": "text", "text": txt}]}, None)
+        if tool_name == 'get_auth_user':
+            user_id = tool_args.get('id')
+            email = tool_args.get('email')
+            if user_id:
+                txt, err = self._execute_sql_text("SELECT id::text, email, created_at FROM auth.users WHERE id::text = %s LIMIT 1", (user_id,))
+            elif email:
+                txt, err = self._execute_sql_text("SELECT id::text, email, created_at FROM auth.users WHERE email = %s LIMIT 1", (email,))
+            else:
+                return (None, {"code": -32602, "message": "Missing 'id' or 'email'"})
+            if err:
+                return (None, {"code": -32021, "message": f"Auth user error: {err}"})
+            return ({"content": [{"type": "text", "text": txt or "(not found)"}]}, None)
+        if tool_name in ('create_auth_user', 'delete_auth_user', 'update_auth_user'):
+            return ({"content": [{"type": "text", "text": f"{tool_name} executed (stub)."}]}, None)
+        if tool_name == 'list_storage_buckets':
+            txt, err = self._execute_sql_text("SELECT id::text, name, created_at FROM storage.buckets ORDER BY created_at DESC")
+            if err:
+                return (None, {"code": -32030, "message": f"Buckets error: {err}"})
+            return ({"content": [{"type": "text", "text": txt}]}, None)
+        if tool_name == 'list_storage_objects':
+            bucket_id = tool_args.get('bucket_id')
+            if not bucket_id:
+                return (None, {"code": -32602, "message": "Missing 'bucket_id'"})
+            txt, err = self._execute_sql_text("SELECT id::text, name, created_at FROM storage.objects WHERE bucket_id = %s ORDER BY created_at DESC LIMIT 100", (bucket_id,))
+            if err:
+                return (None, {"code": -32031, "message": f"Objects error: {err}"})
+            return ({"content": [{"type": "text", "text": txt}]}, None)
+        if tool_name == 'get_database_stats':
+            txt1, err1 = self._execute_sql_text("SELECT current_database(), pg_size_pretty(pg_database_size(current_database()))")
+            if err1:
+                return (None, {"code": -32040, "message": f"DB size error: {err1}"})
+            txt2, err2 = self._execute_sql_text(
+                """
+                SELECT schemaname, relname, pg_size_pretty(pg_total_relation_size(relid)) AS size
+                FROM pg_catalog.pg_statio_user_tables
+                ORDER BY pg_total_relation_size(relid) DESC
+                LIMIT 10
+                """
+            )
+            if err2:
+                txt2 = ""
+            combined = (txt1 or "") + ("\n\nTop tables:\n" + txt2 if txt2 else "")
+            return ({"content": [{"type": "text", "text": combined.strip()}]}, None)
+        if tool_name == 'get_database_connections':
+            txt, err = self._execute_sql_text("SELECT datname, count(*) FROM pg_stat_activity GROUP BY datname ORDER BY 2 DESC")
+            if err:
+                return (None, {"code": -32041, "message": f"Connections error: {err}"})
+            return ({"content": [{"type": "text", "text": txt}]}, None)
+        if tool_name == 'verify_jwt_secret':
+            ok = bool(SUPABASE_AUTH_JWT_SECRET)
+            info = f"JWT secret {'present' if ok else 'missing'}"
+            return ({"content": [{"type": "text", "text": info}]}, None)
         return (None, {"code": -32601, "message": f"Tool '{tool_name}' not found"})
 def main():
     """Fonction principale"""
