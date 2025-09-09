@@ -58,17 +58,17 @@ deployment:
   platform: "railway"
   url: "https://supabase.mcp.coupaul.fr"
   healthCheck: "https://supabase.mcp.coupaul.fr/health"
-  mcpEndpoint: "https://supabase.mcp.coupaul.fr/mcp"
+  mcpEndpoint: "https://supabase.mcp.coupaul.fr/"
 
 # Variables d'environnement requises
 env:
   SUPABASE_URL:
     description: "Your Supabase project URL"
-    required: true
+    required: false
     example: "https://your-project.supabase.co"
   SUPABASE_ANON_KEY:
     description: "Supabase anonymous key"
-    required: true
+    required: false
     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   SUPABASE_SERVICE_ROLE_KEY:
     description: "Service role key for admin operations"
