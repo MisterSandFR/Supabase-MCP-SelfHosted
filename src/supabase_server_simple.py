@@ -38,6 +38,14 @@ class MCPHandler(BaseHTTPRequestHandler):
             self.send_health_response()
         elif parsed_path.path in ('/.well-known/mcp-config', '/.well-known/mcp.json'):
             self.send_mcp_config()
+        elif parsed_path.path == '/api/tools':
+            # Liste des outils (format REST simple)
+            tools = self._get_tools_definition()
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({"tools": tools}).encode('utf-8'))
         elif parsed_path.path == '/':
             # Landing minimaliste
             self.send_response(200)
@@ -66,6 +74,19 @@ class MCPHandler(BaseHTTPRequestHandler):
 
             logger.info(f"MCP Request: {method} (ID: {request_id})")
 
+            # Endpoint REST alternatif: /api/execute
+            if self.path == '/api/execute':
+                # Adapter le payload REST en appel tools/call
+                tool_name = data.get('name') or data.get('tool') or ''
+                tool_args = data.get('arguments') or {}
+                result, error = self._dispatch_tool(tool_name, tool_args)
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self._set_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"ok": error is None, "result": result, "error": error}).encode('utf-8'))
+                return
+
             # Notifications: pas de réponse (ex: notifications/initialized)
             if method == 'notifications/initialized':
                 self.send_response(204)
@@ -92,64 +113,13 @@ class MCPHandler(BaseHTTPRequestHandler):
                     }
                 }
             elif method == 'tools/list':
-                result = {
-                    "tools": [
-                        {
-                            "name": "execute_sql",
-                            "description": "Exécuter des requêtes SQL sur Supabase",
-                            "inputSchema": {
-                                "type": "object",
-                                "properties": {
-                                    "sql": {"type": "string", "description": "Requête SQL à exécuter"}
-                                },
-                                "required": ["sql"]
-                            }
-                        },
-                        {
-                            "name": "check_health",
-                            "description": "Vérifier la santé de la base de données",
-                            "inputSchema": {
-                                "type": "object",
-                                "properties": {}
-                            }
-                        },
-                        {
-                            "name": "list_tables",
-                            "description": "Lister les tables de la base de données",
-                            "inputSchema": {
-                                "type": "object",
-                                "properties": {}
-                            }
-                        }
-                    ]
-                }
+                result = {"tools": self._get_tools_definition()}
             elif method == 'tools/call':
                 tool_name = params.get('name', '')
                 tool_args = params.get('arguments', {})
 
                 logger.info(f"Tools/call: {tool_name} with args: {tool_args}")
-
-                if tool_name == 'execute_sql':
-                    sql = tool_args.get('sql', 'SELECT 1')
-                    result = {
-                        "content": [
-                            {"type": "text", "text": f"SQL execute ok: {sql[:100]}..."}
-                        ]
-                    }
-                elif tool_name == 'check_health':
-                    result = {
-                        "content": [
-                            {"type": "text", "text": "Database healthy"}
-                        ]
-                    }
-                elif tool_name == 'list_tables':
-                    result = {
-                        "content": [
-                            {"type": "text", "text": "Tables disponibles: users, profiles, posts, comments, etc."}
-                        ]
-                    }
-                else:
-                    error = {"code": -32601, "message": f"Tool '{tool_name}' not found"}
+                result, error = self._dispatch_tool(tool_name, tool_args)
             else:
                 error = {"code": -32601, "message": "Method not found"}
 
@@ -203,11 +173,10 @@ class MCPHandler(BaseHTTPRequestHandler):
         config = {
             "mcpServers": {
                 "supabase": {
-                    "command": "python",
-                    "args": ["src/supabase_server_simple.py"],
-                    "env": {
-                        "SUPABASE_URL": SUPABASE_URL,
-                        "SUPABASE_ANON_KEY": SUPABASE_ANON_KEY
+                    "transport": {"type": "http", "url": "/mcp"},
+                    "metadata": {
+                        "capabilities": {"tools": True, "resources": False, "prompts": False},
+                        "categories": ["database", "auth", "storage"]
                     }
                 }
             }
@@ -223,6 +192,54 @@ class MCPHandler(BaseHTTPRequestHandler):
         """Override pour éviter les logs verbeux"""
         pass
 
+    def _get_tools_definition(self):
+        # Définition minimale d'outils attendus par Smithery (aligné avec README/smithery.yaml)
+        return [
+            {
+                "name": "execute_sql",
+                "description": "Exécuter des requêtes SQL sur Supabase",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "sql": {"type": "string", "description": "Requête SQL à exécuter"}
+                    },
+                    "required": ["sql"]
+                }
+            },
+            {
+                "name": "check_health",
+                "description": "Vérifier la santé de la base de données",
+                "inputSchema": {"type": "object", "properties": {}}
+            },
+            {
+                "name": "list_tables",
+                "description": "Lister les tables de la base de données",
+                "inputSchema": {"type": "object", "properties": {}}
+            }
+        ]
+
+    def _dispatch_tool(self, tool_name: str, tool_args: dict):
+        # Retourne (result, error)
+        if tool_name == 'execute_sql':
+            sql = tool_args.get('sql', 'SELECT 1')
+            return ({
+                "content": [
+                    {"type": "text", "text": f"SQL execute ok: {sql[:100]}..."}
+                ]
+            }, None)
+        if tool_name == 'check_health':
+            return ({
+                "content": [
+                    {"type": "text", "text": "Database healthy"}
+                ]
+            }, None)
+        if tool_name == 'list_tables':
+            return ({
+                "content": [
+                    {"type": "text", "text": "Tables disponibles: users, profiles, posts, comments, etc."}
+                ]
+            }, None)
+        return (None, {"code": -32601, "message": f"Tool '{tool_name}' not found"})
 def main():
     """Fonction principale"""
     port = int(os.getenv('PORT', 8000))
