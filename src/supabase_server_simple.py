@@ -368,9 +368,9 @@ class MCPHandler(BaseHTTPRequestHandler):
                         "name": MCP_SERVER_NAME,
                         "version": MCP_SERVER_VERSION,
                         "capabilities": {
-                            "tools": {"listChanged": true},
-                            "resources": {"listChanged": false},
-                            "prompts": {"listChanged": false}
+                            "tools": {"listChanged": True},
+                            "resources": {"listChanged": False},
+                            "prompts": {"listChanged": False}
                         },
                         "discovery": {"tools": f"{public_url}/mcp/tools.json"},
                         "categories": ["database", "auth", "storage"]
