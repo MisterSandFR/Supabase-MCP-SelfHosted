@@ -108,12 +108,27 @@ def mcp_endpoint():
         logger.info(f"MCP Request: {method} (ID: {request_id})")
 
         if method == "initialize":
+            defs, _ = build_tool_definitions()
             response = {
                 "jsonrpc": "2.0",
                 "id": request_id,
                 "result": {
                     "protocolVersion": "2024-11-05",
-                    "capabilities": {"tools": {"listChanged": True}},
+                    "capabilities": {
+                        "tools": {
+                            "listChanged": True,
+                            "definitions": defs
+                        },
+                        "resources": {
+                            "subscribe": False,
+                            "listChanged": False,
+                            "definitions": {}
+                        },
+                        "prompts": {
+                            "listChanged": False,
+                            "definitions": {}
+                        }
+                    },
                     "serverInfo": {"name": MCP_SERVER_NAME, "version": MCP_SERVER_VERSION},
                 },
             }
@@ -124,23 +139,10 @@ def mcp_endpoint():
             response = {
                 "jsonrpc": "2.0",
                 "id": request_id,
-                "result": {
-                    "content": [{"type": "text", "text": "pong"}]
-                },
+                "result": {"content": [{"type": "text", "text": "pong"}]},
             }
         elif method == "tools/list":
-            tools_schema = []
-            for tool in MCP_TOOLS:
-                tools_schema.append({
-                    "name": tool["name"],
-                    "description": tool["description"],
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "query": {"type": "string", "description": f"Parameters for {tool['name']}"}
-                        },
-                    },
-                })
+            _, tools_schema = build_tool_definitions()
             response = {"jsonrpc": "2.0", "id": request_id, "result": {"tools": tools_schema}}
         elif method == "tools/call":
             tool_name = data.get("params", {}).get("name", "")
@@ -315,6 +317,74 @@ def execute_tool(tool_name: str, args: dict) -> str:
     if "migration" in tool_name.lower():
         return f"Migration operation completed: {tool_name}"
     return f"Tool '{tool_name}' executed successfully with args: {args}"
+
+
+# Helper: construit les définitions et la liste d'outils avec schémas
+def build_tool_definitions():
+    def_schema_overrides = {
+        "execute_sql": {
+            "required": ["sql"],
+            "properties": {"sql": {"type": "string"}},
+        },
+        "list_tables": {
+            "properties": {"schemas": {"type": "array", "items": {"type": "string"}}},
+        },
+        "get_logs": {
+            "properties": {"service": {"type": "string"}},
+        },
+        "search_docs": {
+            "required": ["query"],
+            "properties": {"query": {"type": "string"}},
+        },
+        "apply_migration": {
+            "required": ["version"],
+            "properties": {"version": {"type": "string"}},
+        },
+        "list_storage_objects": {
+            "required": ["bucket_id"],
+            "properties": {"bucket_id": {"type": "string"}},
+        },
+        "get_auth_user": {
+            "properties": {"id": {"type": "string"}, "email": {"type": "string"}},
+        },
+        "create_auth_user": {
+            "properties": {"email": {"type": "string"}, "password": {"type": "string"}},
+        },
+        "delete_auth_user": {
+            "properties": {"id": {"type": "string"}},
+        },
+        "update_auth_user": {
+            "properties": {"id": {"type": "string"}},
+        },
+    }
+
+    definitions = {}
+    tools_array = []
+    for tool in MCP_TOOLS:
+        name = tool.get("name")
+        desc = tool.get("description", "")
+        override = def_schema_overrides.get(name, {})
+        input_schema = {
+            "type": "object",
+            "properties": override.get("properties", {}),
+        }
+        if "required" in override:
+            input_schema["required"] = override["required"]
+
+        definitions[name] = {
+            "name": name,
+            "description": desc,
+            "inputSchema": input_schema,
+            "input_schema": input_schema,
+        }
+        tools_array.append({
+            "name": name,
+            "description": desc,
+            "inputSchema": input_schema,
+            "input_schema": input_schema,
+        })
+
+    return definitions, tools_array
 
 
 if __name__ == "__main__":
