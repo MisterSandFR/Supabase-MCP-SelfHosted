@@ -112,9 +112,20 @@ def mcp_endpoint():
                 "jsonrpc": "2.0",
                 "id": request_id,
                 "result": {
-                    "protocolVersion": "2025-06-18",
+                    "protocolVersion": "2024-11-05",
                     "capabilities": {"tools": {"listChanged": True}},
                     "serverInfo": {"name": MCP_SERVER_NAME, "version": MCP_SERVER_VERSION},
+                },
+            }
+        elif method == "notifications/initialized":
+            # Notification JSON-RPC: pas de réponse requise, mais 200 vide côté HTTP
+            return "", 200
+        elif method == "ping":
+            response = {
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "result": {
+                    "content": [{"type": "text", "text": "pong"}]
                 },
             }
         elif method == "tools/list":
