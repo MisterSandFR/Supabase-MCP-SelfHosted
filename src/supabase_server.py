@@ -65,17 +65,38 @@ MCP_TOOLS = [
 # Endpoints requis (duplicés sous / et /supabase)
 # ------------------------
 
+# Lecture configuration envoyée par Smithery (header/query)
+from base64 import b64decode
+
+def parse_request_config():
+    cfg_raw = request.headers.get('x-smithery-config') or request.headers.get('x-mcp-config') or request.args.get('config')
+    if not cfg_raw:
+        return {}
+    try:
+        # Essayer JSON direct
+        return json.loads(cfg_raw)
+    except Exception:
+        # Essayer base64(JSON)
+        try:
+            return json.loads(b64decode(cfg_raw).decode('utf-8'))
+        except Exception:
+            return {}
+
 @app.route('/health', methods=['GET'])
 @app.route('/supabase/health', methods=['GET'])
 def health_check():
+    req_cfg = parse_request_config()
+    eff_url = req_cfg.get('SUPABASE_URL', SUPABASE_URL)
+    eff_anon = req_cfg.get('SUPABASE_ANON_KEY', SUPABASE_ANON_KEY)
     return jsonify({
         "status": "UP",
         "service": MCP_SERVER_NAME,
         "version": MCP_SERVER_VERSION,
         "tools_count": len(MCP_TOOLS),
         "healthcheck": "OK",
-        "supabase_connected": bool(SUPABASE_URL and SUPABASE_ANON_KEY),
+        "supabase_connected": bool(eff_url and eff_anon),
         "timestamp": time.time(),
+        "receivedConfigKeys": sorted(list(req_cfg.keys())) if req_cfg else []
     })
 
 @app.route('/api/tools', methods=['GET'])
@@ -108,6 +129,7 @@ def mcp_endpoint():
         logger.info(f"MCP Request: {method} (ID: {request_id})")
 
         if method == "initialize":
+            req_cfg = parse_request_config()
             defs, _ = build_tool_definitions()
             response = {
                 "jsonrpc": "2.0",
@@ -130,6 +152,7 @@ def mcp_endpoint():
                         }
                     },
                     "serverInfo": {"name": MCP_SERVER_NAME, "version": MCP_SERVER_VERSION},
+                    "receivedConfigKeys": sorted(list(req_cfg.keys())) if req_cfg else []
                 },
             }
         elif method == "notifications/initialized":
@@ -219,7 +242,17 @@ def mcp_config():
                             "prompts": {"listChanged": False, "definitions": {}}
                         },
                         "discovery": {"tools": f"{base_url}/mcp/tools.json"},
-                        "categories": ["database", "auth", "storage"]
+                        "categories": ["database", "auth", "storage"],
+                        "configSchema": {
+                            "type": "object",
+                            "properties": {
+                                "SUPABASE_URL": {"type": "string"},
+                                "SUPABASE_ANON_KEY": {"type": "string"},
+                                "SUPABASE_SERVICE_ROLE_KEY": {"type": "string"},
+                                "SUPABASE_AUTH_JWT_SECRET": {"type": "string"}
+                            },
+                            "required": ["SUPABASE_URL", "SUPABASE_ANON_KEY"]
+                        }
                     }
                 }
             }
