@@ -193,6 +193,80 @@ def mcp_config():
         }
     )
 
+@app.route('/mcp/tools.json', methods=['GET'])
+@app.route('/supabase/mcp/tools.json', methods=['GET'])
+def mcp_tools_json():
+    """Exporte les définitions des outils MCP pour la découverte externe (Smithery)."""
+    def_schema_overrides = {
+        "execute_sql": {
+            "required": ["sql"],
+            "properties": {"sql": {"type": "string"}},
+        },
+        "list_tables": {
+            "properties": {"schemas": {"type": "array", "items": {"type": "string"}}},
+        },
+        "get_logs": {
+            "properties": {"service": {"type": "string"}},
+        },
+        "search_docs": {
+            "required": ["query"],
+            "properties": {"query": {"type": "string"}},
+        },
+        "apply_migration": {
+            "required": ["version"],
+            "properties": {"version": {"type": "string"}},
+        },
+        "list_storage_objects": {
+            "required": ["bucket_id"],
+            "properties": {"bucket_id": {"type": "string"}},
+        },
+        "get_auth_user": {
+            "properties": {"id": {"type": "string"}, "email": {"type": "string"}},
+        },
+        "create_auth_user": {
+            "properties": {"email": {"type": "string"}, "password": {"type": "string"}},
+        },
+        "delete_auth_user": {
+            "properties": {"id": {"type": "string"}},
+        },
+        "update_auth_user": {
+            "properties": {"id": {"type": "string"}},
+        },
+    }
+
+    definitions = {}
+    tools_array = []
+    for tool in MCP_TOOLS:
+        name = tool.get("name")
+        desc = tool.get("description", "")
+        override = def_schema_overrides.get(name, {})
+        input_schema = {
+            "type": "object",
+            "properties": override.get("properties", {}),
+        }
+        if "required" in override:
+            input_schema["required"] = override["required"]
+
+        # Dupliquer avec input_schema snake_case et inputSchema camelCase
+        definitions[name] = {
+            "name": name,
+            "description": desc,
+            "inputSchema": input_schema,
+            "input_schema": input_schema,
+        }
+        tools_array.append({
+            "name": name,
+            "description": desc,
+            "inputSchema": input_schema,
+            "input_schema": input_schema,
+        })
+
+    return jsonify({
+        "definitions": definitions,
+        "tools": tools_array,
+        "serverInfo": {"name": MCP_SERVER_NAME, "version": MCP_SERVER_VERSION},
+    })
+
 # Racine - accepte GET et POST (certains clients postent à la racine)
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/supabase', methods=['GET', 'POST'])
