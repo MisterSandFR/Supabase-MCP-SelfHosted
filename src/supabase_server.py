@@ -174,22 +174,53 @@ def mcp_endpoint():
             500,
         )
 
+@app.route('/mcp', methods=['GET'])
+@app.route('/supabase/mcp', methods=['GET'])
+def mcp_http_introspection():
+    """Introspection HTTP pour scanners: renvoie capacités et endpoints."""
+    defs, tools_schema = build_tool_definitions()
+    return jsonify({
+        "service": MCP_SERVER_NAME,
+        "version": MCP_SERVER_VERSION,
+        "protocolVersion": "2024-11-05",
+        "capabilities": {
+            "tools": {"listChanged": True, "definitions": defs},
+            "resources": {"subscribe": False, "listChanged": False, "definitions": {}},
+            "prompts": {"listChanged": False, "definitions": {}}
+        },
+        "endpoints": {
+            "rpc": "/mcp",
+            "health": "/health",
+            "config": "/.well-known/mcp-config",
+            "discovery": "/mcp/tools.json"
+        },
+        "tools": tools_schema,
+        "status": "ready"
+    })
+
 # Endpoint de configuration MCP (well-known)
 @app.route('/.well-known/mcp-config', methods=['GET'])
 @app.route('/supabase/.well-known/mcp-config', methods=['GET'])
 def mcp_config():
+    base_url = request.host_url.rstrip('/')
+    transport_url = f"{base_url}/mcp"
+    defs, _ = build_tool_definitions()
     return jsonify(
         {
             "mcpServers": {
-                "supabase-mcp": {
-                    "command": "python",
-                    "args": ["src/supabase_server.py"],
-                    "env": {
-                        "MCP_SERVER_NAME": MCP_SERVER_NAME,
-                        "MCP_SERVER_VERSION": MCP_SERVER_VERSION,
-                        "SUPABASE_URL": SUPABASE_URL,
-                        "SUPABASE_ANON_KEY": "[CONFIGURED]",
-                    },
+                "supabase": {
+                    "transport": {"type": "http", "url": transport_url},
+                    "metadata": {
+                        "name": MCP_SERVER_NAME,
+                        "version": MCP_SERVER_VERSION,
+                        "capabilities": {
+                            "tools": {"listChanged": True, "definitions": defs},
+                            "resources": {"subscribe": False, "listChanged": False, "definitions": {}},
+                            "prompts": {"listChanged": False, "definitions": {}}
+                        },
+                        "discovery": {"tools": f"{base_url}/mcp/tools.json"},
+                        "categories": ["database", "auth", "storage"]
+                    }
                 }
             }
         }
