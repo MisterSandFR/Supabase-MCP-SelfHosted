@@ -228,11 +228,22 @@ def mcp_config():
     base_url = request.host_url.rstrip('/')
     transport_url = f"{base_url}/mcp"
     defs, _ = build_tool_definitions()
+    config_schema = {
+        "type": "object",
+        "properties": {
+            "SUPABASE_URL": {"type": "string"},
+            "SUPABASE_ANON_KEY": {"type": "string"},
+            "SUPABASE_SERVICE_ROLE_KEY": {"type": "string"},
+            "SUPABASE_AUTH_JWT_SECRET": {"type": "string"}
+        },
+        "required": ["SUPABASE_URL", "SUPABASE_ANON_KEY"]
+    }
     return jsonify(
         {
             "mcpServers": {
                 "supabase": {
                     "transport": {"type": "http", "url": transport_url},
+                    "configSchema": config_schema,
                     "metadata": {
                         "name": MCP_SERVER_NAME,
                         "version": MCP_SERVER_VERSION,
@@ -243,16 +254,7 @@ def mcp_config():
                         },
                         "discovery": {"tools": f"{base_url}/mcp/tools.json"},
                         "categories": ["database", "auth", "storage"],
-                        "configSchema": {
-                            "type": "object",
-                            "properties": {
-                                "SUPABASE_URL": {"type": "string"},
-                                "SUPABASE_ANON_KEY": {"type": "string"},
-                                "SUPABASE_SERVICE_ROLE_KEY": {"type": "string"},
-                                "SUPABASE_AUTH_JWT_SECRET": {"type": "string"}
-                            },
-                            "required": ["SUPABASE_URL", "SUPABASE_ANON_KEY"]
-                        }
+                        "configSchema": config_schema
                     }
                 }
             }
