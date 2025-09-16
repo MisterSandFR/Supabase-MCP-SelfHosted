@@ -3,18 +3,19 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "minecraft-mcp-forge-1.6.4"
-version = "3.7.0"
-description = "Minecraft MCP Server for Forge 1.6.4 - GUI analysis and Java code generation"
+name = "supabase-mcp-server"
+version = "3.1.0"
+description = "Supabase MCP Server (FastMCP + Smithery)"
 authors = [
-    {name = "coupaul", email = "support@mcp.coupaul.fr"}
+    {name = "coupaul", email = "contact@coupaul.fr"}
 ]
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
-    "smithery>=0.1.23",
-    "pydantic>=2.0.0"
+    "pydantic>=2.7.0",
+    "mcp>=0.4.0",
+    "smithery>=0.1.23"
 ]
 
 [tool.smithery]
-server = "server.src.index:create_server"
+server = "supabase_mcp_server.server:create_server"
