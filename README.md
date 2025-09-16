@@ -33,7 +33,28 @@ Supabase MCP Server (Port 8000)
 - Instance Supabase (self-hosted ou cloud)
 - Variables d'environnement Supabase
 
-### Installation
+### Option A — SDK Smithery (recommandé)
+
+```bash
+# Cloner le repository
+git clone https://github.com/MisterSandFR/Supabase-MCP-SelfHosted.git
+cd Supabase-MCP-SelfHosted
+
+# Installer les dépendances
+pip install -r requirements.txt
+
+# (Facultatif) Installer la CLI Smithery si besoin
+npm i -g @smithery/cli
+
+# Lancer le dev SDK (selon votre environnement)
+smithery dev   # ou: smithery playground
+```
+
+- Le serveur SDK est défini dans `pyproject.toml` via:
+  - `[tool.smithery] server = "supabase_mcp_server.server:create_server"`
+- Lors du déploiement dans l’interface Smithery, configurez le Test Profile puis lancez le Scan.
+
+### Option B — HTTP self-hosted (compat)
 
 ```bash
 # Cloner le repository
@@ -48,15 +69,15 @@ export SUPABASE_URL="https://your-project.supabase.co"
 export SUPABASE_ANON_KEY="your-anon-key"
 export SUPABASE_SERVICE_KEY="your-service-key"  # Optionnel
 
-# Démarrer le serveur
+# Démarrer le serveur HTTP externe
 python src/supabase_server.py
 ```
 
-### Avec Docker
+### Avec Docker (Railway / self-hosted)
 
 ```bash
-# Build et démarrage
-docker build -t supabase-mcp-server .
+# Build et démarrage (utilisez Dockerfile.railway si besoin)
+docker build -f Dockerfile.railway -t supabase-mcp-server .
 docker run -p 8000:8000 \
   -e SUPABASE_URL="https://your-project.supabase.co" \
   -e SUPABASE_ANON_KEY="your-anon-key" \
@@ -150,10 +171,11 @@ PYTHONUNBUFFERED=1
 
 ## 🔧 API Endpoints
 
-### Serveur MCP
+### Serveur MCP (HTTP self-hosted)
 - `GET /health` - Health check
 - `POST /mcp` - Endpoint JSON-RPC principal
 - `GET /.well-known/mcp-config` - Configuration MCP
+- `GET /mcp/tools.json` - Découverte des outils (JSON)
 
 ### Outils Spécialisés
 - `GET /api/tools` - Liste des outils disponibles
@@ -161,7 +183,14 @@ PYTHONUNBUFFERED=1
 
 ## 🚀 Déploiement
 
-### Railway (Recommandé)
+### Smithery (SDK Python) — Recommandé
+1. Vérifiez que `pyproject.toml` contient:
+   - `[tool.smithery] server = "supabase_mcp_server.server:create_server"`
+2. Dans Smithery → Deploy, sélectionnez SDK Python
+3. Configurez le Test Profile puis lancez le Scan
+   - Requis: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+
+### Railway (Self-hosted)
 ```bash
 # Déployer sur Railway
 railway login
@@ -187,12 +216,25 @@ Ce serveur est conçu pour être intégré avec le [MCP Hub Central](https://git
       "name": "Supabase MCP Server",
       "host": "supabase.mcp.coupaul.fr",
       "port": 8000,
-      "path": "/supabase",
+      "path": "/",
       "categories": ["database", "auth", "storage", "realtime", "security", "migration", "monitoring", "performance"]
     }
   }
 }
 ```
+
+## 🧪 Test Profile (Smithery)
+
+Lors de la connexion côté Smithery, fournissez les clés suivantes dans le Test Profile:
+
+```json
+{
+  "SUPABASE_URL": "https://your-project.supabase.co",
+  "SUPABASE_ANON_KEY": "eyJ..."
+}
+```
+
+En cas de cache, re-sauvegardez le profil et relancez le Scan.
 
 ## 🔒 Sécurité
 
