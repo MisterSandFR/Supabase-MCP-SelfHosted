@@ -17,7 +17,32 @@ logger = logging.getLogger(__name__)
 
 # Configuration Flask
 app = Flask(__name__)
-CORS(app)
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    allow_headers=["Content-Type", "Authorization", "x-smithery-config", "x-mcp-config"],
+    expose_headers=["Content-Type", "Authorization", "x-smithery-config", "x-mcp-config"],
+)
+
+# Assurer les en-têtes CORS pour tous les endpoints
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, x-smithery-config, x-mcp-config"
+    return response
+
+# Handlers OPTIONS explicites pour éviter toute erreur de préflight
+@app.route('/mcp', methods=['OPTIONS'])
+@app.route('/supabase/mcp', methods=['OPTIONS'])
+@app.route('/health', methods=['OPTIONS'])
+@app.route('/supabase/health', methods=['OPTIONS'])
+@app.route('/.well-known/mcp-config', methods=['OPTIONS'])
+@app.route('/supabase/.well-known/mcp-config', methods=['OPTIONS'])
+@app.route('/mcp/tools.json', methods=['OPTIONS'])
+@app.route('/supabase/mcp/tools.json', methods=['OPTIONS'])
+def cors_preflight():
+    return ("", 204)
 
 # Configuration Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://api.recube.gg/")
