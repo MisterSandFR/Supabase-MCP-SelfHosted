@@ -68,19 +68,38 @@ MCP_TOOLS = [
 # Lecture configuration envoyée par Smithery (header/query)
 from base64 import b64decode
 
-def parse_request_config():
+def parse_request_config(data: dict | None = None):
+    # Headers ou query
     cfg_raw = request.headers.get('x-smithery-config') or request.headers.get('x-mcp-config') or request.args.get('config')
-    if not cfg_raw:
-        return {}
-    try:
-        # Essayer JSON direct
-        return json.loads(cfg_raw)
-    except Exception:
-        # Essayer base64(JSON)
+    if cfg_raw:
         try:
-            return json.loads(b64decode(cfg_raw).decode('utf-8'))
+            return json.loads(cfg_raw)
         except Exception:
-            return {}
+            try:
+                return json.loads(b64decode(cfg_raw).decode('utf-8'))
+            except Exception:
+                pass
+    # Corps JSON (si fourni)
+    if data and isinstance(data, dict):
+        for key_path in (
+            ("config",),
+            ("params", "config"),
+            ("params", "profile"),
+            ("params", "credentials"),
+            ("profile",),
+            ("credentials",),
+        ):
+            cur = data
+            ok = True
+            for k in key_path:
+                if isinstance(cur, dict) and k in cur:
+                    cur = cur[k]
+                else:
+                    ok = False
+                    break
+            if ok and isinstance(cur, dict):
+                return cur
+    return {}
 
 @app.route('/health', methods=['GET'])
 @app.route('/supabase/health', methods=['GET'])
@@ -111,25 +130,44 @@ def mcp_endpoint():
     try:
         # GET pour infos rapides (certains scanners font un GET d'abord)
         if request.method == 'GET':
+            defs, tools_schema = build_tool_definitions()
+            config_schema = {
+                "type": "object",
+                "properties": {
+                    "SUPABASE_URL": {"type": "string"},
+                    "SUPABASE_ANON_KEY": {"type": "string"},
+                    "SUPABASE_SERVICE_ROLE_KEY": {"type": "string"},
+                    "SUPABASE_AUTH_JWT_SECRET": {"type": "string"}
+                },
+                "required": ["SUPABASE_URL", "SUPABASE_ANON_KEY"]
+            }
             return jsonify({
                 "service": MCP_SERVER_NAME,
                 "version": MCP_SERVER_VERSION,
-                "protocol": "JSON-RPC 2.0",
-                "methods": ["initialize", "tools/list", "tools/call"],
-                "endpoint": "/mcp",
-                "status": "ready",
+                "protocolVersion": "2024-11-05",
+                "capabilities": {
+                    "tools": {"listChanged": True, "definitions": defs},
+                    "resources": {"subscribe": False, "listChanged": False, "definitions": {}},
+                    "prompts": {"listChanged": False, "definitions": {}}
+                },
+                "endpoints": {"rpc": "/mcp", "health": "/health", "config": "/.well-known/mcp-config", "discovery": "/mcp/tools.json"},
+                "tools": tools_schema,
+                "configSchema": config_schema,
+                "status": "ready"
             })
 
+        # Gestion des requêtes POST
         data = request.get_json(silent=True) or {}
+        req_cfg = parse_request_config(data)
         if not data:
             return jsonify({"error": "No JSON data provided"}), 400
 
         method = data.get("method", "")
         request_id = data.get("id", "unknown")
+
         logger.info(f"MCP Request: {method} (ID: {request_id})")
 
         if method == "initialize":
-            req_cfg = parse_request_config()
             defs, _ = build_tool_definitions()
             response = {
                 "jsonrpc": "2.0",
@@ -137,19 +175,9 @@ def mcp_endpoint():
                 "result": {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {
-                        "tools": {
-                            "listChanged": True,
-                            "definitions": defs
-                        },
-                        "resources": {
-                            "subscribe": False,
-                            "listChanged": False,
-                            "definitions": {}
-                        },
-                        "prompts": {
-                            "listChanged": False,
-                            "definitions": {}
-                        }
+                        "tools": {"listChanged": True, "definitions": defs},
+                        "resources": {"subscribe": False, "listChanged": False, "definitions": {}},
+                        "prompts": {"listChanged": False, "definitions": {}}
                     },
                     "serverInfo": {"name": MCP_SERVER_NAME, "version": MCP_SERVER_VERSION},
                     "receivedConfigKeys": sorted(list(req_cfg.keys())) if req_cfg else []
