@@ -1,0 +1,5 @@
+name: supabase-mcp-server
+version: 3.1.0
+runtime: python
+python:
+  server: supabase_mcp_server.server:create_server
