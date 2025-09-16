@@ -14,8 +14,15 @@ requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.7.0",
     "mcp>=0.4.0",
-    "smithery>=0.1.23"
+    "smithery>=0.1.23",
+    "fastmcp>=0.1.0"
 ]
 
 [tool.smithery]
 server = "supabase_mcp_server.server:create_server"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
