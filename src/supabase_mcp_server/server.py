@@ -4,6 +4,7 @@ Supabase MCP Server (FastMCP + Smithery)
 """
 
 from typing import Optional
+import os
 from pydantic import BaseModel, Field
 from mcp.server.fastmcp import Context, FastMCP
 from smithery.decorators import smithery
@@ -20,24 +21,32 @@ class ConfigSchema(BaseModel):
 def create_server() -> FastMCP:
     server = FastMCP("Supabase MCP Server")
 
+    def effective_config(ctx: Context):
+        cfg = ctx.session_config
+        supabase_url = getattr(cfg, "SUPABASE_URL", None) or os.getenv("SUPABASE_URL", "")
+        anon_key = getattr(cfg, "SUPABASE_ANON_KEY", None) or os.getenv("SUPABASE_ANON_KEY", "")
+        service_key = getattr(cfg, "SUPABASE_SERVICE_ROLE_KEY", None) or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+        jwt_secret = getattr(cfg, "SUPABASE_AUTH_JWT_SECRET", None) or os.getenv("SUPABASE_AUTH_JWT_SECRET", "")
+        return supabase_url, anon_key, service_key, jwt_secret
+
     @server.tool()
     def execute_sql(sql: str, ctx: Context) -> str:
-        cfg = ctx.session_config
-        if not cfg.SUPABASE_URL or not cfg.SUPABASE_ANON_KEY:
+        supabase_url, anon_key, _, _ = effective_config(ctx)
+        if not supabase_url or not anon_key:
             return "Configuration Supabase manquante (SUPABASE_URL, SUPABASE_ANON_KEY)."
-        return f"SQL reçu ({len(sql)} chars). Connexion prête pour {cfg.SUPABASE_URL}."
+        return f"SQL reçu ({len(sql)} chars). Connexion prête pour {supabase_url}."
 
     @server.tool()
     def list_tables(ctx: Context) -> str:
-        cfg = ctx.session_config
-        if not cfg.SUPABASE_URL:
+        supabase_url, _, _, _ = effective_config(ctx)
+        if not supabase_url:
             return "Configuration Supabase manquante."
         return "Tables listées (démo)."
 
     @server.tool()
     def check_health(ctx: Context) -> str:
-        cfg = ctx.session_config
-        if not cfg.SUPABASE_URL:
+        supabase_url, _, _, _ = effective_config(ctx)
+        if not supabase_url:
             return "Configuration Supabase manquante."
         return "OK"
 
