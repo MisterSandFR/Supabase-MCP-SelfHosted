@@ -58,32 +58,32 @@ PRODUCTION_MODE = os.getenv("PRODUCTION_MODE", "true").lower() == "true"
 
 # Liste des outils MCP disponibles (extrait représentatif)
 MCP_TOOLS = [
-    {"name": "execute_sql", "description": "Execute SQL queries"},
-    {"name": "check_health", "description": "Check database health"},
-    {"name": "list_tables", "description": "List database tables"},
-    {"name": "create_migration", "description": "Create database migration"},
-    {"name": "apply_migration", "description": "Apply database migration"},
-    {"name": "create_auth_user", "description": "Create authenticated user"},
-    {"name": "list_storage_buckets", "description": "List storage buckets"},
-    {"name": "manage_rls_policies", "description": "Manage RLS policies"},
-    {"name": "list_extensions", "description": "List PostgreSQL extensions"},
-    {"name": "manage_functions", "description": "Manage database functions"},
-    {"name": "manage_triggers", "description": "Manage database triggers"},
-    {"name": "manage_roles", "description": "Manage database roles"},
-    {"name": "manage_webhooks", "description": "Manage webhooks"},
-    {"name": "list_realtime_publications", "description": "List realtime publications"},
-    {"name": "get_logs", "description": "Get application logs"},
-    {"name": "metrics_dashboard", "description": "Get metrics dashboard"},
-    {"name": "audit_security", "description": "Audit security configuration"},
-    {"name": "analyze_performance", "description": "Analyze database performance"},
-    {"name": "backup_database", "description": "Create database backup"},
-    {"name": "cache_management", "description": "Manage application cache"},
-    {"name": "manage_secrets", "description": "Manage application secrets"},
-    {"name": "get_project_url", "description": "Get project URL"},
-    {"name": "get_anon_key", "description": "Get anonymous key"},
-    {"name": "get_service_key", "description": "Get service role key"},
-    {"name": "generate_crud_api", "description": "Generate CRUD API"},
-    {"name": "generate_typescript_types", "description": "Generate TypeScript types"},
+    {"name": "execute_sql", "displayName": "Execute SQL", "description": "Execute SQL queries"},
+    {"name": "check_health", "displayName": "Health Check", "description": "Check database health"},
+    {"name": "list_tables", "displayName": "List Tables", "description": "List database tables"},
+    {"name": "create_migration", "displayName": "Create Migration", "description": "Create database migration"},
+    {"name": "apply_migration", "displayName": "Apply Migration", "description": "Apply database migration"},
+    {"name": "create_auth_user", "displayName": "Create Auth User", "description": "Create authenticated user"},
+    {"name": "list_storage_buckets", "displayName": "List Storage Buckets", "description": "List storage buckets"},
+    {"name": "manage_rls_policies", "displayName": "Manage RLS Policies", "description": "Manage RLS policies"},
+    {"name": "list_extensions", "displayName": "List Extensions", "description": "List PostgreSQL extensions"},
+    {"name": "manage_functions", "displayName": "Manage Functions", "description": "Manage database functions"},
+    {"name": "manage_triggers", "displayName": "Manage Triggers", "description": "Manage database triggers"},
+    {"name": "manage_roles", "displayName": "Manage Roles", "description": "Manage database roles"},
+    {"name": "manage_webhooks", "displayName": "Manage Webhooks", "description": "Manage webhooks"},
+    {"name": "list_realtime_publications", "displayName": "List Realtime Publications", "description": "List realtime publications"},
+    {"name": "get_logs", "displayName": "Get Logs", "description": "Get application logs"},
+    {"name": "metrics_dashboard", "displayName": "Metrics Dashboard", "description": "Get metrics dashboard"},
+    {"name": "audit_security", "displayName": "Audit Security", "description": "Audit security configuration"},
+    {"name": "analyze_performance", "displayName": "Analyze Performance", "description": "Analyze database performance"},
+    {"name": "backup_database", "displayName": "Backup Database", "description": "Create database backup"},
+    {"name": "cache_management", "displayName": "Cache Management", "description": "Manage application cache"},
+    {"name": "manage_secrets", "displayName": "Manage Secrets", "description": "Manage application secrets"},
+    {"name": "get_project_url", "displayName": "Get Project URL", "description": "Get project URL"},
+    {"name": "get_anon_key", "displayName": "Get Anon Key", "description": "Get anonymous key"},
+    {"name": "get_service_key", "displayName": "Get Service Role Key", "description": "Get service role key"},
+    {"name": "generate_crud_api", "displayName": "Generate CRUD API", "description": "Generate CRUD API"},
+    {"name": "generate_typescript_types", "displayName": "Generate TypeScript Types", "description": "Generate TypeScript types"},
 ]
 
 # ------------------------
@@ -146,7 +146,24 @@ def health_check():
 @app.route('/api/tools', methods=['GET'])
 @app.route('/supabase/api/tools', methods=['GET'])
 def get_tools():
-    return jsonify(MCP_TOOLS)
+    # Retourne les outils avec displayName et parameters (schéma) pour chaque entrée
+    defs, tools_schema = build_tool_definitions()
+    # tools_schema contient déjà name/description/inputSchema; enrichir avec displayName et parameters
+    tools_enriched = []
+    tool_display_by_name = {t.get("name"): t.get("displayName") for t in MCP_TOOLS}
+    for t in tools_schema:
+        name = t.get("name")
+        display_name = tool_display_by_name.get(name) or name
+        input_schema = t.get("inputSchema") or t.get("input_schema") or {"type": "object", "properties": {}}
+        tools_enriched.append({
+            "name": name,
+            "displayName": display_name,
+            "description": t.get("description", ""),
+            "parameters": input_schema,
+            "inputSchema": input_schema,
+            "input_schema": input_schema,
+        })
+    return jsonify(tools_enriched)
 
 # Endpoint MCP principal - Support GET et POST
 @app.route('/mcp', methods=['GET', 'POST'])
@@ -360,6 +377,7 @@ def mcp_tools_json():
     for tool in MCP_TOOLS:
         name = tool.get("name")
         desc = tool.get("description", "")
+        disp = tool.get("displayName") or name
         override = def_schema_overrides.get(name, {})
         input_schema = {
             "type": "object",
@@ -371,13 +389,17 @@ def mcp_tools_json():
         # Dupliquer avec input_schema snake_case et inputSchema camelCase
         definitions[name] = {
             "name": name,
+            "displayName": disp,
             "description": desc,
+            "parameters": input_schema,
             "inputSchema": input_schema,
             "input_schema": input_schema,
         }
         tools_array.append({
             "name": name,
+            "displayName": disp,
             "description": desc,
+            "parameters": input_schema,
             "inputSchema": input_schema,
             "input_schema": input_schema,
         })
@@ -482,6 +504,7 @@ def build_tool_definitions():
     for tool in MCP_TOOLS:
         name = tool.get("name")
         desc = tool.get("description", "")
+        disp = tool.get("displayName") or name
         override = def_schema_overrides.get(name, {})
         input_schema = {
             "type": "object",
@@ -492,13 +515,17 @@ def build_tool_definitions():
 
         definitions[name] = {
             "name": name,
+            "displayName": disp,
             "description": desc,
+            "parameters": input_schema,
             "inputSchema": input_schema,
             "input_schema": input_schema,
         }
         tools_array.append({
             "name": name,
+            "displayName": disp,
             "description": desc,
+            "parameters": input_schema,
             "inputSchema": input_schema,
             "input_schema": input_schema,
         })
