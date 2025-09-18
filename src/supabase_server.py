@@ -173,15 +173,38 @@ def mcp_endpoint():
         # GET pour infos rapides (certains scanners font un GET d'abord)
         if request.method == 'GET':
             defs, tools_schema = build_tool_definitions()
+            base_url = request.host_url.rstrip('/')
             config_schema = {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "$id": f"{base_url}/.well-known/mcp-config",
+                "title": "Supabase MCP Session Configuration",
+                "description": "Configuration pour se connecter au serveur MCP Supabase.",
+                "x-query-style": "dot+bracket",
                 "type": "object",
                 "properties": {
-                    "SUPABASE_URL": {"type": "string"},
-                    "SUPABASE_ANON_KEY": {"type": "string"},
-                    "SUPABASE_SERVICE_ROLE_KEY": {"type": "string"},
-                    "SUPABASE_AUTH_JWT_SECRET": {"type": "string"}
+                    "SUPABASE_URL": {
+                        "type": "string",
+                        "title": "Supabase URL",
+                        "description": "URL de votre projet Supabase (ex: https://your-project.supabase.co)"
+                    },
+                    "SUPABASE_ANON_KEY": {
+                        "type": "string",
+                        "title": "Supabase Anon Key",
+                        "description": "Clé anonyme publique Supabase"
+                    },
+                    "SUPABASE_SERVICE_ROLE_KEY": {
+                        "type": "string",
+                        "title": "Service Role Key (optionnel)",
+                        "description": "Clé de service (permissions élevées). Ne fournissez que si nécessaire."
+                    },
+                    "SUPABASE_AUTH_JWT_SECRET": {
+                        "type": "string",
+                        "title": "Auth JWT Secret (optionnel)",
+                        "description": "Secret JWT pour l'authentification (si requis)"
+                    }
                 },
-                "required": ["SUPABASE_URL", "SUPABASE_ANON_KEY"]
+                "required": ["SUPABASE_URL", "SUPABASE_ANON_KEY"],
+                "additionalProperties": False
             }
             return jsonify({
                 "service": MCP_SERVER_NAME,
@@ -296,40 +319,39 @@ def mcp_http_introspection():
 @app.route('/supabase/.well-known/mcp-config', methods=['GET'])
 def mcp_config():
     base_url = request.host_url.rstrip('/')
-    transport_url = f"{base_url}/mcp"
-    defs, _ = build_tool_definitions()
-    config_schema = {
+    schema = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": f"{base_url}/.well-known/mcp-config",
+        "title": "MCP Session Configuration",
+        "description": "Configuration pour la connexion au Supabase MCP Server",
+        "x-query-style": "dot+bracket",
         "type": "object",
         "properties": {
-            "SUPABASE_URL": {"type": "string"},
-            "SUPABASE_ANON_KEY": {"type": "string"},
-            "SUPABASE_SERVICE_ROLE_KEY": {"type": "string"},
-            "SUPABASE_AUTH_JWT_SECRET": {"type": "string"}
-        },
-        "required": ["SUPABASE_URL", "SUPABASE_ANON_KEY"]
-    }
-    return jsonify(
-        {
-            "mcpServers": {
-                "supabase": {
-                    "transport": {"type": "http", "url": transport_url},
-                    "configSchema": config_schema,
-                    "metadata": {
-                        "name": MCP_SERVER_NAME,
-                        "version": MCP_SERVER_VERSION,
-                        "capabilities": {
-                            "tools": {"listChanged": True, "definitions": defs},
-                            "resources": {"subscribe": False, "listChanged": False, "definitions": {}},
-                            "prompts": {"listChanged": False, "definitions": {}}
-                        },
-                        "discovery": {"tools": f"{base_url}/mcp/tools.json"},
-                        "categories": ["database", "auth", "storage"],
-                        "configSchema": config_schema
-                    }
-                }
+            "SUPABASE_URL": {
+                "type": "string",
+                "title": "Supabase URL",
+                "description": "URL de votre projet Supabase (ex: https://your-project.supabase.co)"
+            },
+            "SUPABASE_ANON_KEY": {
+                "type": "string",
+                "title": "Supabase Anon Key",
+                "description": "Clé anonyme publique Supabase"
+            },
+            "SUPABASE_SERVICE_ROLE_KEY": {
+                "type": "string",
+                "title": "Service Role Key (optionnel)",
+                "description": "Clé de service (permissions élevées). Ne fournissez que si nécessaire."
+            },
+            "SUPABASE_AUTH_JWT_SECRET": {
+                "type": "string",
+                "title": "Auth JWT Secret (optionnel)",
+                "description": "Secret JWT pour l'authentification (si requis)"
             }
-        }
-    )
+        },
+        "required": ["SUPABASE_URL", "SUPABASE_ANON_KEY"],
+        "additionalProperties": False
+    }
+    return jsonify(schema)
 
 @app.route('/mcp/tools.json', methods=['GET'])
 @app.route('/supabase/mcp/tools.json', methods=['GET'])
