@@ -83,6 +83,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+smithery-config.env
 
 # Spyder project settings
 .spyderproject
