@@ -66,9 +66,9 @@ export class SelfhostedSupabaseClient {
      * Factory function to create and asynchronously initialize the client.
      * Checks for the existence of the helper RPC function.
      */
-    public static async create(options: SelfhostedSupabaseClientOptions): Promise<SelfhostedSupabaseClient> {
+    public static async create(options: SelfhostedSupabaseClientOptions & { allowAutoCreateRpc?: boolean }): Promise<SelfhostedSupabaseClient> {
         const client = new SelfhostedSupabaseClient(options);
-        await client.initialize();
+        await client.initialize(!!options.allowAutoCreateRpc);
         return client;
     }
 
@@ -76,10 +76,10 @@ export class SelfhostedSupabaseClient {
      * Initializes the client by checking for the required RPC function.
      * Attempts to create the function if it doesn't exist and a service role key is provided.
      */
-    public async initialize(): Promise<void> {
+    public async initialize(allowAutoCreateRpc = false): Promise<void> {
         console.error('Initializing SelfhostedSupabaseClient...');
         try {
-            await this.checkAndCreateRpcFunction();
+            await this.checkAndCreateRpcFunction(allowAutoCreateRpc);
             console.error(`RPC function 'public.execute_sql' status: ${this.rpcFunctionExists ? 'Available' : 'Unavailable'}`);
         } catch (error) {
             console.error('Error during client initialization:', error);
@@ -392,7 +392,7 @@ export class SelfhostedSupabaseClient {
 
     // --- Helper/Private Methods (to be implemented) ---
 
-    private async checkAndCreateRpcFunction(): Promise<void> {
+    private async checkAndCreateRpcFunction(allowAutoCreateRpc: boolean): Promise<void> {
         console.error("Checking for public.execute_sql RPC function...");
         try {
             // Try calling the function with a simple query
@@ -412,9 +412,12 @@ export class SelfhostedSupabaseClient {
                 error.code === UNDEFINED_FUNCTION_ERROR_CODE ||
                 error.code === POSTGREST_FUNCTION_NOT_FOUND_CODE
             ) {
-                console.error(
-                    `'public.execute_sql' function not found (Code: ${error.code}). Attempting creation...`,
-                );
+                if (!allowAutoCreateRpc) {
+                    console.error("'public.execute_sql' function not found and auto-create is disabled.");
+                    this.rpcFunctionExists = false;
+                    return;
+                }
+                console.error(`'public.execute_sql' function not found (Code: ${error.code}). Attempting creation...`);
                 if (!this.options.supabaseServiceRoleKey) {
                     console.error("Cannot create 'public.execute_sql': supabaseServiceRoleKey not provided.");
                     this.rpcFunctionExists = false;
